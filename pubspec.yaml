@@ -1,5 +1,5 @@
 name: simple_routes
-description: A new Flutter package project.
+description: Simple, class-based route management for go_router.
 version: 0.0.1
 homepage: https://github.com/andyhorn/simple_routes
 
