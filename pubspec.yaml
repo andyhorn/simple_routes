@@ -1,10 +1,10 @@
 name: simple_routes
 description: A new Flutter package project.
 version: 0.0.1
-homepage:
+homepage: https://github.com/andyhorn/simple_routes
 
 environment:
-  sdk: '>=3.1.0 <4.0.0'
+  sdk: ">=3.1.0 <4.0.0"
   flutter: ">=1.17.0"
 
 dependencies:
