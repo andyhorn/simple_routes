@@ -30,6 +30,26 @@ void main() {
       expect(withPrefix(TestParams.userId), ':userId');
     });
 
+    group('toQuery', () {
+      test('empty', () {
+        expect(toQuery({}), '');
+      });
+
+      test('single', () {
+        expect(toQuery({'key': 'value'}), '?key=value');
+      });
+
+      test('multiple', () {
+        expect(toQuery({'key': 'value', 'key2': 'value2'}),
+            '?key=value&key2=value2');
+      });
+
+      test('with space', () {
+        expect(toQuery({'key': 'value one', 'key2': 'value two'}),
+            '?key=value%20one&key2=value%20two');
+      });
+    });
+
     group('setParam', () {
       test('replaces template', () {
         expect(':userId'.setParam(TestParams.userId, 'value'), 'value');
@@ -37,6 +57,17 @@ void main() {
 
       test('does not touch other templates', () {
         expect(':userId'.setParam(TestParams.paramTwo, 'value'), ':userId');
+      });
+    });
+
+    group('maybeAppendQuery', () {
+      test('empty', () {
+        expect('path'.maybeAppendQuery(null), 'path');
+        expect('path'.maybeAppendQuery({}), 'path');
+      });
+
+      test('non-empty', () {
+        expect('path'.maybeAppendQuery({'key': 'value'}), 'path?key=value');
       });
     });
   });

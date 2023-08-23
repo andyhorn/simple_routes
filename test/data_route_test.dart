@@ -45,7 +45,7 @@ class _RootDataRoute extends DataRoute<RootRouteData> {
 
   // overriding for test purposes only
   @override
-  void go(BuildContext context, RootRouteData data) {
+  void go(BuildContext context, RootRouteData data, [Map<String, String>? _]) {
     onGo(data.inject(fullPath));
   }
 }
@@ -64,7 +64,7 @@ class _ChildDataRoute extends DataRoute<ChildRouteData>
 
   // overriding for test purposes only
   @override
-  void go(BuildContext context, RootRouteData data) {
+  void go(BuildContext context, RootRouteData data, [Map<String, String>? _]) {
     onGo(data.inject(fullPath));
   }
 }
