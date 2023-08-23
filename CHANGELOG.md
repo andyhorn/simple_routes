@@ -1,3 +1,10 @@
+## 0.0.3
+
+- Add support for injecting query parameters into route paths
+- Add helper method for extracting query param map from GoRouterState
+- Fix bug in route data factory
+- Add and improve tests
+
 ## 0.0.2
 
 - Improve README
