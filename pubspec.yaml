@@ -1,6 +1,6 @@
 name: simple_routes
 description: Simple, class-based route management for go_router.
-version: 0.0.1
+version: 0.0.1+1
 homepage: https://github.com/andyhorn/simple_routes
 
 environment:
