@@ -1,4 +1,4 @@
-## 0.0.1+1
+## 0.0.2
 
 - Improve README
 - Remove static route getter from example for consistency
