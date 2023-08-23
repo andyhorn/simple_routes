@@ -61,7 +61,7 @@ class ProfileRouteDataFactory extends SimpleRouteDataFactory<ProfileRouteData> {
   @override
   ProfileRouteData fromState(GoRouterState state) {
     return ProfileRouteData(
-      userId: state.pathParameters[RouteParams.userId]!,
+      userId: extractParam(state, RouteParams.userId),
     );
   }
 
