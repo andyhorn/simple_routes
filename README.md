@@ -1,15 +1,3 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
-
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages).
-
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages).
--->
 # Simple Routes
 
 Simple, class-based route management for [go_router](https://pub.dev/packages/go_router).
@@ -34,15 +22,11 @@ dependencies:
 
 ### Defining simple routes 
 
-This first section will describe how to use the `SimpleRoute` and `ChildRoute` classes to define routes that _do not_ require any dynamic variables.
+This first section will describe how to use the `SimpleRoute` class and `ChildRoute` interface to define routes that _do not_ require any dynamic variables, i.e. "static" routes like `/home` or `/settings/notifications`.
 
 For routing that requires path parameters, see the **Defining dynamic routes** section below.
 
-#### Root-level routes
-
-Any root-level routes (routes that are not nested within another route) should extend the `SimpleRoute` class.
-
-**Note:** Root level routes should have a path that is prefixed with a leading slash.
+Static routes should extend the `SimpleRoute` base class, such as the example `HomeRoute` below.
 
 ```dart
 class HomeRoute extends SimpleRoute {
@@ -53,7 +37,11 @@ class HomeRoute extends SimpleRoute {
 }
 ```
 
-By extending the `SimpleRoute` base class, you are required to implement the `path` property. This path is used to define the `path` of a `GoRoute`. 
+When extending the `SimpleRoute` base class, you must override the `path` property.
+
+**Note:** Root level routes should have a path that is prefixed with a forward slash (`/`).
+
+ This value is used to define the `path` of a `GoRoute`. 
 
 ```dart
   GoRoute(
@@ -62,7 +50,7 @@ By extending the `SimpleRoute` base class, you are required to implement the `pa
   ),
 ```
 
-Your route also inherits a `go` method that makes navigation, well, simple.
+By extending `SimpleRoute`, your route will inherit a `go` method that makes navigation, well, simple.
 
 
 ```dart
@@ -74,9 +62,7 @@ ElevatedButton(
 
 #### Nested (child) routes
 
-Any nested (AKA "Child") routes should extend the `SimpleRoute` class and implement the `ChildRoute` interface.
-
-**Note:** Child routes should have a path that is _not_ prefixed with a leading slash.
+Any nested (AKA "Child") routes should implement the `ChildRoute` interface.
 
 ```dart
 class SettingsRoute extends SimpleRoute implements ChildRoute<HomeRoute> {
@@ -90,9 +76,11 @@ class SettingsRoute extends SimpleRoute implements ChildRoute<HomeRoute> {
 }
 ```
 
-By implementing the `ChildRoute` interface, you are required to implement the `parent` property. This property provides an instance of the route's parent and is used behind-the-scenes to generate the `fullPath` property.
+**Note:** Child routes should have a path that is _not_ prefixed with a slash.
 
-The `go` method will automatically build the full path for your route, based on its path and the `path` values of its parent routes.
+Along with providing the `path` for this route, when implementing the `ChildRoute` interface, you must also implement the `parent` property. 
+
+The `go` method will automatically build the full path for your route, based on its `path` and the `path`s of its parents.
 
 ```dart
 ElevatedButton(
@@ -101,14 +89,15 @@ ElevatedButton(
 ),
 ```
 
+Simple! Now let's look at how to handle routes that require dynamic data.
 
 ### Defining dynamic routes
 
-Routes that require path parameters are also supported. 
+Before we define our dynamic route, we need to do a little bit of setup:
 
-Before we define our route, there is a little bit of setup to do;  This package adds helpful requirements for how dynamic data is captured and used by your routes. 
+#### Parameters
 
-The first rule is that all path parameter names must be defined in an enum.
+The first rule is that all parameters must be defined as an enum.
 
 ```dart
 enum RouteParams {
@@ -116,7 +105,11 @@ enum RouteParams {
 }
 ```
 
-Second, we need to define a custom class that extends the `SimpleRouteData` class. This class will be used to store the dynamic data that is passed to the route.
+This helps eliminate "magic strings" and, therefore, reduce the opportunity for errors and hard-to-track-down bugs.
+
+#### Data classes
+
+Secondly, we need to define a class that represents the data needed by our new route. This new class should extend the `SimpleRouteData` class. 
 
 ```dart
 class UserRouteData extends SimpleRouteData {
@@ -126,7 +119,7 @@ class UserRouteData extends SimpleRouteData {
 
   @override
   void inject(String path) {
-    return path.setParams(
+    return path.setParam(
       RouteParams.userId,
       userId,
     );
@@ -134,11 +127,17 @@ class UserRouteData extends SimpleRouteData {
 }
 ```
 
-The `SimpleRouteData` base class requires us to implement the `inject` method. This is how the templated parameters in the path are replaced with the actual values. Note the `setParams` extension method - it is recommended to utilize this utility anytime you set a path parameter.
+By extending the `SimpleRouteData` base class, we must implement the `inject` method. This is how the templated parameters in the path are replaced with the actual values. Note the `String.setParam` extension - it is recommended to utilize this function anytime you inject a value.
 
-Finally, your dynamic route should extend the `DataRoute` class, typed for the relevant data class.
+This extension takes an enum value as its first argument and a String value as its second argument.
 
-**Note:** Just like the `SimpleRoute`s above, any root-level paths should be prefixed with a leading slash; any child routes should **not** be prefixed.
+```dart
+String setParam<E extends Enum>(E enum, String value);
+```
+
+#### Dynamic routes
+
+Finally, your route class should extend the `DataRoute` class, typed for the data class we just created.
 
 ```dart
 class UserRoute extends DataRoute<UserRouteData> {
@@ -149,15 +148,23 @@ class UserRoute extends DataRoute<UserRouteData> {
 }
 ```
 
-Let's take a moment to break this example down. 
+**Note:** Just like the `SimpleRoute`s above, any root-level paths should be prefixed with a forward slash; any child routes should **not** be prefixed.
 
-The route class extends `DataRoute` with the appropriate `SimpleRouteData` subclass for this route's data. A mouthful, but easy enough. This will be useful in a moment.
+##### Utility functions
 
-The `path` value is a little more interesting. We are using the `join` utility method to join the path segments together - This is the recommend way of defining paths with multiple segments. 
+We used a couple utility functions in this example, so let's take a moment to break it all down.
 
-The `withPrefix` extension method is used to convert the enum value to the path template. This is the recommended way of converting your enum values to their path template values. For example, this `path` would become `/user/:userId`.
+First, we can see that the route class itself extends `DataRoute` with the appropriate `SimpleRouteData` as the generic type.
 
-Now that we have our route defined, let's see how we can use it.
+Next, we create the `path` value in a more interesting way. We use the `join` utility method to build a path from the path segments - This is the recommend way of defining paths with multiple segments (again, to reduce the chance of error). 
+
+Inside the `join` we use the `withPrefix` extension method to convert the enum value to the path template String. This is the recommended way of converting your enum values to their path template values. 
+
+In this example, the `path` would become `/user/:userId`.
+
+##### Using dynamic routes
+
+Now that we have our route defined, let's see how to use it!
 
 ```dart
 ElevatedButton(
@@ -169,17 +176,15 @@ ElevatedButton(
 ),
 ```
 
-When the `go` method is invoked, the data will be injected into the fully-qualified route string.
+As you can see, the `go` method now requires an instance of your route's data class. When invoked, the data will be injected into the full path (via your `inject` method).
 
 #### Children of DataRoutes
 
-One caveat with this structure is that any children of a `DataRoute` will need to also be a `DataRoute` that supplies the data to all of its parents.
+One caveat with this structure is that any children of a `DataRoute` must also be a `DataRoute` to supply the data to its parents.
 
-For example, say we have a route `/users/:userId/settings/mfa` - the `settings` route _and_ the `mfa` route will both require the `userId` value to generate their full route; therefore they will need to accept a data object containing that value.
+For example, if we have a route - `/users/:userId/settings/mfa` - the `settings` route _and_ the `mfa` route will both need the `userId` value to generate their full route; therefore, they will need to accept a data object containing that value.
 
-Defining these routes is simple, but it does require the extra boilerplate of `DataRoute<DataType>`. 
-
-For cases like this example, where only one piece of data is needed, these child classes can simply re-use the parent's data class.
+For cases like this example, where the same piece of data is needed, these child classes can simply re-use the parent's data class.
 
 ```dart
 class UserSettingsRoute extends DataRoute<UserRouteData> implements ChildRoute<UserRoute> {
@@ -223,11 +228,13 @@ ElevatedButton(
 ),
 ```
 
-If one of the child routes requires its own parameter, you have one of two options:
+If a child route requires its own data in addition to its parent's data, you have two options:
   1. Create a new data class that extends the parent's data class and adds the value(s) you need
-  2. Create a new data class that extends the `SimpleRouteData` class and add all necessary values
+  2. Create a totally new data class
 
-Option 1 is easy, as it will allow you to re-use the parent's data class and only add the values you need, but it is not recommended, as it can break the compiler-time type-checking and will not force you to implement the `inject` method, leaving extra room for error.
+While option 1 is certainly easy, it is not recommended. By extending the parent's data class, you will lose some of the compile-time type-checking that the `DataRoute` class would otherwise provide.
+
+If you do use Option 1, make sure to implement the `inject` method (the compiler will not yell at you if you do not). You can call `super.inject(path)` to inject the parent's data into the path, then inject your new value(s).
 
 ```dart
 class MyRouteData extends UserRouteData {
@@ -237,24 +244,19 @@ class MyRouteData extends UserRouteData {
   });
 
   final String someValue;
-}
-```
 
-**Note:** If you are going to use Option 1, make sure to implement the `inject` method. You can call `super.inject(path)` to inject the parent's data into the path, then inject this class' values.
-
-```dart
-@override
-String inject(String path) {
-  return super.inject(path).setParam(
-    RouteParams.someValue,
-    someValue,
-  );
+  String inject(String path) {
+    return super.inject(path).setParam(
+      RouteParams.someValue,
+      someValue,
+    );
+  }
 }
 ```
 
 ### Data Factories
 
-Another useful utility is the `SimpleRouteDataFactory` class. By extending this class, you can define a factory that can safely extract the route data from the `GoRouterState`.
+Another useful utility is the `SimpleRouteDataFactory` class. By extending this class, you can define a factory that can safely extract the route data from `GoRouterState`.
 
 ```dart
 class UserRouteDataFactory extends SimpleRouteDataFactory<UserRouteData> {
@@ -274,9 +276,13 @@ class UserRouteDataFactory extends SimpleRouteDataFactory<UserRouteData> {
 }
 ```
 
-The `fromState` method is useful within your route configuration for extracting the route data from the `GoRouterState` object to be passed into your screen widgets.
+The `fromState` method is useful within your route configuration for extracting the route data from the `GoRouterState`.
 
-The `containsData` method should be implemented to give you a way to validate whether all parameters are present in the `GoRouterState` object.
+The `containsData` method must also be implemented; it gives you a way to validate whether all necessary parameters are present in the `GoRouterState`.
+
+Also note the `containsKey` helper method. This utility checks whether the `GoRouterState` contains a particular parameter key (i.e. enum value name).
+
+#### Using a DataFactory
 
 ```dart
 GoRoute(
@@ -300,9 +306,11 @@ GoRoute(
 
 A useful pattern is to check the validity of the state in a `redirect`, thus ensuring that the state is valid before attempting to extract the route data object and build the screen in the `builder`.
 
-### Other Tips
+## Useful Tips
 
-If you find it tedious or smelly to repeatedly create new instances of your routes, you can create a static instance of each route and use that instead.
+### Static instances
+
+If you don't liking creating instances of your routes all over the place, you can create a static instance of each route and use that instead.
 
 ```dart
 class HomeRoute extends SimpleRoute {
@@ -314,6 +322,8 @@ class HomeRoute extends SimpleRoute {
   static const instance = HomeRoute();
 }
 ```
+
+Then:
 
 ```dart
 GoRoute(
@@ -329,3 +339,51 @@ ElevatedButton(
 ),
 ```
 
+### Route getters
+
+Another useful pattern is to create a getter for each child route on its parent route.
+
+```dart
+class HomeRoute extends SimpleRoute {
+  const HomeRoute();
+
+  @override
+  String get path => '/home';
+
+  // make it static
+  static DashboardRoute get dashboard => const DashboardRoute();
+
+  // or make it an instance method
+  SettingsRoute get settings => const SettingsRoute();
+}
+```
+
+Then:
+
+```dart
+GoRoute(
+  path: const HomeRoute().path,
+  builder: (context, state) => const HomeScreen(),
+  routes: [
+    GoRoute(
+      // static getter
+      path: HomeRoute.dashboard.path,
+      builder: (context, state) => const DashboardScreen(),
+    ),
+    GoRoute(
+      // instance method
+      path: const HomeRoute().settings.path,
+      builder: (context, state) => const SettingsScreen(),
+    ),
+  ],
+),
+```
+
+```dart
+ElevatedButton(
+  onPressed: () => HomeRoute.dashboard.go(context),
+),
+ElevatedButton(
+  onPressed: () => const HomeRoute().settings.go(context),
+),
+```
