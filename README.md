@@ -6,6 +6,29 @@ Simple, class-based route management for [go_router](https://pub.dev/packages/go
 
 This package is intended to provide useful classes and a helpful structure for defining, managing, and using your app's routes.
 
+**Breaking Changes**
+- Version 0.0.4 changed the signature of the `go` method to require any data or query parameters be passed as a named argument.
+
+Instead of writing:
+
+```dart
+const MyRoute().go(
+  context, 
+  const MyRouteData('some-value'), 
+  {'key': 'value'},
+);
+```
+
+You will now need to write it as:
+
+```dart
+const MyRoute().go(
+  context, 
+  data: const MyRouteData('some-value'), 
+  query: {'key': 'value'},
+);
+```
+
 ## Getting started
 
 This package is intended to be used with the [GoRouter](https://pub.dev/packages/go_router) package.
@@ -170,7 +193,7 @@ Now that we have our route defined, let's see how to use it!
 ElevatedButton(
   onPressed: () => const UserRoute().go(
     context,
-    UserRouteData(userId: '123'),
+    data: UserRouteData(userId: '123'),
   ),
   child: const Text('Go to User'),
 ),
@@ -214,7 +237,7 @@ Then, when invoking navigation to either of these routes, you can pass the same 
 ElevatedButton(
   onPressed: () => const UserSettingsRoute().go(
     context,
-    UserRouteData(userId: '123'),
+    data: UserRouteData(userId: '123'),
   ),
   child: const Text('Go to User Settings'),
 ),
@@ -222,7 +245,7 @@ ElevatedButton(
 ElevatedButton(
   onPressed: () => const MfaSettingsRoute().go(
     context,
-    UserRouteData(userId: '123'),
+    data: UserRouteData(userId: '123'),
   ),
   child: const Text('Go to MFA Settings'),
 ),
@@ -305,6 +328,33 @@ GoRoute(
 ```
 
 A useful pattern is to check the validity of the state in a `redirect`, thus ensuring that the state is valid before attempting to extract the route data object and build the screen in the `builder`.
+
+### Query parameters
+
+As of v0.0.3, this package supports injecting and extracting query parameters.
+
+#### Injecting query parameters
+
+Injecting query parameters into your route is easy. When calling the `go` method, just add a `Map<String, String>` to the `query` argument.
+
+```dart
+ElevatedButton(
+  onPressed: () => const MyRoute().go(context, query: {'key': 'value'}),
+),
+```
+
+#### Extracting query parameters
+
+The query parameters live on a `Uri` instance on the `GoRouterState`. You can access this map yourself using `GoRouterState.uri.queryParameters`.
+
+Or, you can use the `getQueryParams` convenience function. This method is a wrapper around the `queryParameters` property and just serves to make it easier to access.
+
+```dart
+GoRoute(
+  path: const MyRoute().path,
+  builder: (context, state) => MyScreen(data: getQueryParams(state)['someKey']),
+),
+```
 
 ## Useful Tips
 
