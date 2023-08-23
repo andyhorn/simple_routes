@@ -1,3 +1,9 @@
+## 0.0.4
+
+**Breaking Change**
+
+- Change `go` method to use named parameters for `data` and `query`
+
 ## 0.0.3
 
 - Add support for injecting query parameters into route paths
