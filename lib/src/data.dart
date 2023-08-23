@@ -1,5 +1,4 @@
 import 'package:go_router/go_router.dart';
-import 'package:simple_routes/src/utils.dart';
 
 abstract class SimpleRouteData {
   const SimpleRouteData();
@@ -14,6 +13,6 @@ abstract class SimpleRouteDataFactory<Data extends SimpleRouteData> {
   bool containsData(GoRouterState state);
 
   bool containsKey<E extends Enum>(GoRouterState state, E key) {
-    return state.pathParameters.containsKey(withPrefix(key));
+    return state.pathParameters.containsKey(key.name);
   }
 }
