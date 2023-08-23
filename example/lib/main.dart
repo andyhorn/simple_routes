@@ -15,7 +15,7 @@ final router = GoRouter(
       builder: (context, state) => const RootPage(),
       routes: [
         GoRoute(
-          path: const RootRoute().dashboard.path,
+          path: const DashboardRoute().path,
           builder: (context, state) => const DashboardPage(),
         ),
       ],

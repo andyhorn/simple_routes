@@ -11,8 +11,6 @@ class RootRoute extends SimpleRoute {
   // override the [path] to define the path of this route.
   @override
   final String path = '/';
-
-  DashboardRoute get dashboard => const DashboardRoute();
 }
 
 // Simple child route
