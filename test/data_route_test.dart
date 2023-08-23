@@ -45,7 +45,11 @@ class _RootDataRoute extends DataRoute<RootRouteData> {
 
   // overriding for test purposes only
   @override
-  void go(BuildContext context, RootRouteData data, [Map<String, String>? _]) {
+  void go(
+    BuildContext context, {
+    required RootRouteData data,
+    Map<String, String>? query,
+  }) {
     onGo(data.inject(fullPath));
   }
 }
@@ -64,7 +68,11 @@ class _ChildDataRoute extends DataRoute<ChildRouteData>
 
   // overriding for test purposes only
   @override
-  void go(BuildContext context, RootRouteData data, [Map<String, String>? _]) {
+  void go(
+    BuildContext context, {
+    required RootRouteData data,
+    Map<String, String>? query,
+  }) {
     onGo(data.inject(fullPath));
   }
 }
@@ -84,7 +92,10 @@ void main() {
     test('injection', () {
       var injected = '';
       final route = _RootDataRoute((x) => injected = x);
-      route.go(_MockBuildContext(), const RootRouteData(userId: 'user-id'));
+      route.go(
+        _MockBuildContext(),
+        data: const RootRouteData(userId: 'user-id'),
+      );
       expect(injected, '/user-id');
     });
   });
@@ -103,8 +114,10 @@ void main() {
     test('injection', () {
       var injected = '';
       final child = _ChildDataRoute((x) => injected = x);
-      child.go(_MockBuildContext(),
-          const ChildRouteData(userId: 'user-id', someValue: 'some-value'));
+      child.go(
+        _MockBuildContext(),
+        data: const ChildRouteData(userId: 'user-id', someValue: 'some-value'),
+      );
       expect(injected, '/user-id/child/some-value');
     });
   });

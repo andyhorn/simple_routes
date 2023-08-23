@@ -94,7 +94,7 @@ class NavButtons extends StatelessWidget {
         ElevatedButton(
           onPressed: () => const ProfileRoute().go(
             context,
-            const ProfileRouteData(userId: '123'),
+            data: const ProfileRouteData(userId: '123'),
           ),
           child: const Text('Go to profile'),
         ),
@@ -102,8 +102,8 @@ class NavButtons extends StatelessWidget {
         ElevatedButton(
           onPressed: () => const ProfileEditRoute().go(
             context,
-            const ProfileRouteData(userId: '123'),
-            {'foo': 'bar'},
+            data: const ProfileRouteData(userId: '123'),
+            query: {'foo': 'bar'},
           ),
           child: const Text('Go to profile edit'),
         ),

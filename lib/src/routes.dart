@@ -8,7 +8,7 @@ abstract class SimpleRoute extends BaseRoute {
   const SimpleRoute();
 
   /// Navigate to this route.
-  void go(BuildContext context, [Map<String, String>? query]) {
+  void go(BuildContext context, {Map<String, String>? query}) {
     GoRouter.of(context).go(fullPath.maybeAppendQuery(query));
   }
 }
@@ -20,10 +20,10 @@ abstract class DataRoute<Data extends SimpleRouteData> extends BaseRoute {
 
   /// Navigate to this route using the supplied [data].
   void go(
-    BuildContext context,
-    Data data, [
+    BuildContext context, {
+    required Data data,
     Map<String, String>? query,
-  ]) {
+  }) {
     GoRouter.of(context).go(data.inject(fullPath).maybeAppendQuery(query));
   }
 }
