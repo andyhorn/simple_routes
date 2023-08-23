@@ -92,12 +92,12 @@ void main() {
   group('Child $DataRoute', () {
     test('path', () {
       final child = _ChildDataRoute((_) {});
-      expect(child.path, 'child');
+      expect(child.path, 'child/:someValue');
     });
 
     test('fullPath', () {
       final child = _ChildDataRoute((_) {});
-      expect(child.fullPath, '/:userId/child');
+      expect(child.fullPath, '/:userId/child/:someValue');
     });
 
     test('injection', () {
