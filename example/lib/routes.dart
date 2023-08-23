@@ -51,17 +51,6 @@ class ProfileRouteData extends SimpleRouteData {
   }
 }
 
-class NewData extends ProfileRouteData {
-  NewData({required super.userId, required this.someValue});
-
-  final String someValue;
-
-  @override
-  String inject(String path) {
-    return super.inject(path).setParam(RouteParams.userId, userId);
-  }
-}
-
 // If you find it useful, define a factory class to extract the route data from
 // an instance of [GoRouterState].
 class ProfileRouteDataFactory extends SimpleRouteDataFactory<ProfileRouteData> {
