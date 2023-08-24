@@ -2,26 +2,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:simple_routes/simple_routes.dart';
 
 class _TestSimpleRoute extends SimpleRoute {
-  @override
-  String get path => '/test';
+  _TestSimpleRoute() : super('test');
 }
 
 class _TestSimpleChildRoute extends SimpleRoute
     implements ChildRoute<_TestSimpleRoute> {
-  @override
-  _TestSimpleRoute get parent => _TestSimpleRoute();
+  _TestSimpleChildRoute() : super('child');
 
   @override
-  String get path => 'child';
+  _TestSimpleRoute get parent => _TestSimpleRoute();
 }
 
 class _SecondLevelChildRoute extends SimpleRoute
     implements ChildRoute<_TestSimpleChildRoute> {
-  @override
-  _TestSimpleChildRoute get parent => _TestSimpleChildRoute();
+  _SecondLevelChildRoute() : super('second-level');
 
   @override
-  String get path => 'second-level';
+  _TestSimpleChildRoute get parent => _TestSimpleChildRoute();
 }
 
 void main() {

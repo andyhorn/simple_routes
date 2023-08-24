@@ -12,22 +12,22 @@ final router = GoRouter(
     GoRoute(
       // use the route class' [path] property to define this segment of the
       // route path.
-      path: const RootRoute().path,
+      path: RootRoute.root.path,
       builder: (context, state) => const RootPage(),
       routes: [
         GoRoute(
-          path: const DashboardRoute().path,
+          path: RootRoute.dashboard.path,
           builder: (context, state) => const DashboardPage(),
         ),
       ],
     ),
     GoRoute(
-      path: const ProfileRoute().path,
+      path: ProfileRoute.root.path,
       redirect: (context, state) {
         // use your factory class to validate the route data.
         if (!const ProfileRouteDataFactory().containsData(state)) {
           // when redirecting, use the `fullPath` property.
-          return const RootRoute().fullPath;
+          return RootRoute.root.fullPath;
         }
 
         return null;
@@ -43,7 +43,7 @@ final router = GoRouter(
       },
       routes: [
         GoRoute(
-          path: const ProfileEditRoute().path,
+          path: ProfileRoute.edit.path,
           builder: (context, state) => ProfileEditPage(
             queryParams: getQueryParams(state),
           ),
@@ -82,17 +82,17 @@ class NavButtons extends StatelessWidget {
       children: [
         const SizedBox(height: 12),
         ElevatedButton(
-          onPressed: () => const RootRoute().go(context),
+          onPressed: () => RootRoute.root.go(context),
           child: const Text('Go to root'),
         ),
         const SizedBox(height: 12),
         ElevatedButton(
-          onPressed: () => const DashboardRoute().go(context),
+          onPressed: () => RootRoute.dashboard.go(context),
           child: const Text('Go to dashboard'),
         ),
         const SizedBox(height: 12),
         ElevatedButton(
-          onPressed: () => const ProfileRoute().go(
+          onPressed: () => ProfileRoute.root.go(
             context,
             data: const ProfileRouteData(userId: '123'),
           ),
@@ -100,7 +100,7 @@ class NavButtons extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         ElevatedButton(
-          onPressed: () => const ProfileEditRoute().go(
+          onPressed: () => ProfileRoute.edit.go(
             context,
             data: const ProfileRouteData(userId: '123'),
             query: {'foo': 'bar'},

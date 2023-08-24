@@ -36,12 +36,9 @@ class ChildRouteData extends RootRouteData {
 }
 
 class _RootDataRoute extends DataRoute<RootRouteData> {
-  _RootDataRoute(this.onGo);
+  _RootDataRoute(this.onGo) : super(withPrefix(DataRouteParams.userId));
 
   final void Function(String) onGo;
-
-  @override
-  String get path => join(['/', withPrefix(DataRouteParams.userId)]);
 
   // overriding for test purposes only
   @override
@@ -56,15 +53,13 @@ class _RootDataRoute extends DataRoute<RootRouteData> {
 
 class _ChildDataRoute extends DataRoute<ChildRouteData>
     implements ChildRoute<_RootDataRoute> {
-  _ChildDataRoute(this.onGo);
+  _ChildDataRoute(this.onGo)
+      : super.join(['child', withPrefix(DataRouteParams.someValue)]);
 
   final void Function(String) onGo;
 
   @override
   _RootDataRoute get parent => _RootDataRoute((_) {});
-
-  @override
-  String get path => join(['child', withPrefix(DataRouteParams.someValue)]);
 
   // overriding for test purposes only
   @override

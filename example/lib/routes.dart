@@ -6,18 +6,21 @@ import 'package:simple_routes/simple_routes.dart';
 // Declare your route as a child of [SimpleRoute] or
 // [DataRoute] (see more below).
 class RootRoute extends SimpleRoute {
-  const RootRoute();
+  // Use the [root] constructor to signify that this is the root route ('/').
+  RootRoute() : super.root();
 
-  // override the [path] to define the path of this route.
-  @override
-  final String path = '/';
+  // Create static instances of this route and its children to aid in
+  // navigation and to reduce the number of instantiations.
+  static final RootRoute root = RootRoute();
+  static final DashboardRoute dashboard = DashboardRoute();
 }
 
 // Simple child route
 // Declare your child route as a child of [SimpleRoute] and an implementation
 // of the [ChildRoute] interface.
 class DashboardRoute extends SimpleRoute implements ChildRoute<RootRoute> {
-  const DashboardRoute();
+  // Set the [path] in the super to define the path of this route.
+  DashboardRoute() : super('dashboard');
 
   // override the [path] to define the path of this route.
   // Note: This should be everything that comes _after_ the parent's path,
@@ -27,7 +30,7 @@ class DashboardRoute extends SimpleRoute implements ChildRoute<RootRoute> {
 
   // override the [parent] getter to return an instance of the parent route.
   @override
-  RootRoute get parent => const RootRoute();
+  RootRoute get parent => RootRoute.root;
 }
 
 // Simple data route
@@ -75,36 +78,31 @@ class ProfileRouteDataFactory extends SimpleRouteDataFactory<ProfileRouteData> {
 }
 
 // Define your route as a child of [DataRoute].
-class ProfileRoute extends DataRoute<ProfileRouteData> {
-  const ProfileRoute();
-
-  // override the [path] getter to define the path of this route.
-  // since this is a [DataRoute], it should contain some dynamic variable, such
-  // as a userId. e.g. '/profile/:userId'.
+final class ProfileRoute extends DataRoute<ProfileRouteData> {
+  // Since this is a [DataRoute], the path should contain some dynamic variable,
+  // such as a userId. e.g. '/profile/:userId'.
   //
-  // use the [withPrefix] helper method to add the colon prefix to your
-  // parameter in the template, and use the [join] method to join the path
-  // segments together.
+  // Use the [withPrefix] helper method to inject your parameter into the
+  // template, and use the [join] constructor to join the path segments
+  // together with the appropriate slashes.
   //
-  // you can craft this template yourself, but the helper methods are here to
+  // You could craft this template yourself, but the helper methods are here to
   // minimize the chance of error.
-  @override
-  String get path => join(['/profile', withPrefix(RouteParams.userId)]);
+  ProfileRoute() : super.join(['profile', withPrefix(RouteParams.userId)]);
+
+  static final ProfileRoute root = ProfileRoute();
+  static final ProfileEditRoute edit = ProfileEditRoute();
 }
 
 // Child data route
 
 // Define your route as a child of [DataRoute] with its appropriate data type
 // and implement the [ChildRoute] interface.
-class ProfileEditRoute extends DataRoute<ProfileRouteData>
+final class ProfileEditRoute extends DataRoute<ProfileRouteData>
     implements ChildRoute<ProfileRoute> {
-  const ProfileEditRoute();
-
-  // override the [path] getter with this route's path.
-  @override
-  String get path => 'edit';
+  ProfileEditRoute() : super('edit');
 
   // override the [parent] getter to return an instance of this route's parent.
   @override
-  ProfileRoute get parent => const ProfileRoute();
+  ProfileRoute get parent => ProfileRoute.root;
 }

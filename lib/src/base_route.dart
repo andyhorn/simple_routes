@@ -21,14 +21,37 @@ class SegmentedPath extends PathData {
 
 /// An abstract class to serve as the parent for all routes.
 abstract class BaseRoute {
-  const BaseRoute();
+  const BaseRoute(this._pathData);
 
-  /// The sub-path for this route. e.g. 'login'.
-  abstract final String path;
+  final PathData _pathData;
+
+  /// The path for this route. e.g. '/login'.
+  String get path => _getPath();
 
   String get fullPath {
     if (this is ChildRoute) {
       return join([(this as ChildRoute).parent.fullPath, path]);
+    }
+
+    return path;
+  }
+
+  String _getPath() {
+    // get the path String from the path data.
+    final path = switch (_pathData) {
+      AtomicPath(:final path) => path,
+      SegmentedPath(:final segments) => join(segments),
+    };
+
+    // if this route is a child but the path contains a slash, remove it.
+    if (this is ChildRoute && path.startsWith('/')) {
+      return path.substring(1);
+    }
+
+    // if this route is NOT a child and the path does NOT contain a slash,
+    // add one.
+    if (this is! ChildRoute && !path.startsWith('/')) {
+      return '/$path';
     }
 
     return path;
