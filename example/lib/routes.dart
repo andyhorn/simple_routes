@@ -78,7 +78,7 @@ class ProfileRouteDataFactory extends SimpleRouteDataFactory<ProfileRouteData> {
 }
 
 // Define your route as a child of [DataRoute].
-final class ProfileRoute extends DataRoute<ProfileRouteData> {
+class ProfileRoute extends DataRoute<ProfileRouteData> {
   // Since this is a [DataRoute], the path should contain some dynamic variable,
   // such as a userId. e.g. '/profile/:userId'.
   //
@@ -98,7 +98,7 @@ final class ProfileRoute extends DataRoute<ProfileRouteData> {
 
 // Define your route as a child of [DataRoute] with its appropriate data type
 // and implement the [ChildRoute] interface.
-final class ProfileEditRoute extends DataRoute<ProfileRouteData>
+class ProfileEditRoute extends DataRoute<ProfileRouteData>
     implements ChildRoute<ProfileRoute> {
   ProfileEditRoute() : super('edit');
 
