@@ -1,3 +1,7 @@
+## 0.0.5
+
+- Fix several small issues in README
+
 ## 0.0.4
 
 **Breaking Change**
