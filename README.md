@@ -38,7 +38,7 @@ Install both of these packages to your app's dependencies.
 ```yaml
 dependencies:
   go_router: <version>
-  simple_route: <version>
+  simple_routes: <version>
 ```
 
 ## Usage
@@ -141,7 +141,7 @@ class UserRouteData extends SimpleRouteData {
   final String userId;
 
   @override
-  void inject(String path) {
+  String inject(String path) {
     return path.setParam(
       RouteParams.userId,
       userId,
@@ -268,6 +268,7 @@ class MyRouteData extends UserRouteData {
 
   final String someValue;
 
+  @override
   String inject(String path) {
     return super.inject(path).setParam(
       RouteParams.someValue,
