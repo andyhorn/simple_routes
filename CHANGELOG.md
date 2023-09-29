@@ -1,3 +1,7 @@
+## 0.0.6
+
+- Add automated release workflow
+
 ## 0.0.5
 
 - Fix several small issues in README
