@@ -1,3 +1,8 @@
+## 0.0.6
+
+- Add automated release workflow
+- Update go_router to ^11.1.1
+
 ## 0.0.5
 
 - Fix several small issues in README
