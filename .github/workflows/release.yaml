@@ -40,3 +40,5 @@ jobs:
         run: flutter pub get
       - name: Publish
         run: dart pub publish --force
+        with:
+          environment: pub.dev
