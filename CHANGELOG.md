@@ -20,6 +20,26 @@
 
 - Change `go` method to use named parameters for `data` and `query`
 
+Instead of writing:
+
+```dart
+const MyRoute().go(
+  context, 
+  const MyRouteData('some-value'), 
+  {'key': 'value'},
+);
+```
+
+You will now need to write it as:
+
+```dart
+const MyRoute().go(
+  context, 
+  data: const MyRouteData('some-value'), 
+  query: {'key': 'value'},
+);
+```
+
 ## 0.0.3
 
 - Add support for injecting query parameters into route paths
