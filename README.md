@@ -1,33 +1,16 @@
 # Simple Routes
 
-Simple, class-based route management for [go_router](https://pub.dev/packages/go_router).
+Simple, type-safe route and navigation management for [go_router](https://pub.dev/packages/go_router).
 
 ## Features
 
-This package is intended to provide useful classes and a helpful structure for defining, managing, and using your app's routes.
+By defining your routes and route structure using Dart classes, you gain powerful tools to help you build and manage your app's navigation. 
 
-**Breaking Changes**
-- Version 0.0.4 changed the signature of the `go` method to require any data or query parameters be passed as a named argument.
-
-Instead of writing:
-
-```dart
-const MyRoute().go(
-  context, 
-  const MyRouteData('some-value'), 
-  {'key': 'value'},
-);
-```
-
-You will now need to write it as:
-
-```dart
-const MyRoute().go(
-  context, 
-  data: const MyRouteData('some-value'), 
-  query: {'key': 'value'},
-);
-```
+- Eliminate "magic strings"
+- Enforce route parameter requirements
+- Inject and extract route and query parameters
+- Navigate without building custom strings
+- Determine the current route and its ancestors
 
 ## Getting started
 
@@ -35,10 +18,8 @@ This package is intended to be used with the [GoRouter](https://pub.dev/packages
 
 Install both of these packages to your app's dependencies.
 
-```yaml
-dependencies:
-  go_router: <version>
-  simple_routes: <version>
+```
+flutter pub add go_router simple_routes
 ```
 
 ## Usage
@@ -355,6 +336,68 @@ GoRoute(
   path: const MyRoute().path,
   builder: (context, state) => MyScreen(data: getQueryParams(state)['someKey']),
 ),
+```
+
+### Route Checking
+
+#### Current Route
+
+As of 0.0.7, you can use the `isCurrentRoute` method, available on all SimpleRoutes, to check whether the current route is a match for the given route.
+
+This works for DataRoutes, too!
+
+For example, if we have a simple route structure like:
+
+```dart
+class BaseRoute extends SimpleRoute {
+  const BaseRoute();
+
+  @override
+  String get path => '/base';
+}
+
+class SubRoute extends SimpleRoute implements ChildRoute<BaseRoute> {
+  const SubRoute();
+
+  @override
+  String get path => 'sub';
+
+  @override
+  BaseRoute get parent => const BaseRoute();
+}
+```
+
+And we are at the screen for the `SubRoute` with a location of `/base/sub`. We can easily check whether the current route is the `SubRoute` by calling `isCurrentRoute`:
+
+```dart
+// current location: '/base/sub'
+if (const SubRoute().isCurrentRoute(context) /* true */) {
+  debugPrint('We are at SubRoute!');
+}
+```
+
+#### Ancestor Route
+
+As of 0.0.7, you can use the `isAncestorRoute` method, available on all SimpleRoutes, to check whether the current route is an ancestor of the given route. This is similar to `isCurrentRoute` (see section above), except that the current route must be a descendant of the route in question.
+
+For example, in our simple route structure from the previous section, we can check whether the current route is a descendant of `BaseRoute` by calling `isAncestorRoute`:
+
+```dart
+// current location: '/base/sub'
+if (const BaseRoute().isAncestorRoute(context) /* true */) {
+  debugPrint('We are at a descendant of BaseRoute!');
+}
+```
+
+However, this method will return `false` if the current route is an exact match for the route in question.
+
+For example, if we are at the screen for the `SubRoute` and use `isAncestor`, it will return `false`;
+
+```dart
+// current location: '/base/sub'
+if (const SubRoute().isAncestor(context) /* false */) {
+  ...
+}
 ```
 
 ## Useful Tips
