@@ -1,3 +1,7 @@
+## 0.0.8
+
+- Version bump for release workflow fixes
+
 ## 0.0.7
 
 - Add `isCurrentRoute` method

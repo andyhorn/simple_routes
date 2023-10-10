@@ -1,6 +1,6 @@
 name: simple_routes
 description: Simple, type-safe route and navigation management for go_router.
-version: 0.0.7
+version: 0.0.8
 homepage: https://github.com/andyhorn/simple_routes
 
 environment:
