@@ -7,6 +7,7 @@ on:
 
 jobs:
   test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -21,9 +22,18 @@ jobs:
       - name: Test
         run: flutter test
   publish:
+    name: Publish to pub.dev
     needs: test
+    runs-on: ubuntu-latest
     permissions:
       id-token: write
-    uses: dart-lang/ecosystem/.github/workflows/publish.yaml@main
-    with:
-      environment: pub.dev
+    steps:
+      - uses: actions/checkout@v2
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.13.6
+          channel: "stable"
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Publish
+        run: dart pub publish --force
