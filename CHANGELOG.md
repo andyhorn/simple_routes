@@ -1,3 +1,10 @@
+## 0.0.7
+
+- Add `isCurrentRoute` method
+- Add `isAncestory` method
+- Update description in pubspec.yaml
+- Update README
+
 ## 0.0.6
 
 - Add automated release workflow
