@@ -1,3 +1,7 @@
+## 0.0.9
+
+- Add support for pushing routes
+
 ## 0.0.8
 
 - Version bump for release workflow fixes
