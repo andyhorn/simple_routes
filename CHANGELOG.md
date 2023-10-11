@@ -5,7 +5,7 @@
 ## 0.0.7
 
 - Add `isCurrentRoute` method
-- Add `isAncestory` method
+- Add `isAncestor` method
 - Update description in pubspec.yaml
 - Update README
 
