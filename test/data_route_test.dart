@@ -49,6 +49,7 @@ class _RootDataRoute extends DataRoute<RootRouteData> {
     BuildContext context, {
     required RootRouteData data,
     Map<String, String>? query,
+    push = false,
   }) {
     onGo(data.inject(fullPath));
   }
@@ -72,6 +73,7 @@ class _ChildDataRoute extends DataRoute<ChildRouteData>
     BuildContext context, {
     required RootRouteData data,
     Map<String, String>? query,
+    push = false,
   }) {
     onGo(data.inject(fullPath));
   }
