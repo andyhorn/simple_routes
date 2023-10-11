@@ -12,6 +12,30 @@ By defining your routes and route structure using Dart classes, you gain powerfu
 - Navigate without building custom strings
 - Determine the current route and its ancestors
 
+The primary focus of this package is to provide a simple interface for triggering navigation within the app.
+
+It boils down to a simple `go` method:
+
+```dart
+const MySimpleRoute().go(context);
+```
+
+Or, for more complicated routes:
+
+```dart
+const MyNestedRouteWithParams().go(context, data: MyRouteData('some-value'));
+```
+
+**Push**
+
+The `go` method also supports the "push" navigation type. 
+
+To use this, just set the `push` named argument to `true`.
+
+```dart
+const MySimpleRoute().go(context, push: true);
+```
+
 ## Getting started
 
 This package is intended to be used with the [GoRouter](https://pub.dev/packages/go_router) package.
