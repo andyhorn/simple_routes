@@ -9,6 +9,7 @@ jobs:
   release:
     name: Test and Release
     runs-on: ubuntu-latest
+    environment: pub.dev
     permissions:
       id-token: write
     steps:
@@ -28,5 +29,3 @@ jobs:
         run: flutter test
       - name: Publish
         run: dart pub publish --force
-        environment:
-          environment: pub.dev
