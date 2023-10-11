@@ -1,3 +1,7 @@
+## 0.0.10
+
+- Attempt to fix release workflow (again)
+
 ## 0.0.9
 
 - Add support for pushing routes
