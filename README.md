@@ -40,10 +40,10 @@ const MySimpleRoute().go(context, push: true);
 
 This package is intended to be used with the [GoRouter](https://pub.dev/packages/go_router) package.
 
-Install both of these packages to your app's dependencies.
-
 ```
-flutter pub add go_router simple_routes
+dependencies:
+  go_router: ^12.0.0
+  simple_routes: ^0.0.11
 ```
 
 ## Usage

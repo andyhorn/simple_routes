@@ -1,3 +1,7 @@
+## 0.0.11
+
+- Update GoRouter to ^12.0.0
+
 ## 0.0.10
 
 - Attempt to fix release workflow (again)
