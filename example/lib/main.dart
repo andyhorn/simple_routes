@@ -27,6 +27,8 @@ final router = GoRouter(
         // use your factory class to validate the route data.
         if (!const ProfileRouteDataFactory().containsData(state)) {
           // when redirecting, use the `fullPath` property.
+          // note: If your route has parameters, you should use the
+          // `buildFullPath` method instead.
           return const RootRoute().fullPath;
         }
 
@@ -36,8 +38,8 @@ final router = GoRouter(
         // use a factory class to extract your route data.
         // This is especially useful if you have multiple routes that use the
         // same data class or if your route has multiple values.
-        final profileRouteData =
-            const ProfileRouteDataFactory().fromState(state);
+        const factory = ProfileRouteDataFactory();
+        final profileRouteData = factory.fromState(state);
 
         return ProfilePage(userId: profileRouteData.userId);
       },

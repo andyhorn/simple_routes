@@ -4,14 +4,14 @@ class Path1 extends SimpleRoute {
   const Path1();
 
   @override
-  String get path => '/path1';
+  String get path => 'path1';
 }
 
 class Path2 extends SimpleRoute {
   const Path2();
 
   @override
-  String get path => '/path2';
+  String get path => 'path2';
 }
 
 enum TestRouteParams {

@@ -24,6 +24,23 @@ abstract class BaseRoute {
     return path;
   }
 
+  /// Get the [GoRoute] path for this route.
+  ///
+  /// ```dart
+  /// GoRoute(
+  ///   path: const MyRoute().goPath,
+  /// ),
+  /// ```
+  String get goPath {
+    var path = this.path;
+
+    if (this is ChildRoute) {
+      return path.startsWith('/') ? path.substring(1) : path;
+    } else {
+      return path.startsWith('/') ? path : '/$path';
+    }
+  }
+
   /// Determine if the current GoRouter location matches this route.
   ///
   /// This is useful for determining if a route is active.

@@ -22,7 +22,7 @@ class TestApp extends StatelessWidget {
         initialLocation: const Path1().fullPath,
         routes: [
           GoRoute(
-            path: const Path1().path,
+            path: const Path1().goPath,
             builder: (context, state) => Scaffold(
               body: Builder(builder: (context) {
                 onPath1Load?.call(context);
@@ -38,7 +38,7 @@ class TestApp extends StatelessWidget {
             ),
           ),
           GoRoute(
-            path: const Path2().path,
+            path: const Path2().goPath,
             builder: (context, state) => Scaffold(
               body: Center(
                 child: Builder(
@@ -59,7 +59,7 @@ class TestApp extends StatelessWidget {
             ),
             routes: [
               GoRoute(
-                path: const DataPath().path,
+                path: const DataPath().goPath,
                 builder: (context, state) => Scaffold(
                   body: Builder(
                     builder: (context) {

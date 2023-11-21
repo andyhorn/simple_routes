@@ -89,7 +89,7 @@ class ProfileRoute extends DataRoute<ProfileRouteData> {
   // you can craft this template yourself, but the helper methods are here to
   // minimize the chance of error.
   @override
-  String get path => join(['/profile', withPrefix(RouteParams.userId)]);
+  String get path => join(['profile', withPrefix(RouteParams.userId)]);
 }
 
 // Child data route

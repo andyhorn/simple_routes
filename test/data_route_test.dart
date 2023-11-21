@@ -50,7 +50,7 @@ class _RootDataRoute extends DataRoute<RootRouteData> {
   final void Function(String) onGo;
 
   @override
-  String get path => join(['/', withPrefix(DataRouteParams.userId)]);
+  String get path => withPrefix(DataRouteParams.userId);
 
   // overriding for test purposes only
   @override
@@ -90,9 +90,9 @@ class _ChildDataRoute extends DataRoute<ChildRouteData>
 
 void main() {
   group('$DataRoute', () {
-    test('path', () {
+    test('goPath', () {
       final route = _RootDataRoute((_) {});
-      expect(route.path, '/:userId');
+      expect(route.goPath, '/:userId');
     });
 
     test('fullPath', () {
@@ -123,9 +123,9 @@ void main() {
   });
 
   group('Child $DataRoute', () {
-    test('path', () {
+    test('goPath', () {
       final child = _ChildDataRoute((_, __) {});
-      expect(child.path, 'child/:someValue');
+      expect(child.goPath, 'child/:someValue');
     });
 
     test('fullPath', () {
