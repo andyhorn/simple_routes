@@ -9,8 +9,9 @@ abstract class BaseRoute {
   /// The path for this route. e.g. 'verify-email'.
   abstract final String path;
 
-  /// Get the fully-qualified path for this route.
-  /// e.g. '/auth/register/verify-email'.
+  /// Get the fully-qualified path template for this route.
+  ///
+  /// e.g. `/auth/register/verify-email` or `/auth/register/verify-email/:token`
   String get fullPath {
     if (this is ChildRoute) {
       return join([(this as ChildRoute).parent.fullPath, path]);
@@ -55,7 +56,7 @@ abstract class SimpleRoute extends BaseRoute {
     bool push = false,
   }) {
     final action = _getAction(context, push);
-    action.call(fullPath.maybeAppendQuery(query));
+    action(fullPath.maybeAppendQuery(query));
   }
 }
 
@@ -72,9 +73,19 @@ abstract class DataRoute<Data extends SimpleRouteData> extends BaseRoute {
     bool push = false,
   }) {
     final action = _getAction(context, push);
-    final path = data.inject(fullPath).maybeAppendQuery(query);
+    final path = buildPath(data, query: query);
 
-    action.call(path);
+    action(path);
+  }
+
+  /// Build the path for this route using the supplied [data].
+  ///
+  /// This method allows you to build a path for a route without navigating.
+  String buildPath(
+    Data data, {
+    Map<String, String>? query,
+  }) {
+    return data.inject(fullPath).maybeAppendQuery(query);
   }
 }
 

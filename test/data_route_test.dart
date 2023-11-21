@@ -80,7 +80,7 @@ class _ChildDataRoute extends DataRoute<ChildRouteData>
 }
 
 void main() {
-  group(DataRoute, () {
+  group('$DataRoute', () {
     test('path', () {
       final route = _RootDataRoute((_) {});
       expect(route.path, '/:userId');
@@ -99,6 +99,17 @@ void main() {
         data: const RootRouteData(userId: 'user-id'),
       );
       expect(injected, '/user-id');
+    });
+
+    test('buildPath', () {
+      final route = _RootDataRoute((_) {});
+      expect(
+        route.buildPath(
+          const RootRouteData(userId: 'user-id'),
+          query: {'key': 'value'},
+        ),
+        '/user-id?key=value',
+      );
     });
   });
 
@@ -121,6 +132,20 @@ void main() {
         data: const ChildRouteData(userId: 'user-id', someValue: 'some-value'),
       );
       expect(injected, '/user-id/child/some-value');
+    });
+
+    test('buildPath', () {
+      final child = _ChildDataRoute((_) {});
+      expect(
+        child.buildPath(
+          const ChildRouteData(
+            userId: 'user-id',
+            someValue: 'some-value',
+          ),
+          query: {'key': 'value'},
+        ),
+        '/user-id/child/some-value?key=value',
+      );
     });
   });
 }
