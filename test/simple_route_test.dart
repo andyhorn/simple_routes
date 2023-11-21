@@ -6,6 +6,24 @@ class _TestSimpleRoute extends SimpleRoute {
   String get path => '/test';
 }
 
+class _TestRouteNoSlash extends SimpleRoute {
+  const _TestRouteNoSlash();
+
+  @override
+  String get path => 'test';
+}
+
+class _TestChildRouteNoSlash extends SimpleRoute
+    implements ChildRoute<_TestRouteNoSlash> {
+  const _TestChildRouteNoSlash();
+
+  @override
+  _TestRouteNoSlash get parent => const _TestRouteNoSlash();
+
+  @override
+  String get path => 'child';
+}
+
 class _TestSimpleChildRoute extends SimpleRoute
     implements ChildRoute<_TestSimpleRoute> {
   @override
@@ -25,7 +43,7 @@ class _SecondLevelChildRoute extends SimpleRoute
 }
 
 void main() {
-  group(SimpleRoute, () {
+  group('$SimpleRoute', () {
     final route = _TestSimpleRoute();
 
     test('path', () {
@@ -58,6 +76,22 @@ void main() {
 
     test('fullPath', () {
       expect(child.fullPath, '/test/child/second-level');
+    });
+  });
+
+  group('$_TestRouteNoSlash', () {
+    group('#fullPath', () {
+      test('adds leading slash', () {
+        expect(const _TestRouteNoSlash().fullPath, '/test');
+      });
+    });
+  });
+
+  group('$_TestChildRouteNoSlash', () {
+    group('#fullPath', () {
+      test('adds leading slash', () {
+        expect(const _TestChildRouteNoSlash().fullPath, '/test/child');
+      });
     });
   });
 }
