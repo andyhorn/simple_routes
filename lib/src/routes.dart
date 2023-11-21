@@ -39,7 +39,10 @@ abstract class BaseRoute {
     return location != fullPath && (location?.startsWith(fullPath) ?? false);
   }
 
-  void Function(String) _getAction(BuildContext context, bool push) {
+  void Function(
+    String, {
+    Object? extra,
+  }) _getAction(BuildContext context, bool push) {
     final goRouter = GoRouter.of(context);
     return push ? goRouter.push : goRouter.go;
   }
@@ -74,8 +77,9 @@ abstract class DataRoute<Data extends SimpleRouteData> extends BaseRoute {
   }) {
     final action = _getAction(context, push);
     final path = buildPath(data, query: query);
+    final extra = data.extra();
 
-    action(path);
+    action(path, extra: extra);
   }
 
   /// Build the path for this route using the supplied [data].

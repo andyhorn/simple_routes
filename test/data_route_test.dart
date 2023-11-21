@@ -5,6 +5,12 @@ import 'package:simple_routes/simple_routes.dart';
 
 class _MockBuildContext extends Mock implements BuildContext {}
 
+class _ExtraData {
+  const _ExtraData(this.value);
+
+  final String value;
+}
+
 enum DataRouteParams {
   userId,
   someValue,
@@ -33,6 +39,9 @@ class ChildRouteData extends RootRouteData {
   String inject(String path) {
     return super.inject(path).setParam(DataRouteParams.someValue, someValue);
   }
+
+  @override
+  Object? extra() => _ExtraData(someValue);
 }
 
 class _RootDataRoute extends DataRoute<RootRouteData> {
@@ -59,7 +68,7 @@ class _ChildDataRoute extends DataRoute<ChildRouteData>
     implements ChildRoute<_RootDataRoute> {
   _ChildDataRoute(this.onGo);
 
-  final void Function(String) onGo;
+  final void Function(String, Object?) onGo;
 
   @override
   _RootDataRoute get parent => _RootDataRoute((_) {});
@@ -75,7 +84,7 @@ class _ChildDataRoute extends DataRoute<ChildRouteData>
     Map<String, String>? query,
     push = false,
   }) {
-    onGo(data.inject(fullPath));
+    onGo(data.inject(fullPath), data.extra());
   }
 }
 
@@ -115,18 +124,18 @@ void main() {
 
   group('Child $DataRoute', () {
     test('path', () {
-      final child = _ChildDataRoute((_) {});
+      final child = _ChildDataRoute((_, __) {});
       expect(child.path, 'child/:someValue');
     });
 
     test('fullPath', () {
-      final child = _ChildDataRoute((_) {});
+      final child = _ChildDataRoute((_, __) {});
       expect(child.fullPath, '/:userId/child/:someValue');
     });
 
     test('injection', () {
       var injected = '';
-      final child = _ChildDataRoute((x) => injected = x);
+      final child = _ChildDataRoute((x, _) => injected = x);
       child.go(
         _MockBuildContext(),
         data: const ChildRouteData(userId: 'user-id', someValue: 'some-value'),
@@ -134,8 +143,18 @@ void main() {
       expect(injected, '/user-id/child/some-value');
     });
 
+    test('injects extra data', () {
+      _ExtraData? extra;
+      final child = _ChildDataRoute((_, x) => extra = x as _ExtraData?);
+      child.go(
+        _MockBuildContext(),
+        data: const ChildRouteData(userId: 'user-id', someValue: 'some-value'),
+      );
+      expect(extra?.value, 'some-value');
+    });
+
     test('buildPath', () {
-      final child = _ChildDataRoute((_) {});
+      final child = _ChildDataRoute((_, __) {});
       expect(
         child.buildPath(
           const ChildRouteData(

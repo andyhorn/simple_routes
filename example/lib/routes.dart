@@ -70,7 +70,7 @@ class ProfileRouteDataFactory extends SimpleRouteDataFactory<ProfileRouteData> {
   // The [containsKey] helper method is extremely useful here.
   @override
   bool containsData(GoRouterState state) {
-    return containsKey(state, RouteParams.userId);
+    return containsParam(state, RouteParams.userId);
   }
 }
 
