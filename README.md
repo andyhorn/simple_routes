@@ -8,8 +8,8 @@ By defining your routes and route structure using Dart classes, you gain powerfu
 
 - Eliminate "magic strings"
 - Enforce route parameter requirements
-- Inject and extract route and query parameters
-- Navigate without building custom strings
+- Inject and extract path parameters, query parameters, and "extra" route data
+- Navigate anywhere without building strings or worrying about what data you need
 - Determine the current route and its ancestors
 
 The primary focus of this package is to provide a simple interface for triggering navigation within the app.
@@ -43,7 +43,7 @@ This package is intended to be used with the [GoRouter](https://pub.dev/packages
 ```
 dependencies:
   go_router: ^12.0.0
-  simple_routes: ^0.0.11
+  simple_routes: ^0.0.12
 ```
 
 ## Usage
@@ -61,19 +61,21 @@ class HomeRoute extends SimpleRoute {
   const HomeRoute();
 
   @override
-  String get path => '/home';
+  String get path => 'home';
 }
 ```
 
-When extending the `SimpleRoute` base class, you must override the `path` property.
+When extending the `SimpleRoute` base class, you must override the `path` property. This sets the path for this route. You are not required to prefix the path with a leading slash - this is handled for you.
 
-**Note:** Root level routes should have a path that is prefixed with a forward slash (`/`).
+## GoRouter configuration
 
- This value is used to define the `path` of a `GoRoute`. 
+When defining your `GoRouter` structure, use the `goPath` property of your routes to properly set the path for each route.
+
+This property will manage the leading slashes for you, based on whether or not your route is a `ChildRoute` or not (more on this below).
 
 ```dart
   GoRoute(
-    path: const HomeRoute().path,
+    path: const HomeRoute().goPath,
     pageBuilder: (context, state) => const HomePage(),
   ),
 ```
@@ -88,7 +90,7 @@ ElevatedButton(
 ),
 ```
 
-#### Nested (child) routes
+#### ChildRoute
 
 Any nested (AKA "Child") routes should implement the `ChildRoute` interface.
 
@@ -104,11 +106,9 @@ class SettingsRoute extends SimpleRoute implements ChildRoute<HomeRoute> {
 }
 ```
 
-**Note:** Child routes should have a path that is _not_ prefixed with a slash.
+Along with providing the `path` for this route, you must also implement the `parent` property. This tells your route how to find its parent in the route structure.
 
-Along with providing the `path` for this route, when implementing the `ChildRoute` interface, you must also implement the `parent` property. 
-
-The `go` method will automatically build the full path for your route, based on its `path` and the `path`s of its parents.
+The `go` method will then automatically build the full path for your route, based on its `path` and the `path`s of its parent(s).
 
 ```dart
 ElevatedButton(
@@ -116,6 +116,8 @@ ElevatedButton(
   child: const Text('Go to Settings'),
 ),
 ```
+
+**NOTE:** Any routes that do not implement `ChildRoute` will be treated as a root-level route (i.e. prefixed with a leading slash).
 
 Simple! Now let's look at how to handle routes that require dynamic data.
 
@@ -133,7 +135,7 @@ enum RouteParams {
 }
 ```
 
-This helps eliminate "magic strings" and, therefore, reduce the opportunity for errors and hard-to-track-down bugs.
+This helps eliminate "magic strings" and reduces the opportunity for typos and other hard-to-track-down bugs.
 
 #### Data classes
 
@@ -155,9 +157,9 @@ class UserRouteData extends SimpleRouteData {
 }
 ```
 
-By extending the `SimpleRouteData` base class, we must implement the `inject` method. This is how the templated parameters in the path are replaced with the actual values. Note the `String.setParam` extension - it is recommended to utilize this function anytime you inject a value.
+By extending the `SimpleRouteData` base class, we must implement the `inject` method. This is how the templated parameters in the path are replaced with their values at runtime. Note the `String.setParam` extension - it is recommended to utilize this extension method anytime you inject a value.
 
-This extension takes an enum value as its first argument and a String value as its second argument.
+This extension takes an enum value as its first argument and a `String` value as its second argument.
 
 ```dart
 String setParam<E extends Enum>(E enum, String value);
@@ -172,7 +174,7 @@ class UserRoute extends DataRoute<UserRouteData> {
   const UserRoute();
 
   @override
-  String get path => join(['/user', withPrefix(RouteParams.userId)]);
+  String get path => join(['user', withPrefix(RouteParams.userId)]);
 }
 ```
 
@@ -300,16 +302,16 @@ class UserRouteDataFactory extends SimpleRouteDataFactory<UserRouteData> {
 
   @override
   bool containsData(GoRouterState state) {
-    return containsKey(state, RouteParams.userId);
+    return containsParam(state, RouteParams.userId);
   }
 }
 ```
 
-The `fromState` method is useful within your route configuration for extracting the route data from the `GoRouterState`.
+The `fromState` method is required to be implemented and should return an instance of your data class, populated with the values from the `GoRouterState`.
 
-The `containsData` method must also be implemented; it gives you a way to validate whether all necessary parameters are present in the `GoRouterState`.
+The `containsData` method must also be implemented; it gives you a way to validate whether all necessary parameters are present in the `GoRouterState` before attempting to build your data class. This is often useful in a `redirect` method (see below).
 
-Also note the `containsKey` helper method. This utility checks whether the `GoRouterState` contains a particular parameter key (i.e. enum value name).
+The `containsParam` method is useful for checking if a path parameter (defined as an Enum value) exists in the `GoRouterState`.
 
 #### Using a DataFactory
 
@@ -333,15 +335,52 @@ GoRoute(
 ),
 ```
 
-A useful pattern is to check the validity of the state in a `redirect`, thus ensuring that the state is valid before attempting to extract the route data object and build the screen in the `builder`.
-
 ### Query parameters
 
-As of v0.0.3, this package supports injecting and extracting query parameters.
+#### Using data classes
 
-#### Injecting query parameters
+The recommended method of injecting and extracting query parameters is to use a `DataRoute` and a `SimpleRouteDataFactory`.
 
-Injecting query parameters into your route is easy. When calling the `go` method, just add a `Map<String, String>` to the `query` argument.
+First, define your data class and have it add the query parameters as part of the `inject` method, using the `maybeAppendQuery` extension method.
+
+```dart
+class MyRouteData extends SimpleRouteData {
+  const MyRouteData({required this.someValue});
+
+  final String? someValue;
+
+  @override
+  String inject(String path) {
+    return path.maybeAppendQuery({
+      if (someValue != null) 'someKey': someValue!,
+    });
+  }
+}
+```
+
+Then, define your factory class and use the `containsQuery` and `extractQuery` methods to build your data class.
+
+```dart
+
+class MyRouteDataFactory extends SimpleRouteDataFactory<MyRouteData> {
+  static const queryKey = 'someKey';
+
+  @override
+  MyRouteData fromState(GoRouterState state) {
+    return MyRouteData(
+      someValue: containsQuery(state, queryKey) 
+        ? extractQuery(state, queryKey) 
+        : null,
+    );
+  }
+
+  ...
+}
+```
+
+#### Quick n' dirty
+
+If you don't want to use a data class and factory, you can still inject and extract query parameters. The `go` method exposes a `query` named argument that accepts a `Map<String, String>`.
 
 ```dart
 ElevatedButton(
@@ -349,17 +388,61 @@ ElevatedButton(
 ),
 ```
 
-#### Extracting query parameters
-
-The query parameters live on a `Uri` instance on the `GoRouterState`. You can access this map yourself using `GoRouterState.uri.queryParameters`.
-
-Or, you can use the `getQueryParams` convenience function. This method is a wrapper around the `queryParameters` property and just serves to make it easier to access.
+Then, when building your screen, you can use extract your query parameters from the `GoRouterState`. The `getQueryParams` method takes in the state and returns a `Map<String, String>`.
 
 ```dart
-GoRoute(
-  path: const MyRoute().path,
-  builder: (context, state) => MyScreen(data: getQueryParams(state)['someKey']),
-),
+builder: (context, state) {
+  final queryParams = getQueryParams(state);
+
+  return MyScreen(
+    someValue: queryParams['key'],
+  );
+}
+```
+
+### Extra data
+
+GoRouter provides a way of passing "extra" data to your routes. This is useful for passing data that is not part of the route itself, but is still needed by the screen.
+
+You can utilize this "extra" data as part of a `DataRoute` by overriding the `extra` getter. Note that you do not have to use it in the `inject` method.
+
+```dart
+class MyRouteData extends SimpleRouteData {
+  const MyRouteData({
+    required this.parameterValue,
+    required this.extraValue,
+  });
+
+  final String parameterValue;
+  final String extraValue;
+
+  @override
+  Object? get extra => SomeOtherDataClass(someValue);
+
+  @override
+  String inject(String path) {
+    return path.setParam(
+      RouteParams.parameter,
+      parameterValue,
+    );
+  }
+}
+```
+
+Then, when building your screen, you can use a `SimpleRouteDataFactory` to extract the extra data from the `GoRouterState`.
+
+```dart
+class MyRouteDataFactory extends SimpleRouteDataFactory<MyRouteData> {
+  @override
+  MyRouteData fromState(GoRouterState state) {
+    return MyRouteData(
+      parameterValue: extractParam(state, RouteParams.parameter),
+      extraValue: extractExtra<SomeOtherDataClass>(state).someValue,
+    );
+  }
+
+  ...
+}
 ```
 
 ### Route Checking
