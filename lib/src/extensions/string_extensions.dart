@@ -28,6 +28,11 @@ extension StringExtensions on String {
   }
 }
 
+extension StringIterableExtensions on Iterable<String> {
+  /// Join a list of strings into a forward slash-separated path.
+  String toPath() => join('/');
+}
+
 /// Generate a query string from a map of parameters.
 ///
 /// For example, `query({'key': 'my value'})` returns `'?key=my%20value'`.

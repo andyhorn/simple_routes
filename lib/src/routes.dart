@@ -14,7 +14,7 @@ abstract class BaseRoute {
   /// e.g. `/auth/register/verify-email` or `/auth/register/verify-email/:token`
   String get fullPath {
     var path = this is ChildRoute
-        ? join([(this as ChildRoute).parent.fullPath, this.path])
+        ? [(this as ChildRoute).parent.fullPath, this.path].toPath()
         : this.path;
 
     if (!path.startsWith('/')) {

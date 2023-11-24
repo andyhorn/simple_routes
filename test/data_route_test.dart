@@ -74,7 +74,10 @@ class _ChildDataRoute extends DataRoute<ChildRouteData>
   _RootDataRoute get parent => _RootDataRoute((_) {});
 
   @override
-  String get path => join(['child', DataRouteParams.someValue.prefixed]);
+  String get path => [
+        'child',
+        DataRouteParams.someValue.prefixed,
+      ].toPath();
 
   // overriding for test purposes only
   @override
