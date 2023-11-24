@@ -108,3 +108,38 @@ class ProfileEditRoute extends DataRoute<ProfileRouteData>
   @override
   ProfileRoute get parent => const ProfileRoute();
 }
+
+class ProfileEditRouteData extends ProfileRouteData {
+  ProfileEditRouteData({
+    required super.userId,
+    required this.query,
+  });
+
+  final String? query;
+
+  @override
+  String inject(String path) {
+    return super.inject(path).maybeAppendQuery({
+      if (query != null) 'query': query!,
+    });
+  }
+}
+
+class ProfileEditRouteDataFactory
+    extends SimpleRouteDataFactory<ProfileEditRouteData> {
+  const ProfileEditRouteDataFactory();
+
+  @override
+  bool containsData(GoRouterState state) {
+    return containsParam(state, RouteParams.userId);
+  }
+
+  @override
+  ProfileEditRouteData fromState(GoRouterState state) {
+    return ProfileEditRouteData(
+      userId: extractParam(state, RouteParams.userId),
+      query:
+          containsQuery(state, 'query') ? extractQuery(state, 'query') : null,
+    );
+  }
+}

@@ -4,7 +4,6 @@
 import 'package:example/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:simple_routes/simple_routes.dart';
 
 // define your root-level routes and sub-routes in the same way.
 final router = GoRouter(
@@ -47,7 +46,7 @@ final router = GoRouter(
         GoRoute(
           path: const ProfileEditRoute().path,
           builder: (context, state) => ProfileEditPage(
-            queryParams: getQueryParams(state),
+            query: const ProfileEditRouteDataFactory().fromState(state).query,
           ),
         ),
       ],
@@ -162,9 +161,12 @@ class ProfilePage extends StatelessWidget {
 }
 
 class ProfileEditPage extends StatelessWidget {
-  const ProfileEditPage({super.key, required this.queryParams});
+  const ProfileEditPage({
+    super.key,
+    required this.query,
+  });
 
-  final Map<String, String> queryParams;
+  final String? query;
 
   @override
   Widget build(BuildContext context) {
@@ -176,7 +178,7 @@ class ProfileEditPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text('Profile edit page for ${profileRouteData.userId}'),
-        Text('Query parameters: $queryParams'),
+        Text('Query: ${query ?? 'none'}'),
         const NavButtons(),
       ],
     );
