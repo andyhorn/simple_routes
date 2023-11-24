@@ -33,7 +33,7 @@ class DataPath extends DataRoute<TestRouteData> implements ChildRoute<Path2> {
   const DataPath();
 
   @override
-  String get path => withPrefix(TestRouteParams.test);
+  String get path => TestRouteParams.test.prefixed;
 
   @override
   Path2 get parent => const Path2();

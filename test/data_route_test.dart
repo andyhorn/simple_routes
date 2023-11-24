@@ -50,7 +50,7 @@ class _RootDataRoute extends DataRoute<RootRouteData> {
   final void Function(String) onGo;
 
   @override
-  String get path => withPrefix(DataRouteParams.userId);
+  String get path => DataRouteParams.userId.prefixed;
 
   // overriding for test purposes only
   @override
@@ -74,7 +74,7 @@ class _ChildDataRoute extends DataRoute<ChildRouteData>
   _RootDataRoute get parent => _RootDataRoute((_) {});
 
   @override
-  String get path => join(['child', withPrefix(DataRouteParams.someValue)]);
+  String get path => join(['child', DataRouteParams.someValue.prefixed]);
 
   // overriding for test purposes only
   @override

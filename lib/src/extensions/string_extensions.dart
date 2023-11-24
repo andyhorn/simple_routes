@@ -1,4 +1,3 @@
-import 'package:simple_routes/src/utils.dart';
 import 'package:simple_routes/simple_routes.dart';
 
 final _queryRegex = RegExp(r'\?.+$');
@@ -8,7 +7,7 @@ extension StringExtensions on String {
   ///
   /// For example, `':value'.setParam(MyEnum.value, 'foo')` returns `'foo'`.
   String setParam<Param extends Enum>(Param param, String value) {
-    return replaceAll(withPrefix(param), value);
+    return replaceAll(param.prefixed, value);
   }
 
   /// Append a query string to this String, if [query] is not empty.

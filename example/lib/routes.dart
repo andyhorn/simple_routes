@@ -82,14 +82,14 @@ class ProfileRoute extends DataRoute<ProfileRouteData> {
   // since this is a [DataRoute], it should contain some dynamic variable, such
   // as a userId. e.g. '/profile/:userId'.
   //
-  // use the [withPrefix] helper method to add the colon prefix to your
+  // use the `prefixed` property to add the colon (:) prefix to your
   // parameter in the template, and use the [join] method to join the path
   // segments together.
   //
   // you can craft this template yourself, but the helper methods are here to
   // minimize the chance of error.
   @override
-  String get path => join(['profile', withPrefix(RouteParams.userId)]);
+  String get path => join(['profile', RouteParams.userId.prefixed]);
 }
 
 // Child data route
