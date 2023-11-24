@@ -1,13 +1,13 @@
 import 'package:go_router/go_router.dart';
 
-abstract class SimpleRouteData {
+abstract class SimpleRouteData<E extends Object> {
   const SimpleRouteData();
 
   /// Inject this route data into the path.
   String inject(String path);
 
   /// Inject data into the "extra" field of the [GoRouterState].
-  Object? extra() => null;
+  E? extra() => null;
 }
 
 abstract class SimpleRouteDataFactory<Data extends SimpleRouteData> {
@@ -38,14 +38,16 @@ abstract class SimpleRouteDataFactory<Data extends SimpleRouteData> {
   String extractQuery(GoRouterState state, String key) {
     return state.uri.queryParameters[key]!;
   }
+}
 
+mixin ExtraDataMixin<E extends Object> {
   /// Returns true if the [state]'s `extra` data is of type [T].
-  bool containsExtra<T>(GoRouterState state) {
-    return state.extra is T;
+  bool containsExtra(GoRouterState state) {
+    return state.extra is E;
   }
 
   /// Extract the [state] `extra` data as type [T].
-  T extractExtra<T>(GoRouterState state) {
-    return state.extra as T;
+  E extractExtra(GoRouterState state) {
+    return state.extra as E;
   }
 }

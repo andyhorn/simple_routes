@@ -1,11 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/src/state.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:simple_routes/simple_routes.dart';
+import 'package:simple_routes/src/data.dart';
 
 enum _MyEnum {
   myKey,
 }
+
+class ExtraData {}
+
+class ExtraDataTwo {}
+
+class TestClass with ExtraDataMixin<ExtraData> {}
 
 class _Factory extends SimpleRouteDataFactory {
   @override
@@ -17,12 +23,6 @@ class _Factory extends SimpleRouteDataFactory {
   SimpleRouteData fromState(GoRouterState state) {
     throw UnimplementedError();
   }
-}
-
-class _ExtraData {
-  const _ExtraData(this.value);
-
-  final String value;
 }
 
 class _MockGoRouterState extends Mock implements GoRouterState {}
@@ -140,45 +140,55 @@ void main() {
         expect(_Factory().extractParam(state, _MyEnum.myKey), 'myValue');
       });
     });
+  });
+
+  group('$ExtraDataMixin', () {
+    late GoRouterState state;
+    final testClass = TestClass();
+
+    setUp(() {
+      state = _MockGoRouterState();
+    });
 
     group('#containsExtra', () {
-      group('when it does not contain any extra data', () {
-        late GoRouterState state;
-
+      group('when state does not contain extra data', () {
         setUp(() {
-          state = _MockGoRouterState();
           when(() => state.extra).thenReturn(null);
         });
 
         test('returns false', () {
-          expect(_Factory().containsExtra<_ExtraData>(state), isFalse);
+          expect(testClass.containsExtra(state), isFalse);
         });
       });
 
-      group('when it contains extra data', () {
-        late GoRouterState state;
-
+      group('when state contains an object of a different type', () {
         setUp(() {
-          state = _MockGoRouterState();
-          when(() => state.extra).thenReturn(const _ExtraData('hello world'));
+          when(() => state.extra).thenReturn(ExtraDataTwo());
+        });
+
+        test('returns false', () {
+          expect(testClass.containsExtra(state), isFalse);
+        });
+      });
+
+      group('when state contains the extra data', () {
+        setUp(() {
+          when(() => state.extra).thenReturn(ExtraData());
         });
 
         test('returns true', () {
-          expect(_Factory().containsExtra<_ExtraData>(state), isTrue);
+          expect(testClass.containsExtra(state), isTrue);
         });
       });
     });
 
     group('#extractExtra', () {
-      late GoRouterState state;
-
       setUp(() {
-        state = _MockGoRouterState();
-        when(() => state.extra).thenReturn(const _ExtraData('hello world'));
+        when(() => state.extra).thenReturn(ExtraData());
       });
 
-      test('extracts the extra data', () {
-        expect(_Factory().extractExtra<_ExtraData>(state).value, 'hello world');
+      test('returns the extra data', () {
+        expect(testClass.extractExtra(state), isA<ExtraData>());
       });
     });
   });
