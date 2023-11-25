@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/src/state.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:simple_routes/src/data.dart';
+import 'package:simple_routes/src/route_data.dart';
 
 enum _MyEnum {
   myKey,
