@@ -110,7 +110,7 @@ class ProfileEditRoute extends DataRoute<ProfileRouteData>
 }
 
 class ProfileEditRouteData extends ProfileRouteData {
-  ProfileEditRouteData({
+  const ProfileEditRouteData({
     required super.userId,
     required this.query,
   });
