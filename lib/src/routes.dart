@@ -59,14 +59,6 @@ abstract class BaseRoute {
     final location = GoRouterState.of(context).fullPath;
     return location != fullPath && (location?.startsWith(fullPath) ?? false);
   }
-
-  void Function(
-    String, {
-    Object? extra,
-  }) _getAction(BuildContext context, bool push) {
-    final goRouter = GoRouter.of(context);
-    return push ? goRouter.push : goRouter.go;
-  }
 }
 
 /// A route that contains no parameters.
@@ -74,13 +66,13 @@ abstract class SimpleRoute extends BaseRoute {
   const SimpleRoute();
 
   /// Navigate to this route.
-  void go(
-    BuildContext context, {
-    Map<String, String>? query,
-    bool push = false,
-  }) {
-    final action = _getAction(context, push);
-    action(fullPath.maybeAppendQuery(query));
+  void go(BuildContext context) {
+    GoRouter.of(context).go(fullPath);
+  }
+
+  /// Push this route onto the stack.
+  void push(BuildContext context) {
+    GoRouter.of(context).push(fullPath);
   }
 }
 
@@ -93,24 +85,21 @@ abstract class DataRoute<Data extends SimpleRouteData> extends BaseRoute {
   void go(
     BuildContext context, {
     required Data data,
-    Map<String, String>? query,
-    bool push = false,
   }) {
-    final action = _getAction(context, push);
-    final path = buildPath(data, query: query);
-    final extra = data.extra();
-
-    action(path, extra: extra);
+    GoRouter.of(context).go(generate(data), extra: data.extra());
   }
 
-  /// Build the path for this route using the supplied [data].
-  ///
-  /// This method allows you to build a path for a route without navigating.
-  String buildPath(
-    Data data, {
-    Map<String, String>? query,
+  /// Push this route onto the stack using the supplied [data].
+  void push(
+    BuildContext context, {
+    required Data data,
   }) {
-    return data.inject(fullPath).maybeAppendQuery(query);
+    GoRouter.of(context).push(generate(data), extra: data.extra());
+  }
+
+  /// Generate a populated path for this route using the supplied [data].
+  String generate(Data data) {
+    return data.inject(fullPath);
   }
 }
 
