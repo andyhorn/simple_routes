@@ -11,12 +11,16 @@ extension StringExtensions on String {
   }
 
   /// Append a query string to this String, if [query] is not empty.
-  String maybeAppendQuery(Map<String, String>? query) {
-    if (query == null || query.isEmpty) {
+  String appendQuery(Map<String, String?> query) {
+    final filtered = query.entries
+        .where((e) => e.value?.isNotEmpty ?? false)
+        .map((e) => MapEntry(e.key, e.value!));
+
+    if (filtered.isEmpty) {
       return this;
     }
 
-    var queryString = _toQueryString(query);
+    var queryString = _toQueryString(Map.fromEntries(filtered));
 
     if (_queryRegex.hasMatch(this)) {
       // If this path already ends in a query string, append the new query

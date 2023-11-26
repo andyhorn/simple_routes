@@ -23,24 +23,31 @@ void main() {
       });
     });
 
-    group('#maybeAppendQuery', () {
-      test('does not append empty query', () {
-        expect('path'.maybeAppendQuery(null), 'path');
-        expect('path'.maybeAppendQuery({}), 'path');
+    group('#appendQuery', () {
+      test('does not append an empty query', () {
+        expect('path'.appendQuery({}), 'path');
+      });
+
+      test('does not append empty values', () {
+        expect('path'.appendQuery({'key': ''}), 'path');
+      });
+
+      test('does not append null values', () {
+        expect('path'.appendQuery({'key': null}), 'path');
       });
 
       test('appends query string', () {
-        expect('path'.maybeAppendQuery({'key': 'value'}), 'path?key=value');
+        expect('path'.appendQuery({'key': 'value'}), 'path?key=value');
       });
 
       test('appends query string to existing query', () {
-        expect('path?key=value'.maybeAppendQuery({'key2': 'value2'}),
+        expect('path?key=value'.appendQuery({'key2': 'value2'}),
             'path?key=value&key2=value2');
       });
 
       test('appends multiple query values', () {
         expect(
-          'path'.maybeAppendQuery({
+          'path'.appendQuery({
             'key': 'value',
             'key2': 'value2',
           }),

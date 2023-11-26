@@ -123,7 +123,7 @@ class _TestRouteData extends SimpleRouteData {
 
   @override
   String inject(String path) {
-    return path.setParam(_TestEnum.valueOne, testValue).maybeAppendQuery({
+    return path.setParam(_TestEnum.valueOne, testValue).appendQuery({
       _TestEnum.valueTwo.name: testQuery,
     });
   }
