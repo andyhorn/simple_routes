@@ -264,7 +264,7 @@ onPressed: () => const UserRoute().go(
 ),
 ```
 
-**Note**: The `push` method signatures are identical to their corresponding `go` methods.
+**Note**: The `push` method signatures are identical to their corresponding SimpleRoute/DataRoute `go` methods.
 
 ## Advanced usage
 
