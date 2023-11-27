@@ -48,14 +48,14 @@ abstract class BaseRoute {
     return GoRouterState.of(context).fullPath == fullPath;
   }
 
-  /// Determine if this route is an ancestor of the current GoRouter location.
+  /// Determine if this route is a parent of the current route.
   ///
   /// e.g. if this route is '/parent' and the current GoRouter location is
   /// '/parent/child', '/parent/child/sub-child', etc, this method will return
   /// true.
   ///
   /// This is useful for determining if a parent route is active.
-  bool isAncestor(BuildContext context) {
+  bool isParentRoute(BuildContext context) {
     final location = GoRouterState.of(context).fullPath;
     return location != fullPath && (location?.startsWith(fullPath) ?? false);
   }

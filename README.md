@@ -23,7 +23,7 @@ Simple Routes is a companion package to [GoRouter](https://pub.dev/packages/go_r
   * [Advanced usage](#advanced-usage)
     * [Route matching](#route-matching)
       * [Current route](#current-route)
-      * [Ancestor route](#ancestor-route)
+      * [Parent route](#parent-route)
 
 ## Getting started
 
@@ -306,29 +306,29 @@ if (const SubRoute().isCurrentRoute(context)) {
 
 Your app will print `We are at SubRoute!`.
 
-#### Ancestor route
+#### Parent route
 
-Similar to `isCurrentRoute`, you can use the `isAncestorRoute` method to check whether a route is an **ancestor** of the current location.
+Similar to `isCurrentRoute`, you can use the `isParentRoute` method to check whether a route is a **parent** of the current location.
 
 For example, if your app is at the location of `/base/sub`:
 
 ```dart
 // current location: '/base/sub'
-if (const BaseRoute().isAncestorRoute(context)) {
-  debugPrint('We are at a descendant of BaseRoute!');
+if (const BaseRoute().isParentRoute(context)) {
+  debugPrint('We are at a child of BaseRoute!');
 }
 ```
 
-Your app will print `We are at a descendant of BaseRoute!`.
+Your app will print `We are at a child of BaseRoute!`.
 
 **Note:** this method will return `false` if the current route is an exact match for the route in question (i.e. `isCurrentRoute`).
 
-For example, if we are at the `/base/sub` location and use `isAncestor`, it will return `false`:
+For example, if we are at the `/base/sub` location and use `isParentRoute`, it will return `false`:
 
 ```dart
 // current location: '/base/sub'
-if (const SubRoute().isAncestor(context)) {
-  debugPrint('We are at a descendant of SubRoute!');
+if (const SubRoute().isParentRoute(context)) {
+  debugPrint('We are at a child of SubRoute!');
 }
 ```
 

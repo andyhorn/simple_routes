@@ -169,11 +169,11 @@ void main() {
     });
   });
 
-  group('#isAncestor', () {
+  group('#isParentRoute', () {
     testWidgets(
-      'returns true when the route is an ancestor',
+      'returns true when the route is a parent',
       (tester) async {
-        var isAncestor = false;
+        var isParent = false;
 
         await tester.pumpWidget(
           MaterialApp.router(
@@ -194,7 +194,7 @@ void main() {
                     GoRoute(
                       path: const _TestChildRoute().goPath,
                       builder: (context, state) {
-                        isAncestor = const _TestRoute().isAncestor(context);
+                        isParent = const _TestRoute().isParentRoute(context);
                         return const Scaffold(
                           body: Text('Test Route'),
                         );
@@ -210,14 +210,14 @@ void main() {
         await tester.tap(find.text('click me'));
         await tester.pump();
 
-        expect(isAncestor, isTrue);
+        expect(isParent, isTrue);
       },
     );
 
     testWidgets(
-      'returns false when the route is not an ancestor',
+      'returns false when the route is not a parent',
       (tester) async {
-        var isAncestor = true;
+        var isParent = true;
 
         await tester.pumpWidget(
           MaterialApp.router(
@@ -238,7 +238,7 @@ void main() {
                 GoRoute(
                   path: '/other-path',
                   builder: (context, state) {
-                    isAncestor = const _TestRoute().isAncestor(context);
+                    isParent = const _TestRoute().isParentRoute(context);
                     return const Scaffold(
                       body: Text('Test Route'),
                     );
@@ -252,7 +252,7 @@ void main() {
         await tester.tap(find.text('click me'));
         await tester.pump();
 
-        expect(isAncestor, isFalse);
+        expect(isParent, isFalse);
       },
     );
   });
