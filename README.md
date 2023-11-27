@@ -250,31 +250,34 @@ GoRouter(
 );
 ```
 
-#### Route redirection with DataRoute
+#### DataRoute generation
 
-If you need to redirect to a route that requires some data, instead of using the `fullPath` property, you must use the `generate` method to generate the full path, including any path and query parameters.
+If you need to redirect to a DataRoute, or otherwise need the complete path for a DataRoute, you must use the `generate` method to generate the full path. The `fullPath` property will include the template values and will not route properly.
+
+For example, given the following route:
 
 ```dart
-GoRoute(
-  path: const HomeRoute().goPath,
-  redirect: (context, state) {
-    if (state.getParam(RouteParams.userId) == null) {
-      // If the data is not present, redirect to another route 
-      // using the `generate` method to generate the full path.
-      return const UserRoute().generate(
-        UserRouteData(
-          userId: '123',
-          queryValue: 'some query value',
-          extraData: MyExtraData('some extra data'),
-        ),
-      );
-    }
+class MyRoute extends DataRoute<MyRouteData> {
+  const MyRoute();
 
-    // If all of the data is present, return null to allow the 
-    // route to be built.
-    return null;
-  },
-),
+  @override
+  String get path => ['user', RouteParams.userId.prefixed].toPath();
+}
+
+...
+
+// This will not work!
+// The return value will be `/user/:userId`
+redirect: (context, state) {
+  return const MyRoute().fullPath;
+}
+
+...
+
+// Instead, use `generate`, like so:
+redirect: (context, state) {
+  return const MyRoute().generate(MyRouteData(userId: '123'));
+}
 ```
 
 ### Navigation
