@@ -7,25 +7,26 @@ Simple, type-safe route and navigation management for [go_router](https://pub.de
 Simple Routes is a companion package to [GoRouter](https://pub.dev/packages/go_router) that provides a simple, type-safe way to define your app's routes and navigate between them.
 
 - Eliminate "magic strings" and the bugs that come with them
+- Simplify route definitions and navigation invocation
 - Enforce type-safe routing requirements
 - Inject and extract path parameters, query parameters, and "extra" route data
 
 ## Table of Contents
-  * [Getting Started](#getting-started)
+  * [Getting started](#getting-started)
   * [Usage](#usage)
     * [Route definitions](#route-definitions)
       * [Basic routing with SimpleRoutes](#basic-routes)
       * [Path parameters and DataRoutes](#data-routes)
     * [Configuration](#configuration)
     * [Navigation](#navigation)
-  * [Advanced usage](#advanced)
+  * [Advanced usage](#advanced-usage)
     * [Child routes](#child-routes)
       * [Definition](#child-route-definition)
       * [Configuration](#child-route-configuration)
       * [Navigation](#child-route-navigation)
     * [Route matching](#route-matching)
-      * [Current Route](#current-route)
-      * [Ancestor Route](#ancestor-route)
+      * [Current route](#current-route)
+      * [Ancestor route](#ancestor-route)
 
 ## Getting started
 
@@ -45,7 +46,7 @@ dependencies:
 
 #### Basic (simple) routes
 
-Define your routes as simple classes that extend the `SimpleRoute` base class.
+Define your routes as classes that extend the `SimpleRoute` base class.
 
 ```dart
 class ProfileRoute extends SimpleRoute {
@@ -122,7 +123,7 @@ class UserRouteData extends SimpleRouteData {
   final MyExtraData extraData;
 
   // Override the `parameters` property with a map of your
-  // route's parameters. These will be automatically injected
+  // route's path parameters. These will be automatically injected
   // into the route path.
   @override
   Map<Enum, String> get parameters => {
@@ -146,7 +147,7 @@ class UserRouteData extends SimpleRouteData {
   MyExtraData get extra => extraData;
 }
 
-// Define the route as a DataRoute, typed with your data class
+// Define the route as a DataRoute, typed for your data class.
 class UserRoute extends DataRoute<UserRouteData> {
   const UserRoute();
 
@@ -163,10 +164,12 @@ class UserRoute extends DataRoute<UserRouteData> {
 
 ### GoRouter Configuration
 
-Configure your `GoRouter` using your routes and factories.
+Configuring your `GoRoute`s is easy. Create an instance of your class and pass in the `goPath` property to your route's `path` parameter.
 
 ```dart
 GoRouter(
+  // Note that the initialLocation should use the "fullPath" property
+  // to include any parent routes, if applicable.
   initialLocation: const HomeRoute().fullPath,
   routes: [
     GoRoute(
@@ -181,7 +184,9 @@ GoRouter(
 
         if (state.getParam(RouteParams.userId) == null) {
           // If the data is not present, redirect to another route 
-          // using the `fullPath` property.
+          // using the `fullPath` property - this is important, as 
+          // the `path` and `goPath` properties only include the 
+          // route's segment(s), but not the fully-qualified path.
           return const HomeRoute().fullPath;
         }
 
@@ -297,7 +302,7 @@ onPressed: () => const UserDetailsRoute.go(
 
 ### Route matching
 
-#### Current Route
+#### Current route
 
 The `isCurrentRoute` method will determine if your app is at a particular route.
 
@@ -333,14 +338,15 @@ if (const SubRoute().isCurrentRoute(context)) {
 
 Your app will print `We are at SubRoute!`.
 
-#### Ancestor Route
+#### Ancestor route
 
 Similar to `isCurrentRoute`, you can use the `isAncestorRoute` method to check whether a route is an **ancestor** of the current location.
 
 For example, if your app is at the location of `/base/sub`:
 
 ```dart
-if (const BaseRoute().isAncestorRoute(context) /* true */) {
+// current location: '/base/sub'
+if (const BaseRoute().isAncestorRoute(context)) {
   debugPrint('We are at a descendant of BaseRoute!');
 }
 ```
@@ -353,7 +359,7 @@ For example, if we are at the `/base/sub` location and use `isAncestor`, it will
 
 ```dart
 // current location: '/base/sub'
-if (const SubRoute().isAncestor(context) /* false */) {
+if (const SubRoute().isAncestor(context)) {
   debugPrint('We are at a descendant of SubRoute!');
 }
 ```
