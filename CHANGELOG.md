@@ -1,6 +1,10 @@
-## 1.0.0
+## 1.0.0-beta.1
 
 We have finally reached a stable release! 🎉
+
+Granted, this is just a beta release for the moment, we are confident that it is stable enough to be classified as version 1.
+
+This release includes a significant rework of the API to improve the developer experience and standardize our package conventions.
 
 Please see the [Migration Guide](docs/migration_guide.md) for information on how to migrate your code to this version from the pre-release versions.
 
