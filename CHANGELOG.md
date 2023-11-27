@@ -2,10 +2,12 @@
 
 We have finally reached a stable release! 🎉
 
+Please see the [Migration Guide](docs/migration_guide.md) for information on how to migrate your code to this version from the pre-release versions.
+
 ### New Features
-  * Manage "extra" data with the `ExtraDataMixin` on your SimpleRouteDataFactory
-    * Inject "extra" data into the GoRouterState with the new `extra` property
-    * Safely extract typed "extra" data from the GoRouterState using `containsExtra` and `extractExtra`
+  * Path parameters are now injected automatically, based on the `parameters` property
+  * Query parameters are now appended automatically, based on the `query` property
+  * Extra data is now injected automatically, based on the `extra` property
   * Automatic leading-slash management - no more worrying about whether or not to add a leading slash to your route's `path`
   * Get the full path of a `DataRoute`, with all template parameters populated, using the new `generate` method
 
@@ -13,12 +15,11 @@ We have finally reached a stable release! 🎉
 
 This release includes a few breaking changes.
 
-  * The `query` parameter of the `go` method has been removed in favor of utilizing a `RouteData` class to inject and extract your query parameters
-  * The `push` argument of the `go` method has been removed in favor of using a discrete `push` method on your route class
-  * A new `goPath` property has been added to the `SimpleRoute` class and should be used when defining your `GoRoute`s. For example: `GoRoute(path: const MyRoute().goPath, ...)`
+  * The `query` parameter of the `go` method has been removed
+  * The `push` argument of the `go` method has been removed
+  * A new `goPath` property has been added to the `SimpleRoute` class and should be used when defining your `GoRoute`s
+  * The `inject` method has been removed from the `DataRoute` class
   * The helper methods have all been removed in favor of extensions and class methods
-    * `withPrefix` has been replaced with `Enum.prefixed` - `MyEnum.myValue.prefixed`
-    * `join` has been replaced with `Iterable<String>#toPath` - `['path', 'to', 'join'].toPath()`
 
 ## 0.0.11
 

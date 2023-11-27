@@ -2,6 +2,12 @@
 
 Simple, type-safe route and navigation management for [go_router](https://pub.dev/packages/go_router).
 
+## Stable release
+
+We have reached a stable release of Simple Routes with v1.0.0! 🎉
+
+This release includes several breaking changes from the pre-release versions. <br/> Please see the [Migration Guide](docs/migration_guide.md) for more info.
+
 ## Features
 
 Simple Routes is a companion package to [GoRouter](https://pub.dev/packages/go_router) that provides a simple, type-safe way to define your app's routes and navigate between them.
