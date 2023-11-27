@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 
+class MockGoRouterState extends Mock implements GoRouterState {}
+
 class MockGoRouter extends Mock implements GoRouter {
   MockGoRouter() {
     when(() => go(

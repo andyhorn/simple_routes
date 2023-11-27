@@ -4,6 +4,7 @@
 import 'package:example/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:simple_routes/simple_routes.dart';
 
 // Define your root-level routes and sub-routes in the same way.
 final router = GoRouter(
@@ -23,10 +24,8 @@ final router = GoRouter(
     GoRoute(
       path: const ProfileRoute().path,
       redirect: (context, state) {
-        const factory = ProfileRouteDataFactory();
-
-        // Use your factory class to validate the route data.
-        if (factory.extractParam(state, RouteParams.userId) == null) {
+        // Use the GoRouterState extension methods to validate the route data.
+        if (state.getParam(RouteParams.userId) == null) {
           // When redirecting, use the `fullPath` property.
           // If your route has parameters, you should use the
           // `buildFullPath` method instead.
@@ -38,9 +37,8 @@ final router = GoRouter(
       builder: (context, state) {
         // Use a factory class to extract your route data.
         // This is especially useful if you have multiple routes that use the
-        // same data class or if your route has multiple values.
-        const factory = ProfileRouteDataFactory();
-        final profileRouteData = factory.fromState(state);
+        // same data class or if your route has many parameters.
+        final profileRouteData = ProfileEditRouteData.fromState(state);
 
         return ProfilePage(userId: profileRouteData.userId);
       },
@@ -48,7 +46,7 @@ final router = GoRouter(
         GoRoute(
           path: const ProfileEditRoute().path,
           builder: (context, state) => ProfileEditPage(
-            query: const ProfileEditRouteDataFactory().fromState(state).query,
+            filter: ProfileEditRouteData.fromState(state).filter,
           ),
         ),
       ],
@@ -105,7 +103,10 @@ class NavButtons extends StatelessWidget {
         ElevatedButton(
           onPressed: () => const ProfileEditRoute().go(
             context,
-            data: const ProfileEditRouteData(userId: '123', query: 'myQuery'),
+            data: const ProfileEditRouteData(
+              userId: '123',
+              filter: 'filterValue',
+            ),
           ),
           child: const Text('Go to profile edit'),
         ),
@@ -164,14 +165,14 @@ class ProfilePage extends StatelessWidget {
 class ProfileEditPage extends StatelessWidget {
   const ProfileEditPage({
     super.key,
-    required this.query,
+    required this.filter,
   });
 
-  final String? query;
+  final String? filter;
 
   @override
   Widget build(BuildContext context) {
-    final profileRouteData = const ProfileRouteDataFactory().fromState(
+    final profileRouteData = ProfileEditRouteData.fromState(
       GoRouterState.of(context),
     );
 
@@ -179,7 +180,7 @@ class ProfileEditPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text('Profile edit page for ${profileRouteData.userId}'),
-        Text('Query: ${query ?? 'none'}'),
+        Text('Filter: ${filter ?? 'none'}'),
         const NavButtons(),
       ],
     );

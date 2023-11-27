@@ -16,7 +16,6 @@ Simple Routes is a companion package to [GoRouter](https://pub.dev/packages/go_r
     * [Route definitions](#route-definitions)
       * [Basic routing with SimpleRoutes](#basic-routes)
       * [Path parameters and DataRoutes](#data-routes)
-    * [Route data factory](#route-data-factory)
     * [Configuration](#configuration)
     * [Navigation](#navigation)
   * [Advanced usage](#advanced)
@@ -24,8 +23,6 @@ Simple Routes is a companion package to [GoRouter](https://pub.dev/packages/go_r
       * [Definition](#child-route-definition)
       * [Configuration](#child-route-configuration)
       * [Navigation](#child-route-navigation)
-    * [Query parameters](#query-parameters)
-    * ["Extra" route data](#extra-route-data)
     * [Route matching](#route-matching)
       * [Current Route](#current-route)
       * [Ancestor Route](#ancestor-route)
@@ -65,88 +62,102 @@ If your route is not a child of another route (more on this below), the path wil
 
 <a id="data-routes"></a>
 
-#### Path parameters and DataRoutes
+#### Route parameters and DataRoutes
 
 For routes that require parameters, extend the `DataRoute` class.
 
 ```dart
-// Define your route parameters as an enum
+// Some class or object that you want to pass with your route.
+class MyExtraData {
+  const MyExtraData(this.someValue);
+  final String someValue;
+}
+
+// Define your route and/or query parameters as an enum
 enum RouteParams {
   userId,
+  query,
 }
 
 // Define a data class that extends SimpleRouteData
 //
 // This class should carry all of the data that your routing
 // requires, including path parameters, query parameters, and
-// "extra" data that you want to pass to your route builders.
+// "extra" data that you want to pass to your route.
 class UserRouteData extends SimpleRouteData {
-  const UserRouteData(this.userId);
+  const UserRouteData({
+    required this.userId,
+    required this.extraData,
+    this.queryValue,
+  });
 
+  // Use a factory constructor to simplify extracting data from 
+  // the GoRouterState.
+  factory UserRouteData.fromState(GoRouterState state) {
+    // Use the extension methods to simplify extracting data from 
+    // the GoRouterState by providing the enum value or data type.
+    //
+    // It is recommended to use these same extensions to validate the 
+    // presence of the required data in a `redirect` - more on this in 
+    // the GoRouter configuration section below.
+    final userId = state.getParam(RouteParams.userId)!;
+    final queryValue = state.getQuery(RouteParams.query);
+    final extraData = state.getExtra<MyExtraData>()!;
+
+    return UserRouteData(
+      userId: userId,
+      queryValue: queryValue,
+      extraData: extraData,
+    );
+  }
+
+  // For example, a "user ID" parameter for the path
+  // i.e. /user/:userId
   final String userId;
 
-  // Override the `inject` method to inject the route parameters
-  // into the path.
-  //
-  // Use the `setParam` method to replace the parameter in the 
-  // path template with the value from your data class.
+  // Or a query parameter
+  final String? queryValue;
+
+  // Or any other data that you want discretely passed to your route.
+  final MyExtraData extraData;
+
+  // Override the `parameters` property with a map of your
+  // route's parameters. These will be automatically injected
+  // into the route path.
   @override
-  String inject(String path) {
-    return path.setParam(RouteParams.userId, userId);
-  }
+  Map<Enum, String> get parameters => {
+    RouteParams.userId: userId,
+  };
+
+  // Override the `query` property with a map of your route's 
+  // query parameters. These will be automatically URL encoded
+  // and appended to the end of your path.
+  //
+  // The query map allows null values, so you don't have to worry 
+  // about whether or not to include a query parameter.
+  @override
+  Map<Enum, String?> get query => {
+    RouteParams.query: queryValue,
+  };
+
+  // Override the `extra` property with any extra data that you 
+  // want passed along with your route.
+  @override
+  MyExtraData get extra => extraData;
 }
 
 // Define the route as a DataRoute, typed with your data class
 class UserRoute extends DataRoute<UserRouteData> {
   const UserRoute();
 
-  // Define the route path using the same enum value.
-  // Use the `prefixed` getter to automatically prefix the
-  // enum value with a colon (how go_router defines template values).
+  // Define the route path using the appropriate enum value.
+  // Use the `prefixed` property to automatically prefix the
+  // enum value name with a colon (e.g. ":userId").
   //
-  // To define a path with multiple segments, create a 
-  // `List<String>` and use the `toPath` extension method.
+  // To define a path with multiple segments, create an 
+  // `Iterable<String>` and use the `toPath` extension method.
   @override
   String get path => ['user', RouteParams.userId.prefixed].toPath();
-}
-```
-
-### Route data factory
-
-While creating a factory for your route data is optional, it can be very 
-helpful for extracting the data from the `GoRouterState` and passing it to your route builders.
-
-Define a factory class that extends the `SimpleRouteDataFactory` class, typed for your data class, to help extract the route data from the `GoRouterState`.
-
-```dart
-class UserRouteDataFactory extends SimpleRouteDataFactory<UserRouteData> {
-  const UserRouteDataFactory();
-
-  // Implement the `containsData` method to validate that all
-  // necessary parameters are present in the `GoRouterState`.
-  //
-  // This method is useful in a redirect scenario, allowing you 
-  // to easily validate the data before redirecting to a new route
-  // or allowing the route to be built.
-  @override
-  bool containsData(GoRouterState state) {
-    // Use the `containsParam` method to check if a particular key,
-    // identified by the enum value, exists in the GoRouterState's 
-    // "pathParameters" map.
-    return containsParam(state, RouteParams.userId);
-  }
-
-  // Implement the `fromState` method to extract the data from
-  // the GoRouterState and return an instance of your data class.
-  @override
-  UserRouteData fromState(GoRouterState state) {
-    return UserRouteData(
-      // Use the `extractParam` method to extract a parameter,
-      // identified by the enum value, from the GoRouterState's 
-      // "pathParameters" map.
-      userId: extractParam(state, RouteParams.userId),
-    );
-  }
 }
 ```
 
@@ -165,22 +176,28 @@ GoRouter(
     GoRoute(
       path: const UserRoute().goPath,
       redirect: (context, state) {
-        // Use the `containsData` method to validate that all
-        // necessary values are present in the GoRouterState.
-        if (!const UserRouteDataFactory().containsData(state)) {
+        // Use the extension methods to validate that any and all 
+        // required values are present.
+
+        if (state.getParam(RouteParams.userId) == null) {
           // If the data is not present, redirect to another route 
           // using the `fullPath` property.
           return const HomeRoute().fullPath;
         }
 
-        // If the data is present, return null to allow the route
-        // to be built.
+        // If all of the data is present, return null to allow the 
+        // route to be built.
         return null;
       },
-      builder: (context, state) => UserScreen(
-        // Use your factory to extract the data from the state
-        userId: const UserRouteDataFactory().fromState(state).userId,
-      ),
+      builder: (context, state) {
+        final routeData = UserRouteData.fromState(state);
+
+        return UserScreen(
+          userId: routeData.userId,
+          query: routeData.queryValue,
+          extra: routeData.extraData,
+        );
+      },
     ),
   ],
 );
@@ -199,7 +216,11 @@ For your routes that require parameters, the `go` method will enforce that you p
 ```dart
 onPressed: () => const UserRoute().go(
   context,
-  data: UserRouteData(userId: '123'),
+  data: UserRouteData(
+    userId: '123',
+    queryValue: 'some query value',
+    extraData: MyExtraData('some extra data'),
+  ),
 ),
 ```
 
@@ -246,15 +267,15 @@ GoRoute(
       path: const UserDetailsRoute().goPath,
       builder: (context, state) => UserDetailsScreen(
         // Notice how this child route requires the same data as its parent.
-        // We can easily re-use the data class and factory.
-        userId: const UserRouteDataFactory().fromState(state).userId,
+        // We can easily re-use the data class and factory constructor.
+        userId: UserRouteData.fromState(state).userId,
       ),
     ),
   ],
 ),
 ```
 
-**Note**: Routes that are children of a `DataRoute` must also be a `DataRoute`, even if they don't require any data, themselves. In cases like these, you can re-use the parent's data class and factory.
+**Note**: Routes that are children of a `DataRoute` must also be a `DataRoute`, even if they don't require any data themselves. In cases like these, you can re-use the parent's data class and factory constructor.
 
 However, if they require their own data, the data class must also provide the data necessary for the parent route(s).
 
@@ -267,111 +288,11 @@ Navigate to your nested routes just like you would any other route.
 ```dart
 onPressed: () => const UserDetailsRoute.go(
   context,
-  data: UserRouteData(userId: '123'),
-),
-```
-
-### Query parameters
-
-Along with injecting path parameters, your data routes can also inject query parameters into the route path using `appendQuery` - this function will append URL encoded query parameters to the end of the path. Plus, it handles empty and null Strings, so you don't have to.
-
-```dart
-class LoginRouteData extends SimpleRouteData {
-  const LoginRouteData({
-    this.redirect,
-  });
-
-  final String? redirect;
-
-  @override
-  String inject(String path) {
-    return path.appendQuery({
-      'redirect': redirect,
-    });
-  }
-}
-
-class LoginRoute extends DataRoute<LoginRouteData> {
-  const LoginRoute();
-
-  @override
-  String get path => 'login';
-}
-```
-
-Extract your query parameters using the `containsQuery` and `extractQuery` methods - available on all `SimpleRouteDataFactory` classes.
-
-```dart
-class LoginRouteDataFactory extends SimpleRouteDataFactory<LoginRouteData> {
-  const LoginRouteDataFactory();
-
-  @override
-  bool containsData(GoRouterState state) {
-    // returning true since the query parameter is optional
-    return true;
-  }
-
-  @override
-  LoginRouteData fromState(GoRouterState state) {
-    return LoginRouteData(
-      redirect: containsQuery(state, 'redirect') 
-        ? extractQuery(state, 'redirect') 
-        : null,
-    );
-  }
-}
-```
-
-Then, in your route configuration:
-
-```dart
-GoRoute(
-  builder: (context, state) => LoginScreen(
-    redirect: const LoginRouteDataFactory().fromState(state).redirect,
+  data: UserRouteData(
+    userId: '123',
+    extraData: MyExtraData('more extra data'),
   ),
 ),
-```
-
-### "Extra" route data
-
-In addition to path parameters and query parameters, you can also inject data into the `extra` property of the `GoRouterState` by overriding the `extra` property of your route data class.
-
-```dart
-class MyRouteData extends SimpleRouteData<MyDataClass> {
-  const MyRouteData({
-    this.extraData,
-  });
-
-  final MyDataClass extraData;
-
-  @override
-  MyDataClass get extra => extraData;
-}
-```
-
-Then, extend your factory class with the `ExtraDataMixin` to gain access to the `containsExtra` and `extractExtra` methods.
-
-```dart
-class MyRouteDataFactory extends SimpleRouteDataFactory<MyRouteData> 
-  with ExtraDataMixin<MyDataClass> {
-  const MyRouteDataFactory();
-
-  @override
-  bool containsData(GoRouterState state) {
-    // Checks for the existence of the extra data in the state,
-    // using the type provided to the mixin (MyDataClass).
-    return containsExtra(state);
-  }
-
-  @override
-  MyRouteData fromState(GoRouterState state) {
-    return MyRouteData(
-      // Extracts the extra data from the state, using the type
-      // provided to the mixin (MyDataClass).
-      extraData: extractExtra(state),
-    );
-  }
-}
 ```
 
 ### Route matching

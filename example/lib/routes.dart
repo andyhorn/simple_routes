@@ -35,6 +35,7 @@ class DashboardRoute extends SimpleRoute implements ChildRoute<RootRoute> {
 // Define an enum to use as the path parameter templates for your routes.
 enum RouteParams {
   userId,
+  filter,
 }
 
 // Define some data for your route as a child of [SimpleRouteData].
@@ -43,43 +44,28 @@ class ProfileRouteData extends SimpleRouteData {
 
   final String userId;
 
-  // Override the [inject] method to define how this data is to be injected into
-  // the route path. The [setParam] extension method is extremely useful here.
+  // Override the [parameters] getter to define the path parameters for this
+  // route, using the enum you defined above.
   @override
-  String inject(String path) {
-    return path.setParam(RouteParams.userId, userId);
-  }
-}
-
-// If you find it useful, define a factory class to extract the route data from
-// an instance of [GoRouterState].
-class ProfileRouteDataFactory extends SimpleRouteDataFactory<ProfileRouteData> {
-  const ProfileRouteDataFactory();
-
-  // Override the [fromState] method to create an instance of your data class
-  // from the [GoRouterState].
-  @override
-  ProfileRouteData fromState(GoRouterState state) {
-    return ProfileRouteData(
-      userId: extractParam(state, RouteParams.userId)!,
-    );
-  }
+  Map<Enum, String> get parameters => {
+        RouteParams.userId: userId,
+      };
 }
 
 // Define your route as a child of [DataRoute].
 class ProfileRoute extends DataRoute<ProfileRouteData> {
   const ProfileRoute();
 
-  // override the [path] getter to define the path of this route.
-  // since this is a [DataRoute], it should contain some dynamic variable, such
+  // Override the [path] getter to define the path of this route.
+  // Since this is a [DataRoute], it should contain some dynamic variable, such
   // as a userId. e.g. '/profile/:userId'.
   //
-  // use the `prefixed` property to add the colon (:) prefix to your
+  // Use the `prefixed` property to add the colon (:) prefix to your
   // parameter in the template, and use the [join] method to join the path
   // segments together.
   //
-  // you can craft this template yourself, but the helper methods are here to
-  // minimize the chance of error.
+  // You can craft this template yourself, but the extension methods are
+  // here to help.
   @override
   String get path => ['profile', RouteParams.userId.prefixed].toPath();
 }
@@ -104,28 +90,24 @@ class ProfileEditRoute extends DataRoute<ProfileRouteData>
 class ProfileEditRouteData extends ProfileRouteData {
   const ProfileEditRouteData({
     required super.userId,
-    required this.query,
+    required this.filter,
   });
 
-  final String? query;
-
-  @override
-  String inject(String path) {
-    return super.inject(path).appendQuery({
-      'query': query,
-    });
-  }
-}
-
-class ProfileEditRouteDataFactory
-    extends SimpleRouteDataFactory<ProfileEditRouteData> {
-  const ProfileEditRouteDataFactory();
-
-  @override
-  ProfileEditRouteData fromState(GoRouterState state) {
+  // Define a factory constructor to easily extract the route data from
+  // [GoRouterState].
+  factory ProfileEditRouteData.fromState(GoRouterState state) {
     return ProfileEditRouteData(
-      userId: extractParam(state, RouteParams.userId)!,
-      query: extractQuery(state, 'query'),
+      userId: state.getParam(RouteParams.userId)!,
+      filter: state.getQuery(RouteParams.filter),
     );
   }
+
+  final String? filter;
+
+  // Provide an implementation of the [query] getter to define the
+  // query parameters for this route.
+  @override
+  Map<Enum, String?> get query => {
+        RouteParams.filter: filter,
+      };
 }

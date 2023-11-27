@@ -86,7 +86,7 @@ abstract class DataRoute<Data extends SimpleRouteData> extends BaseRoute {
     BuildContext context, {
     required Data data,
   }) {
-    GoRouter.of(context).go(generate(data), extra: data.extra());
+    GoRouter.of(context).go(generate(data), extra: data.extra);
   }
 
   /// Push this route onto the stack using the supplied [data].
@@ -94,12 +94,28 @@ abstract class DataRoute<Data extends SimpleRouteData> extends BaseRoute {
     BuildContext context, {
     required Data data,
   }) {
-    GoRouter.of(context).push(generate(data), extra: data.extra());
+    GoRouter.of(context).push(generate(data), extra: data.extra);
   }
 
   /// Generate a populated path for this route using the supplied [data].
   String generate(Data data) {
-    return data.inject(fullPath);
+    return _injectParams(fullPath, data).appendQuery(_getQuery(data));
+  }
+
+  String _injectParams(String path, Data data) {
+    return data.parameters.entries.fold(path, (path, entry) {
+      return path.setParam(entry.key, entry.value);
+    });
+  }
+
+  Map<String, String> _getQuery(Data data) {
+    return data.query.entries.fold({}, (query, entry) {
+      if (entry.value != null && entry.value!.isNotEmpty) {
+        query[entry.key.name] = entry.value!;
+      }
+
+      return query;
+    });
   }
 }
 

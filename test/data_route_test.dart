@@ -119,14 +119,17 @@ class _TestRouteData extends SimpleRouteData {
   final _TestData testData;
 
   @override
-  Object? extra() => testData;
+  Map<Enum, String> get parameters => {
+        _TestEnum.valueOne: testValue,
+      };
 
   @override
-  String inject(String path) {
-    return path.setParam(_TestEnum.valueOne, testValue).appendQuery({
-      _TestEnum.valueTwo.name: testQuery,
-    });
-  }
+  Map<Enum, String?> get query => {
+        _TestEnum.valueTwo: testQuery,
+      };
+
+  @override
+  Object? get extra => testData;
 }
 
 class _TestRoute extends DataRoute<_TestRouteData> {
