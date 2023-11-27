@@ -19,6 +19,7 @@ Simple Routes is a companion package to [GoRouter](https://pub.dev/packages/go_r
       * [Path parameters and DataRoutes](#data-routes)
       * [Child routes](#child-routes)
     * [GoRouter Configuration](#gorouter-configuration)
+      * [Route redirection with DataRoute](#route-redirection-with-dataroute)
     * [Navigation](#navigation)
   * [Advanced usage](#advanced-usage)
     * [Route matching](#route-matching)
@@ -241,6 +242,33 @@ GoRouter(
     ),
   ],
 );
+```
+
+#### Route redirection with DataRoute
+
+If you need to redirect to a route that requires some data, instead of using the `fullPath` property, you must use the `generate` method to generate the full path, including any path and query parameters.
+
+```dart
+GoRoute(
+  path: const HomeRoute().goPath,
+  redirect: (context, state) {
+    if (state.getParam(RouteParams.userId) == null) {
+      // If the data is not present, redirect to another route 
+      // using the `generate` method to generate the full path.
+      return const UserRoute().generate(
+        UserRouteData(
+          userId: '123',
+          queryValue: 'some query value',
+          extraData: MyExtraData('some extra data'),
+        ),
+      );
+    }
+
+    // If all of the data is present, return null to allow the 
+    // route to be built.
+    return null;
+  },
+),
 ```
 
 ### Navigation
