@@ -61,16 +61,8 @@ class ProfileRouteDataFactory extends SimpleRouteDataFactory<ProfileRouteData> {
   @override
   ProfileRouteData fromState(GoRouterState state) {
     return ProfileRouteData(
-      userId: extractParam(state, RouteParams.userId),
+      userId: extractParam(state, RouteParams.userId)!,
     );
-  }
-
-  // Override the [containsData] method to determine if the provided
-  // [GoRouterState] contains all the necessary values for your data class.
-  // The [containsKey] helper method is extremely useful here.
-  @override
-  bool containsData(GoRouterState state) {
-    return containsParam(state, RouteParams.userId);
   }
 }
 
@@ -130,16 +122,10 @@ class ProfileEditRouteDataFactory
   const ProfileEditRouteDataFactory();
 
   @override
-  bool containsData(GoRouterState state) {
-    return containsParam(state, RouteParams.userId);
-  }
-
-  @override
   ProfileEditRouteData fromState(GoRouterState state) {
     return ProfileEditRouteData(
-      userId: extractParam(state, RouteParams.userId),
-      query:
-          containsQuery(state, 'query') ? extractQuery(state, 'query') : null,
+      userId: extractParam(state, RouteParams.userId)!,
+      query: extractQuery(state, 'query'),
     );
   }
 }

@@ -5,11 +5,11 @@ import 'package:example/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-// define your root-level routes and sub-routes in the same way.
+// Define your root-level routes and sub-routes in the same way.
 final router = GoRouter(
   routes: [
     GoRoute(
-      // use the route class' [path] property to define this segment of the
+      // Use the route class' [path] property to define this segment of the
       // route path.
       path: const RootRoute().path,
       builder: (context, state) => const RootPage(),
@@ -23,10 +23,12 @@ final router = GoRouter(
     GoRoute(
       path: const ProfileRoute().path,
       redirect: (context, state) {
-        // use your factory class to validate the route data.
-        if (!const ProfileRouteDataFactory().containsData(state)) {
-          // when redirecting, use the `fullPath` property.
-          // note: If your route has parameters, you should use the
+        const factory = ProfileRouteDataFactory();
+
+        // Use your factory class to validate the route data.
+        if (factory.extractParam(state, RouteParams.userId) == null) {
+          // When redirecting, use the `fullPath` property.
+          // If your route has parameters, you should use the
           // `buildFullPath` method instead.
           return const RootRoute().fullPath;
         }
@@ -34,7 +36,7 @@ final router = GoRouter(
         return null;
       },
       builder: (context, state) {
-        // use a factory class to extract your route data.
+        // Use a factory class to extract your route data.
         // This is especially useful if you have multiple routes that use the
         // same data class or if your route has multiple values.
         const factory = ProfileRouteDataFactory();
@@ -71,7 +73,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// use the route class' [go] method to initiate navigation, supplying the route
+// Use the route class' [go] method to initiate navigation, supplying the route
 // data when it is required.
 class NavButtons extends StatelessWidget {
   const NavButtons({super.key});
@@ -103,7 +105,7 @@ class NavButtons extends StatelessWidget {
         ElevatedButton(
           onPressed: () => const ProfileEditRoute().go(
             context,
-            data: const ProfileEditRouteData(userId: '123', query: 'my-query'),
+            data: const ProfileEditRouteData(userId: '123', query: 'myQuery'),
           ),
           child: const Text('Go to profile edit'),
         ),

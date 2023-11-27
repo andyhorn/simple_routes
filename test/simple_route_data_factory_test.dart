@@ -7,18 +7,15 @@ enum _MyEnum {
   myKey,
 }
 
-class ExtraData {}
+class ExtraData {
+  final String value;
+
+  const ExtraData(this.value);
+}
 
 class ExtraDataTwo {}
 
-class TestClass with ExtraDataMixin<ExtraData> {}
-
 class _Factory extends SimpleRouteDataFactory {
-  @override
-  bool containsData(GoRouterState state) {
-    return containsParam(state, _MyEnum.myKey);
-  }
-
   @override
   SimpleRouteData fromState(GoRouterState state) {
     throw UnimplementedError();
@@ -29,166 +26,116 @@ class _MockGoRouterState extends Mock implements GoRouterState {}
 
 void main() {
   group('$SimpleRouteDataFactory', () {
-    group('#containsData', () {
-      group('when it contains the key', () {
-        final state = _MockGoRouterState();
-
-        setUp(() {
-          final params = {
-            _MyEnum.myKey.name: 'myValue',
-          };
-
-          when(() => state.pathParameters).thenReturn(params);
-        });
-
-        test('it returns true', () {
-          expect(_Factory().containsData(state), isTrue);
-        });
-      });
-
-      group('when it does not contain the key', () {
-        final state = _MockGoRouterState();
-
-        setUp(() {
-          final params = {
-            'someOtherKey': 'myValue',
-          };
-
-          when(() => state.pathParameters).thenReturn(params);
-        });
-
-        test('it returns false', () {
-          expect(_Factory().containsData(state), isFalse);
-        });
-      });
-    });
-
-    group('#containsQuery', () {
-      group('when it contains the key', () {
-        final state = _MockGoRouterState();
-
-        setUp(() {
-          final uri = Uri.parse('http://example.com?key=value');
-          when(() => state.uri).thenReturn(uri);
-        });
-
-        test('it returns true', () {
-          expect(_Factory().containsQuery(state, 'key'), isTrue);
-        });
-      });
-
-      group('when it does not contain the key', () {
-        final state = _MockGoRouterState();
-
-        setUp(() {
-          final uri = Uri.parse('http://example.com?key=value');
-          when(() => state.uri).thenReturn(uri);
-        });
-
-        test('it returns false', () {
-          expect(_Factory().containsQuery(state, 'someOtherKey'), isFalse);
-        });
-      });
-    });
-
-    group('#containsParam', () {
-      group('when it contains the key', () {
-        final state = _MockGoRouterState();
-
-        setUp(() {
-          final params = {
-            _MyEnum.myKey.name: 'myValue',
-          };
-
-          when(() => state.pathParameters).thenReturn(params);
-        });
-
-        test('it returns true', () {
-          expect(_Factory().containsParam(state, _MyEnum.myKey), isTrue);
-        });
-      });
-
-      group('when it does not contain the key', () {
-        final state = _MockGoRouterState();
-
-        setUp(() {
-          final params = {
-            'someOtherKey': 'myValue',
-          };
-
-          when(() => state.pathParameters).thenReturn(params);
-        });
-
-        test('it returns false', () {
-          expect(_Factory().containsParam(state, _MyEnum.myKey), isFalse);
-        });
-      });
-    });
-
     group('#extractParam', () {
-      final state = _MockGoRouterState();
+      group('when the parameter is present', () {
+        final state = _MockGoRouterState();
 
-      setUp(() {
-        final params = {
-          _MyEnum.myKey.name: 'myValue',
-        };
+        setUp(() {
+          final params = {
+            _MyEnum.myKey.name: 'myValue',
+          };
 
-        when(() => state.pathParameters).thenReturn(params);
+          when(() => state.pathParameters).thenReturn(params);
+        });
+
+        test('it returns the value', () {
+          expect(_Factory().extractParam(state, _MyEnum.myKey), 'myValue');
+        });
       });
 
-      test('it returns the value', () {
-        expect(_Factory().extractParam(state, _MyEnum.myKey), 'myValue');
+      group('when the parameter is not present', () {
+        final state = _MockGoRouterState();
+
+        setUp(() {
+          final params = {
+            'otherKey': 'otherValue',
+          };
+
+          when(() => state.pathParameters).thenReturn(params);
+        });
+
+        test('it returns null', () {
+          expect(_Factory().extractParam(state, _MyEnum.myKey), isNull);
+        });
       });
     });
-  });
 
-  group('$ExtraDataMixin', () {
-    late GoRouterState state;
-    final testClass = TestClass();
+    group('#extractQuery', () {
+      group('when the parameter is present', () {
+        final state = _MockGoRouterState();
 
-    setUp(() {
-      state = _MockGoRouterState();
-    });
-
-    group('#containsExtra', () {
-      group('when state does not contain extra data', () {
         setUp(() {
-          when(() => state.extra).thenReturn(null);
+          final uri = Uri.parse('http://example.com?myKey=myValue');
+
+          when(() => state.uri).thenReturn(uri);
         });
 
-        test('returns false', () {
-          expect(testClass.containsExtra(state), isFalse);
+        test('it returns the value', () {
+          expect(_Factory().extractQuery(state, 'myKey'), 'myValue');
         });
       });
 
-      group('when state contains an object of a different type', () {
+      group('when the parameter is not present', () {
+        final state = _MockGoRouterState();
+
         setUp(() {
-          when(() => state.extra).thenReturn(ExtraDataTwo());
+          final uri = Uri.parse('http://example.com?otherKey=otherValue');
+
+          when(() => state.uri).thenReturn(uri);
         });
 
-        test('returns false', () {
-          expect(testClass.containsExtra(state), isFalse);
-        });
-      });
-
-      group('when state contains the extra data', () {
-        setUp(() {
-          when(() => state.extra).thenReturn(ExtraData());
-        });
-
-        test('returns true', () {
-          expect(testClass.containsExtra(state), isTrue);
+        test('it returns null', () {
+          expect(_Factory().extractQuery(state, 'myKey'), isNull);
         });
       });
     });
 
     group('#extractExtra', () {
-      setUp(() {
-        when(() => state.extra).thenReturn(ExtraData());
+      group('when the extra data is present', () {
+        final state = _MockGoRouterState();
+
+        setUp(() {
+          when(() => state.extra).thenReturn(const ExtraData('hello world!'));
+        });
+
+        test('it returns the extra data', () {
+          expect(_Factory().extractExtra<ExtraData>(state), isA<ExtraData>());
+        });
+      });
+      group('when the extra data is null', () {
+        final state = _MockGoRouterState();
+
+        setUp(() {
+          when(() => state.extra).thenReturn(null);
+        });
+
+        test('it returns null', () {
+          expect(_Factory().extractExtra(state), isNull);
+        });
       });
 
-      test('returns the extra data', () {
-        expect(testClass.extractExtra(state), isA<ExtraData>());
+      group('when the extra data is not of the specified type', () {
+        final state = _MockGoRouterState();
+
+        setUp(() {
+          when(() => state.extra).thenReturn(ExtraDataTwo());
+        });
+
+        test('it returns null', () {
+          expect(_Factory().extractExtra<ExtraData>(state), isNull);
+        });
+      });
+
+      group('when the type is not provided', () {
+        final state = _MockGoRouterState();
+
+        setUp(() {
+          when(() => state.extra).thenReturn(const ExtraData('hello world!'));
+        });
+
+        test('it returns null', () {
+          expect(_Factory().extractExtra(state), isNull);
+        });
       });
     });
   });
