@@ -17,13 +17,10 @@ Simple Routes is a companion package to [GoRouter](https://pub.dev/packages/go_r
     * [Route definitions](#route-definitions)
       * [Basic routing with SimpleRoutes](#basic-routes)
       * [Path parameters and DataRoutes](#data-routes)
-    * [Configuration](#configuration)
+      * [Child routes](#child-routes)
+    * [GoRouter Configuration](#gorouter-configuration)
     * [Navigation](#navigation)
   * [Advanced usage](#advanced-usage)
-    * [Child routes](#child-routes)
-      * [Definition](#child-route-definition)
-      * [Configuration](#child-route-configuration)
-      * [Navigation](#child-route-navigation)
     * [Route matching](#route-matching)
       * [Current route](#current-route)
       * [Ancestor route](#ancestor-route)
@@ -162,7 +159,31 @@ class UserRoute extends DataRoute<UserRouteData> {
 }
 ```
 
-### GoRouter Configuration
+### Child routes
+
+To define a route that is a child of another route, implement the `ChildRoute` interface, providing the parent route type and overriding the `parent` property.
+
+```dart
+class UserDetailsRoute extends DataRoute<UserRouteData> implements ChildRoute<UserRoute> {
+  const UserDetailsRoute();
+
+  // Define the route path segment. No need to worry about 
+  // leading slashes - they will be added automatically.
+  @override
+  String get path => 'details';
+
+  // Define the parent route. This will be used to 
+  // construct the full path for this route.
+  @override
+  UserRoute get parent => const UserRoute();
+}
+```
+
+**Note**: Routes that are children of a `DataRoute` must also be a `DataRoute` themselves, even if they don't require any data. In cases like these, you can re-use the parent's data class and factory constructor.
+
+However, if they require their own data, the data class must provide it **and** the data necessary for the parent(s).
+
+### GoRouter configuration
 
 Configuring your `GoRoute`s is easy. Create an instance of your class and pass in the `goPath` property to your route's `path` parameter.
 
@@ -203,6 +224,20 @@ GoRouter(
           extra: routeData.extraData,
         );
       },
+      routes: [
+        // Define the child route, using the same data class as
+        // the parent route.
+        GoRoute(
+          path: const UserDetailsRoute().goPath,
+          builder: (context, state) {
+            final routeData = UserRouteData.fromState(state);
+
+            return UserDetailsScreen(
+              userId: routeData.userId,
+            );
+          },
+        ),
+      ],
     ),
   ],
 );
@@ -232,73 +267,6 @@ onPressed: () => const UserRoute().go(
 **Note**: The `push` method signatures are identical to their corresponding `go` methods.
 
 ## Advanced usage
-
-### Child routes
-
-<a id="child-route-definition" ></a>
-
-#### Definition
-
-To define routes that are sub-routes or children of another route, implement the `ChildRoute` interface.
-
-```dart
-class UserDetailsRoute extends DataRoute<UserRouteData> 
-  implements ChildRoute<UserRoute> {
-  const UserDetailsRoute();
-
-  // Define the route path segment. No need to worry about 
-  // leading slashes - they will be added automatically.
-  @override
-  String get path => 'details';
-
-  // Define the parent route. This will be used to 
-  // construct the full path for this route.
-  @override
-  UserRoute get parent => const UserRoute();
-}
-```
-
-<a id="child-route-configuration"></a>
-
-#### Configuration
-
-Configure your nested routes just like you would any other route.
-
-```dart
-GoRoute(
-  path: const UserRoute().goPath,
-  routes: [
-    GoRoute(
-      path: const UserDetailsRoute().goPath,
-      builder: (context, state) => UserDetailsScreen(
-        // Notice how this child route requires the same data as its parent.
-        // We can easily re-use the data class and factory constructor.
-        userId: UserRouteData.fromState(state).userId,
-      ),
-    ),
-  ],
-),
-```
-
-**Note**: Routes that are children of a `DataRoute` must also be a `DataRoute`, even if they don't require any data themselves. In cases like these, you can re-use the parent's data class and factory constructor.
-
-However, if they require their own data, the data class must also provide the data necessary for the parent route(s).
-
-<a id="child-route-navigation"></a>
-
-#### Navigation
-
-Navigate to your nested routes just like you would any other route.
-
-```dart
-onPressed: () => const UserDetailsRoute.go(
-  context,
-  data: UserRouteData(
-    userId: '123',
-    extraData: MyExtraData('more extra data'),
-  ),
-),
-```
 
 ### Route matching
 
