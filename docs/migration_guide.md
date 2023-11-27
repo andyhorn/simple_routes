@@ -1,0 +1,231 @@
+# Migration Guide
+
+This document is a guide for migrating between major package versions.
+
+## 0.0.11 -> 1.0.0
+
+This section will guide you through the breaking changes introduced in the 1.0.0 release and how to migrate your code.
+
+### GoRoute configuration
+
+Version 1.0.0 introduces a new `goPath` property on the `SimpleRoute` class. This property should be used when defining your `GoRoute`s instead of the `path` property.
+
+From this:
+
+```dart
+GoRoute(
+  path: const MyRoute().path,
+),
+```
+
+to this:
+
+```dart
+GoRoute(
+  path: const MyRoute().goPath,
+),
+```
+
+### Route definitions
+
+#### DataRoute - Path and query parameters
+
+In previous versions, the path and query parameters were injected into the path template within the `inject` method, which was left for you to override and implement. This has been replaced by a `parameters` property and a `query` property on the `DataRoute` class.
+
+In the new version, you need only define what your parameters and their values are; injecting/appending them into the path is now handled for you.
+
+To migrate to v1.0.0, remove any implementations of the `inject` method and replace them with the appropriate `parameters` and/or `query` properties.
+
+From this:
+
+```dart
+class MyRouteData extends SimpleRouteData {
+  const MyRouteData({
+    required this.myPathParameter,
+    this.myQueryParameter,
+  });
+
+  final String myPathParameter;
+  final String? myQueryParameter;
+
+  @override
+  String inject(String path) {
+    return path
+      .setParam(RouteParams.myPathParameter, myPathParameter)
+      .maybeAppendQuery({
+        if (myQueryParameter != null) ...{
+          RouteParams.myQueryParameter.name: myQueryParameter!,
+        },
+      })
+  }
+}
+```
+
+To this:
+
+```dart
+class MyRouteData extends SimpleRouteData {
+  const MyRouteData({
+    required this.myPathParameter,
+    this.myQueryParameter,
+  });
+
+  final String myPathParameter;
+  final String? myQueryParameter;
+
+  @override
+  Map<Enum, String> get parameters => {
+    RouteParams.myPathParameter: myPathParameter,
+  };
+
+  @override
+  Map<Enum, String?> get query => {
+    RouteParams.myQueryParameter: myQueryParameter,
+  };
+}
+```
+
+This also means you no longer need to worry about the `setParam` or `maybeAppendQuery` extension methods, as all of the path-building is handled by the package.
+
+### Route data factories
+
+The `SimpleRouteDataFactory` base class has been removed in favor of using the new extension methods on `GoRouterState`. If you still want a "factory," it is recommended to add a factory constructor or static method to your route data class.
+
+For example, in the previous versions, you would have used a factory to construct your route data, like this:
+
+```dart
+class MyRouteDataFactory extends SimpleRouteDataFactory<MyRouteData> {
+  @override
+  bool containsData(GoRouterState state) {
+    // verify the presence of any necessary data in [state].
+    return containsParam(state, RouteParams.myParam);
+  }
+
+  @override
+  MyRouteData fromState(GoRouterState state) {
+    // craft an instance of your route data class using the data in [state].
+    final param = extractParam(state, RouteParams.myParam);
+  }
+}
+```
+
+In your GoRoute configuration, you may have checked for the presence of data like this:
+
+```dart
+GoRoute(
+  redirect: (context, state) {
+    // use your factory to validate the GoRouterState
+    if (!const MyRouteDataFactory().containsData(state)) {
+      return const MyOtherRoute().fullPath;
+    }
+
+    return null;
+  },
+),
+```
+
+In the v1.0.0 release, you would instead add a factory constructor to your data class:
+
+```dart
+class MyRouteData extends SimpleRouteData {
+  const MyRouteData(this.myParam);
+  final String myParam;
+
+  // use a factory constructor to construct your route data from the state.
+  factory MyRouteData.fromState(GoRouterState state) {
+    // use the `getParam` extension method to extract the data from the state.
+    return MyRouteData(state.getParam(RouteParams.myParam)!);
+  }
+}
+```
+
+And in your GoRoute configuration:
+
+```dart
+GoRoute(
+  rebuild: (context, state) {
+    // use the extension methods to check for the presence of data.
+    if (state.getParam(RouteParams.myParam) == null) {
+      return const MyOtherRoute().fullPath;
+    }
+
+    return null;
+  },
+),
+```
+
+### Navigation
+
+In previous versions, the `go` method accepted a few different arguments, including `Map<String, String> query` and `bool push = false`. These have been removed from the method signature in favor of the `query` property on `DataRoute` and a discrete `push` method, respectively.
+
+For example, if you had an invocation of `go` with a query parameter:
+
+```dart
+onPressed: () => const MyRoute().go(context, query: {'myQueryKey': 'myQueryValue' }),
+```
+
+You would now need to define the query parameter on your route data class:
+
+```dart
+class MyRouteData extends SimpleRouteData {
+  const MyRouteData(this.myQueryValue);
+  final String myQueryValue;
+
+  @override
+  Map<Enum, String?> get query => {
+    RouteParams.myQueryKey: myQueryValue,
+  };
+}
+```
+
+And then invoke `go` without the `query` parameter:
+
+```dart
+onPressed: () => const MyRoute().go(context, data: const MyRouteData('myQueryValue')),
+```
+
+Additionally, if you had an invocation of `go` that used the `push` argument, you would now need to use the `push` method on your route class:
+
+```dart
+onPressed: () => const MyRoute().push(context),
+```
+
+### Helper methods
+
+All of the free-floating helper methods have been removed in favor of extension methods.
+
+#### `withPrefix`
+
+The `withPrefix` helper, which prefixed an Enum value's name with a colon (:) has been replaced with the `prefixed` extension method on `Enum`.
+
+From this:
+
+```dart
+withPrefix(RouteParams.myParam),
+```
+
+To this:
+
+```dart
+RouteParams.myParam.prefixed,
+```
+
+#### `join`
+
+The `join` method, which joined strings with a forward slash (/), has been replaced with the `toPath` extension method on `Iterable<String>`.
+
+From this:
+
+```dart
+join(['path', 'to', 'join']),
+```
+
+To this:
+
+```dart
+['path', 'to', 'join'].toPath(),
+```
+
+#### `setParam`
+
+The `setParam` extension still exists, but you shouldn't need to use it anymore, as path-building is handled entirely by the package.
