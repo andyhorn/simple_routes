@@ -120,7 +120,7 @@ class ProfileEditRouteData extends ProfileRouteData {
   @override
   String inject(String path) {
     return super.inject(path).appendQuery({
-      if (query != null) 'query': query!,
+      'query': query,
     });
   }
 }
