@@ -1,3 +1,7 @@
+## 1.0.0-beta.2 - 4
+
+Minor fixes to documentation.
+
 ## 1.0.0-beta.1
 
 We have finally reached a stable release! 🎉
