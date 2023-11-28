@@ -143,7 +143,7 @@ And in your GoRoute configuration:
 
 ```dart
 GoRoute(
-  rebuild: (context, state) {
+  redirect: (context, state) {
     // use the extension methods to check for the presence of data.
     if (state.getParam(RouteParams.myParam) == null) {
       return const MyOtherRoute().fullPath;
