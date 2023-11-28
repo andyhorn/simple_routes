@@ -8,8 +8,22 @@ import 'mocks.dart';
 
 void main() {
   late GoRouter router;
+  late _TestRootRoute root;
   late _TestRoute route;
   late _TestChildRoute childRoute;
+
+  group('Empty route', () {
+    setUp(() {
+      router = MockGoRouter();
+      root = const _TestRootRoute();
+    });
+
+    group('.fullPath', () {
+      test('returns leading slash', () {
+        expect(root.fullPath, '/');
+      });
+    });
+  });
 
   group('Root route', () {
     setUp(() {
@@ -256,6 +270,13 @@ void main() {
       },
     );
   });
+}
+
+class _TestRootRoute extends SimpleRoute {
+  const _TestRootRoute();
+
+  @override
+  String get path => '';
 }
 
 class _TestRoute extends SimpleRoute {
