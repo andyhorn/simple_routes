@@ -6,7 +6,7 @@ Simple, type-safe route and navigation management for [go_router](https://pub.de
 
 We have reached a stable release of Simple Routes with v1.0.0-beta.1! 🎉
 
-This release includes several breaking changes from the 0.x.x versions. <br/> Please see the [Migration Guide](docs/migration_guide.md) for more info.
+This release includes several breaking changes from the 0.x.x versions. <br/> Please see the [Migration Guide](doc/migration_guide.md) for more info.
 
 ## Features
 

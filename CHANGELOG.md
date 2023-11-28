@@ -6,7 +6,7 @@ Granted, this is just a beta release for the moment, we are confident that it is
 
 This release includes a significant rework of the API to improve the developer experience and standardize our package conventions.
 
-Please see the [Migration Guide](docs/migration_guide.md) for information on how to migrate your code to this version from the pre-release versions.
+Please see the [Migration Guide](doc/migration_guide.md) for information on how to migrate your code to this version from the pre-release versions.
 
 ### New Features
   * Path parameters are now injected automatically, based on the `parameters` property
