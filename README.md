@@ -31,6 +31,7 @@ Simple Routes is a companion package to [GoRouter](https://pub.dev/packages/go_r
     * [Route matching](#route-matching)
       * [Current route](#current-route)
       * [Parent route](#parent-route)
+      * [Active route](#active-route)
 
 ## Getting started
 
@@ -380,3 +381,31 @@ if (const SubRoute().isParentRoute(context)) {
 ```
 
 In this case, the print statement will _not_ be executed.
+
+#### Active route
+
+If you need to determine if a route is active, but not necessarily whether it is the _current_ route or a _parent_, you can use the `isActive` method.
+
+This method will check that the route exists in the current location, but does not discern between being an exact match or a parent match.
+
+For example, if your app is at the location of `/base/sub`:
+
+```dart
+// current location: '/base/sub'
+if (const BaseRoute().isActive(context)) {
+  debugPrint('BaseRoute is active!');
+}
+```
+
+Your app will print `BaseRoute is active!`.
+
+If your app is at the location of `/base`:
+
+```dart
+// current location: '/base'
+if (const BaseRoute().isActive(context)) {
+  debugPrint('BaseRoute is active!');
+}
+```
+
+Your app will still print `BaseRoute is active!`.

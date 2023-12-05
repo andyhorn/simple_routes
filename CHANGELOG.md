@@ -1,3 +1,7 @@
+## 1.0.0-beta.5
+
+- Add `isActive` method
+
 ## 1.0.0-beta.2 - 4
 
 Minor fixes to documentation.

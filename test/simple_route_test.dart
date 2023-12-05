@@ -270,6 +270,127 @@ void main() {
       },
     );
   });
+
+  group('#isActive', () {
+    testWidgets('returns true when on current route', (tester) async {
+      var isActive = false;
+
+      await tester.pumpWidget(
+        MaterialApp.router(
+          routerConfig: GoRouter(
+            initialLocation: '/home',
+            routes: [
+              GoRoute(
+                path: '/home',
+                builder: (context, state) {
+                  return Scaffold(
+                    body: ElevatedButton(
+                      onPressed: () => const _TestRoute().go(context),
+                      child: const Text('click me'),
+                    ),
+                  );
+                },
+              ),
+              GoRoute(
+                path: const _TestRoute().goPath,
+                builder: (context, state) {
+                  isActive = const _TestRoute().isActive(context);
+                  return const Scaffold(
+                    body: Text('Test Route'),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('click me'));
+      await tester.pump();
+
+      expect(isActive, isTrue);
+    });
+
+    testWidgets('returns false when on a different route', (tester) async {
+      var isActive = true;
+
+      await tester.pumpWidget(
+        MaterialApp.router(
+          routerConfig: GoRouter(
+            initialLocation: const _TestRoute().fullPath,
+            routes: [
+              GoRoute(
+                path: const _TestRoute().goPath,
+                builder: (context, state) {
+                  return Scaffold(
+                    body: ElevatedButton(
+                      onPressed: () => context.go('/other-page'),
+                      child: const Text('click me'),
+                    ),
+                  );
+                },
+              ),
+              GoRoute(
+                path: '/other-page',
+                builder: (context, state) {
+                  isActive = const _TestRoute().isCurrentRoute(context);
+                  return const Scaffold(
+                    body: Text('Test Route'),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('click me'));
+      await tester.pump();
+
+      expect(isActive, isFalse);
+    });
+
+    testWidgets('returns true when on a parent route', (tester) async {
+      var isActive = false;
+
+      await tester.pumpWidget(
+        MaterialApp.router(
+          routerConfig: GoRouter(
+            initialLocation: const _TestRoute().fullPath,
+            routes: [
+              GoRoute(
+                path: const _TestRoute().goPath,
+                builder: (context, state) {
+                  return Scaffold(
+                    body: ElevatedButton(
+                      onPressed: () => const _TestChildRoute().go(context),
+                      child: const Text('click me'),
+                    ),
+                  );
+                },
+                routes: [
+                  GoRoute(
+                    path: const _TestChildRoute().goPath,
+                    builder: (context, state) {
+                      isActive = const _TestRoute().isActive(context);
+                      return const Scaffold(
+                        body: Text('Test Route'),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('click me'));
+      await tester.pump();
+
+      expect(isActive, isTrue);
+    });
+  });
 }
 
 class _TestRootRoute extends SimpleRoute {

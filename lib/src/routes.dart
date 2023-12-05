@@ -41,7 +41,7 @@ abstract class BaseRoute {
     }
   }
 
-  /// Determine if the current GoRouter location matches this route.
+  /// Determine if this route is an exact match for the current location.
   ///
   /// This is useful for determining if a route is active.
   bool isCurrentRoute(BuildContext context) {
@@ -58,6 +58,11 @@ abstract class BaseRoute {
   bool isParentRoute(BuildContext context) {
     final location = GoRouterState.of(context).fullPath;
     return location != fullPath && (location?.startsWith(fullPath) ?? false);
+  }
+
+  /// Determine if this route is active in any way.
+  bool isActive(BuildContext context) {
+    return isCurrentRoute(context) || isParentRoute(context);
   }
 }
 
