@@ -82,17 +82,25 @@ void main() {
       });
     });
 
-    group('#generate', () {
+    group('#fullPath', () {
       test('generates the correct path', () {
         const route = _TestRoute();
         final generated = route.fullPath(
           const _TestRouteData(
             testValue: 'test-value',
             testData: _TestData(),
-            testQuery: 'test-query',
+            testQuery: 'test query',
           ),
         );
-        expect(generated, '/test-value?valueTwo=test-query');
+        expect(generated, '/test-value?valueTwo=test%20query');
+      });
+    });
+
+    group('.fullPathTemplate', () {
+      test('returns the correct template', () {
+        const route = _TestRoute();
+        final template = route.fullPathTemplate;
+        expect(template, '/:valueOne');
       });
     });
   });

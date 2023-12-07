@@ -18,9 +18,15 @@ void main() {
       root = const _TestRootRoute();
     });
 
-    group('.fullPath', () {
+    group('.fullPathTemplate', () {
       test('returns leading slash', () {
         expect(root.fullPathTemplate, '/');
+      });
+    });
+
+    group('#fullPath', () {
+      test('returns a leading slash', () {
+        expect(root.fullPath(), '/');
       });
     });
   });
@@ -32,9 +38,15 @@ void main() {
       childRoute = const _TestChildRoute();
     });
 
-    group('.fullPath', () {
+    group('.fullPathTemplate', () {
       test('adds leading slash', () {
         expect(route.fullPathTemplate, '/test');
+      });
+    });
+
+    group('#fullPath', () {
+      test('returns the correct path', () {
+        expect(route.fullPath(), '/test');
       });
     });
 
@@ -90,9 +102,15 @@ void main() {
   });
 
   group('Child route', () {
-    group('.fullPath', () {
+    group('.fullPathTemplate', () {
       test('joins with parents', () {
         expect(childRoute.fullPathTemplate, '/test/child');
+      });
+    });
+
+    group('#fullPath', () {
+      test('returns the correct path', () {
+        expect(childRoute.fullPath(), '/test/child');
       });
     });
 
