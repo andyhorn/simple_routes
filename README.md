@@ -1,10 +1,10 @@
 # Simple Routes
 
-Simple, type-safe route and navigation management for [go_router](https://pub.dev/packages/go_router).
+Simple declarative route and navigation management for [go_router](https://pub.dev/packages/go_router).
 
 ## Stable release
 
-We have reached a stable release of Simple Routes with v1.0.0-beta.4! 🎉
+We have reached a stable release of Simple Routes with v1.0.0! 🎉
 
 This release includes several breaking changes from the 0.x.x versions. <br/> Please see the [Migration Guide](doc/migration_guide.md) for more info.
 
