@@ -31,7 +31,7 @@ abstract class BaseRoute {
 
   /// Get the full path template for this route, including any parent routes.
   ///
-  /// e.g. `/auth/register/verify-email/:token`
+  /// e.g. `/user/:userId/posts/:postId`
   String get fullPathTemplate {
     var path = this is ChildRoute
         ? joinSegments([
@@ -47,7 +47,7 @@ abstract class BaseRoute {
     return path;
   }
 
-  /// Get the [GoRoute] path for this route.
+  /// Get the [GoRoute] `path` for this route.
   ///
   /// ```dart
   /// GoRoute(
@@ -91,6 +91,17 @@ abstract class BaseRoute {
 }
 
 /// A route that contains no parameters.
+///
+/// Override the `path` getter to declare the path segment for this route.
+///
+/// ```dart
+/// class MyRoute extends SimpleRoute {
+///   const MyRoute();
+///
+///   @override
+///   String get path => 'my-route';
+/// }
+/// ```
 abstract class SimpleRoute extends BaseRoute {
   const SimpleRoute();
 
@@ -105,8 +116,22 @@ abstract class SimpleRoute extends BaseRoute {
   }
 }
 
-/// A route that contains a parameter. When navigating, data must be supplied
-/// to populate the route.
+/// A route that contains one or more path and/or query parameters and/or
+/// "extra" data.
+///
+/// When navigating, a data object must be supplied to populate the route.
+///
+/// In this example, the `MyRouteData` class should provide a value for the
+/// `:id` path parameter (declared by the `RouteParams.id` enum value).
+///
+/// ```dart
+/// class MyRoute extends DataRoute<MyRouteData> {
+///   const MyRoute();
+///
+///   @override
+///   String get path => joinSegments(['my-route', RouteParams.id.prefixed]);
+/// }
+/// ```
 abstract class DataRoute<Data extends SimpleRouteData> extends BaseRoute {
   const DataRoute();
 
@@ -126,7 +151,12 @@ abstract class DataRoute<Data extends SimpleRouteData> extends BaseRoute {
     GoRouter.of(context).push(populatedWith(data), extra: data.extra);
   }
 
-  /// Generate a populated path for this route using the supplied [data].
+  /// Generate the populated path for this route using the supplied [data].
+  ///
+  /// This method will inject the [data] parameters into the path template and
+  /// append any query parameters.
+  ///
+  /// e.g. `/user/:userId` becomes `/user/123?query=my%20query`
   String populatedWith(Data data) {
     return _injectParams(fullPathTemplate, data).appendQuery(_getQuery(data));
   }
@@ -148,6 +178,31 @@ abstract class DataRoute<Data extends SimpleRouteData> extends BaseRoute {
   }
 }
 
+/// A route that is a descendant of another route.
+///
+/// Implement this interface to declare a route as a child of another route
+/// in the routing tree.
+///
+/// ```dart
+/// class MyRoute extends SimpleRoute implements ChildRoute<ParentRoute> {
+///   const MyRoute();
+///
+///   @override
+///   String get path => 'my-route';
+///
+///   @override
+///   ParentRoute get parent => const ParentRoute();
+/// }
+/// ```
+///
+/// Then, when navigating to this route, it will automatically construct the
+/// full path using the parent route's path.
+///
+/// ```dart
+/// const MyRoute().go(context);
+/// ```
+///
+/// This will navigate to '/parent-route/my-route'.
 abstract class ChildRoute<Parent extends BaseRoute> {
   /// The parent route of this route.
   Parent get parent;
