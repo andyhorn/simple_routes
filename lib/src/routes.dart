@@ -1,20 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:simple_routes/simple_routes.dart';
+import 'package:simple_routes/src/extensions/string_extensions.dart';
 
 /// An abstract class to serve as the parent for all routes.
 abstract class BaseRoute {
   const BaseRoute();
 
-  /// The path for this route. e.g. 'verify-email'.
+  /// The path segment for this route. e.g. 'verify-email'.
   abstract final String path;
+
+  /// Join a List<String> of path segments into a forward slash-separated path.
+  ///
+  /// e.g. ['auth', 'register', 'verify-email'] -> '/auth/register/verify-email'
+  String joinSegments(List<String> segments) {
+    return segments.join('/');
+  }
 
   /// Get the fully-qualified path template for this route.
   ///
   /// e.g. `/auth/register/verify-email` or `/auth/register/verify-email/:token`
   String get fullPath {
     var path = this is ChildRoute
-        ? [(this as ChildRoute).parent.fullPath, this.path].toPath()
+        ? joinSegments([
+            (this as ChildRoute).parent.fullPath,
+            this.path,
+          ])
         : this.path;
 
     if (!path.startsWith('/')) {

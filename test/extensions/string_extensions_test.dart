@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:simple_routes/simple_routes.dart';
+import 'package:simple_routes/src/extensions/string_extensions.dart';
 
 enum TestParams {
   testParamOne,
