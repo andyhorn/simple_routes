@@ -29,9 +29,9 @@ abstract class BaseRoute {
     return segments.join('/');
   }
 
-  /// Get the fully-qualified path template for this route.
+  /// Get the full path template for this route, including any parent routes.
   ///
-  /// e.g. `/auth/register/verify-email` or `/auth/register/verify-email/:token`
+  /// e.g. `/auth/register/verify-email/:token`
   String get fullPathTemplate {
     var path = this is ChildRoute
         ? joinSegments([
@@ -102,10 +102,6 @@ abstract class SimpleRoute extends BaseRoute {
   /// Push this route onto the stack.
   void push(BuildContext context) {
     GoRouter.of(context).push(fullPathTemplate);
-  }
-
-  String getFullPath() {
-    return fullPathTemplate;
   }
 }
 

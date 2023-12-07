@@ -36,12 +36,6 @@ void main() {
         expect(root.fullPathTemplate, '/');
       });
     });
-
-    group('#getFullPath', () {
-      test('returns a leading slash', () {
-        expect(root.getFullPath(), '/');
-      });
-    });
   });
 
   group('Root route', () {
@@ -54,12 +48,6 @@ void main() {
     group('.fullPathTemplate', () {
       test('adds leading slash', () {
         expect(route.fullPathTemplate, '/test');
-      });
-    });
-
-    group('#getFullPath', () {
-      test('returns the correct path', () {
-        expect(route.getFullPath(), '/test');
       });
     });
 
@@ -118,12 +106,6 @@ void main() {
     group('.fullPathTemplate', () {
       test('joins with parents', () {
         expect(childRoute.fullPathTemplate, '/test/child');
-      });
-    });
-
-    group('#getFullPath', () {
-      test('returns the correct path', () {
-        expect(childRoute.getFullPath(), '/test/child');
       });
     });
 
