@@ -1,3 +1,9 @@
+## 1.0.0-beta.6
+
+- Rename `fullPath` property to `fullPathTemplate`
+- Add `populatedWith` method to `DataRoute`
+- Add `joinSegments` method to base class and remove `toPath` extension method
+
 ## 1.0.0-beta.5
 
 - Add `isActive` method

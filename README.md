@@ -22,6 +22,7 @@ Simple Routes is a companion package to [GoRouter](https://pub.dev/packages/go_r
   * [Usage](#usage)
     * [Route definitions](#route-definitions)
       * [Basic routing with SimpleRoutes](#basic-routes)
+        * [Route path segments](#route-path-segments)
       * [Path parameters and DataRoutes](#data-routes)
       * [Child routes](#child-routes)
     * [GoRouter Configuration](#gorouter-configuration)
@@ -40,7 +41,7 @@ This package is intended to be used with the [GoRouter](https://pub.dev/packages
 ```
 dependencies:
   go_router: ^12.0.0
-  simple_routes: ^1.0.0-beta.4
+  simple_routes: ^1.0.0-beta.6
 ```
 
 ## Usage
@@ -64,6 +65,19 @@ class ProfileRoute extends SimpleRoute {
 
 No need to add the leading slash for a root-level route; if your route is not a child route (more on this below), the leading slash will automatically be added when necessary.
 
+##### Route path segments
+
+If your route contains more than one _segment_, build your path using the `joinSegments` method.
+
+```dart
+class UserProfileRoute extends SimpleRoute {
+  const UserProfileRoute();
+
+  @override
+  String get path => joinSegments(['user', 'profile']);
+}
+```
+
 <a id="data-routes"></a>
 
 #### Route parameters and DataRoutes
@@ -80,7 +94,7 @@ class MyExtraData {
 }
 ```
 
-Next, let's define our route data class.
+Next, we'll need to define our route parameters in an enum.
 
 ```dart
 // Define any route parameters and query parameters as enum values.
@@ -90,7 +104,11 @@ enum RouteParams {
   userId,
   query,
 }
+```
 
+Next, let's define our route data class.
+
+```dart
 // Define a data class that extends SimpleRouteData
 //
 // This class should carry any data that your route requires, 
@@ -153,7 +171,11 @@ class UserRouteData extends SimpleRouteData {
     );
   }
 }
+```
 
+Finally, we can define our route, extending the `DataRoute` class.
+
+```dart
 // Define the route as a DataRoute, typed for your data class.
 class UserRoute extends DataRoute<UserRouteData> {
   const UserRoute();
@@ -162,12 +184,15 @@ class UserRoute extends DataRoute<UserRouteData> {
   // Use the `prefixed` property to automatically prefix the
   // enum value name with a colon (e.g. ":userId").
   //
-  // To define a path with multiple segments, create an 
-  // `Iterable<String>` and use the `toPath` extension method.
+  // To define a path with multiple segments, use the `joinSegments` 
+  // method to join the segments with a forward-slash. This method also 
+  // gives you protection against creating a path with duplicate segments.
   @override
-  String get path => ['user', RouteParams.userId.prefixed].toPath();
+  String get path => joinSegments(['user', RouteParams.userId.prefixed]);
 }
 ```
+
+Because this route is a "data route," we must provide it with an instance of its route data class when navigating. More on this in the [Navigation](#navigation) section.
 
 ### Child routes
 
@@ -223,10 +248,14 @@ GoRouter(
 
         if (state.getParam(RouteParams.userId) == null) {
           // If the data is not present, redirect to another route 
-          // using the `fullPath` property - this is important, as 
-          // the `path` and `goPath` properties only include the 
-          // route's segment(s), but not the fully-qualified path.
-          return const HomeRoute().fullPath;
+          // using the `fullPathTemplate` property - this is important, 
+          // as the `path` and `goPath` properties only include the 
+          // route's segment(s), but not the full URI.
+          //
+          // Note: If you're redirecting to a data route, you must use
+          // the `populatedWith` method to populate the route's template
+          // parameters.
+          return const HomeRoute().fullPathTemplate;
         }
 
         // If all of the data is present, return null to allow the 
@@ -263,7 +292,7 @@ GoRouter(
 
 #### DataRoute generation
 
-If you need to redirect to a DataRoute, or otherwise need the complete path for a DataRoute, you must use the `generate` method to generate the full path. The `fullPath` property will include the template values and will not route properly.
+If you need to redirect to a DataRoute, or otherwise need the complete path for a DataRoute, you must use the `populatedWith` method to populate the route's template parameters.
 
 For example, given the following route:
 
@@ -272,7 +301,7 @@ class MyRoute extends DataRoute<MyRouteData> {
   const MyRoute();
 
   @override
-  String get path => ['user', RouteParams.userId.prefixed].toPath();
+  String get path => joinSegments(['user', RouteParams.userId.prefixed]);
 }
 
 ...
@@ -280,16 +309,18 @@ class MyRoute extends DataRoute<MyRouteData> {
 // This will not work!
 // The return value will be `/user/:userId`
 redirect: (context, state) {
-  return const MyRoute().fullPath;
+  return const MyRoute().fullPathTemplate;
 }
 
 ...
 
-// Instead, use `generate`, like so:
+// Instead, use `populatedWith`, like so:
 redirect: (context, state) {
-  return const MyRoute().generate(MyRouteData(userId: '123'));
+  return const MyRoute().populatedWith(MyRouteData(userId: '123'));
 }
 ```
+
+This will return the full path, with all parameters populated: `/user/123`.
 
 ### Navigation
 
