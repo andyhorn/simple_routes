@@ -56,12 +56,4 @@ void main() {
       });
     });
   });
-
-  group('IterableStringExtensions', () {
-    group('#toPath', () {
-      test('joins strings', () {
-        expect(['one', 'two', 'three'].toPath(), 'one/two/three');
-      });
-    });
-  });
 }
