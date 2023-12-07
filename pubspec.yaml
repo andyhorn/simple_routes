@@ -1,6 +1,6 @@
 name: simple_routes
 description: Simple, declarative route and navigation management for go_router.
-version: 1.0.0-beta.7
+version: 1.0.0-beta.8
 homepage: https://github.com/andyhorn/simple_routes
 
 environment:
