@@ -12,6 +12,19 @@ void main() {
   late _TestRoute route;
   late _TestChildRoute childRoute;
 
+  group('Duplicate segments', () {
+    test('throws an error', () {
+      expect(
+        () => const _DuplicateTestRoute().fullPathTemplate,
+        throwsA(isA<AssertionError>().having(
+          (e) => e.message,
+          'message',
+          'Error in _DuplicateTestRoute - Segments should be unique. Found duplicates of: {test, :param}',
+        )),
+      );
+    });
+  });
+
   group('Empty route', () {
     setUp(() {
       router = MockGoRouter();
@@ -411,6 +424,10 @@ void main() {
   });
 }
 
+enum _TestRouteParams {
+  param,
+}
+
 class _TestRootRoute extends SimpleRoute {
   const _TestRootRoute();
 
@@ -433,4 +450,16 @@ class _TestChildRoute extends SimpleRoute implements ChildRoute<_TestRoute> {
 
   @override
   String get path => 'child';
+}
+
+class _DuplicateTestRoute extends SimpleRoute {
+  const _DuplicateTestRoute();
+
+  @override
+  String get path => joinSegments([
+        'test',
+        'test',
+        _TestRouteParams.param.prefixed,
+        _TestRouteParams.param.prefixed,
+      ]);
 }

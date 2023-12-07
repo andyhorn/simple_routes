@@ -13,7 +13,19 @@ abstract class BaseRoute {
   /// Join a List<String> of path segments into a forward slash-separated path.
   ///
   /// e.g. ['auth', 'register', 'verify-email'] -> '/auth/register/verify-email'
+  ///
+  /// This method will throw an assertion error if any segments are duplicated.
   String joinSegments(List<String> segments) {
+    final duplicates = segments.where((s1) {
+      return segments.where((s2) => s1 == s2).length > 1;
+    }).toList();
+
+    assert(
+      duplicates.isEmpty,
+      'Error in $runtimeType - Segments should be unique.'
+      ' Found duplicates of: ${Set.from(duplicates)}',
+    );
+
     return segments.join('/');
   }
 
