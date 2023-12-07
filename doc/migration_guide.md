@@ -8,12 +8,13 @@ This section will guide you through the breaking changes introduced in the 1.0.0
 
 ### Full path and populated path
 
-The `fullPath` property has been renamed to `fullPathTemplate` to better indicate its purpose. For simple routes (non-data routes), this template value is fully-populated and safe to use as a redirect or link. For data routes, however, this value will contain the _template_ parameters, such as ":userId," and should not be used as a redirect or link.
+The `fullPath` property has been converted to a method.
 
-To get the fully-populated path of a data route, use the new `populatedWith` method.
+This method will return the full path of the route, all the way to the root. For `DataRoute`'s, the method will require an instance of the route data class so that it can populate the path template with real values.
 
 ```dart
-final link = const MyDataRoute().populatedWith(MyRouteData('user-123'));
+final link = const MyDataRoute().fullPath(MyRouteData('user-123'));
+print(link); // /path/to/user-123
 ```
 
 ### GoRoute configuration
@@ -154,9 +155,10 @@ And in your GoRoute configuration:
 ```dart
 GoRoute(
   redirect: (context, state) {
-    // use the extension methods to check for the presence of data.
+    // use the extension methods to check for the presence of data
+    // and redirect using fullPath(), if necessary
     if (state.getParam(RouteParams.myParam) == null) {
-      return const MyOtherRoute().fullPathTemplate;
+      return const MyOtherRoute().fullPath();
     }
 
     return null;
