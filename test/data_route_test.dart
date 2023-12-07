@@ -82,10 +82,10 @@ void main() {
       });
     });
 
-    group('#fullPath', () {
+    group('#populatedWith', () {
       test('generates the correct path', () {
         const route = _TestRoute();
-        final generated = route.fullPath(
+        final generated = route.populatedWith(
           const _TestRouteData(
             testValue: 'test-value',
             testData: _TestData(),

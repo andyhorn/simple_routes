@@ -115,7 +115,7 @@ abstract class DataRoute<Data extends SimpleRouteData> extends BaseRoute {
     BuildContext context, {
     required Data data,
   }) {
-    GoRouter.of(context).go(fullPath(data), extra: data.extra);
+    GoRouter.of(context).go(populatedWith(data), extra: data.extra);
   }
 
   /// Push this route onto the stack using the supplied [data].
@@ -123,11 +123,11 @@ abstract class DataRoute<Data extends SimpleRouteData> extends BaseRoute {
     BuildContext context, {
     required Data data,
   }) {
-    GoRouter.of(context).push(fullPath(data), extra: data.extra);
+    GoRouter.of(context).push(populatedWith(data), extra: data.extra);
   }
 
   /// Generate a populated path for this route using the supplied [data].
-  String fullPath(Data data) {
+  String populatedWith(Data data) {
     return _injectParams(fullPathTemplate, data).appendQuery(_getQuery(data));
   }
 
