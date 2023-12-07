@@ -6,6 +6,16 @@ This document is a guide for migrating between major package versions.
 
 This section will guide you through the breaking changes introduced in the 1.0.0 release and how to migrate your code.
 
+### Full path and populated path
+
+The `fullPath` property has been renamed to `fullPathTemplate` to better indicate its purpose. For simple routes (non-data routes), this template value is fully-populated and safe to use as a redirect or link. For data routes, however, this value will contain the _template_ parameters, such as ":userId," and should not be used as a redirect or link.
+
+To get the fully-populated path of a data route, use the new `populatedWith` method.
+
+```dart
+final link = const MyDataRoute().populatedWith(MyRouteData('user-123'));
+```
+
 ### GoRoute configuration
 
 Version 1.0.0 introduces a new `goPath` property on the `SimpleRoute` class. This property should be used when defining your `GoRoute`s instead of the `path` property.
@@ -146,7 +156,7 @@ GoRoute(
   redirect: (context, state) {
     // use the extension methods to check for the presence of data.
     if (state.getParam(RouteParams.myParam) == null) {
-      return const MyOtherRoute().fullPath;
+      return const MyOtherRoute().fullPathTemplate;
     }
 
     return null;
@@ -212,18 +222,22 @@ RouteParams.myParam.prefixed,
 
 #### `join`
 
-The `join` method, which joined strings with a forward slash (/), has been replaced with the `toPath` extension method on `Iterable<String>`.
+The free-floating `join` method, which joined strings with a forward slash (`/`), has been replaced with a `joinSegments` method on the base route class.
+
+This was done to avoid leaking the method into the global namespace and to clarify its purpose and behavior.
 
 From this:
 
 ```dart
-join(['path', 'to', 'join']),
+@override
+String get path => join(['path', 'to', 'join']),
 ```
 
 To this:
 
 ```dart
-['path', 'to', 'join'].toPath(),
+@override
+String get path => joinSegments(['path', 'to', 'join']),
 ```
 
 #### `setParam`

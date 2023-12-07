@@ -41,7 +41,7 @@ This package is intended to be used with the [GoRouter](https://pub.dev/packages
 ```
 dependencies:
   go_router: ^12.0.0
-  simple_routes: ^1.0.0-beta.6
+  simple_routes: ^1.0.0-beta.7
 ```
 
 ## Usage
@@ -77,6 +77,8 @@ class UserProfileRoute extends SimpleRoute {
   String get path => joinSegments(['user', 'profile']);
 }
 ```
+
+This method provides protection against creating a path with duplicate segments.
 
 <a id="data-routes"></a>
 
@@ -251,11 +253,12 @@ GoRouter(
           // using the `fullPathTemplate` property - this is important, 
           // as the `path` and `goPath` properties only include the 
           // route's segment(s), but not the full URI.
-          //
+          return const HomeRoute().fullPathTemplate;
+
           // Note: If you're redirecting to a data route, you must use
           // the `populatedWith` method to populate the route's template
-          // parameters.
-          return const HomeRoute().fullPathTemplate;
+          // parameters. See the "DataRoute generation" section below.
+          // return const UserRoute().populatedWith(UserRouteData(...));
         }
 
         // If all of the data is present, return null to allow the 
@@ -320,7 +323,7 @@ redirect: (context, state) {
 }
 ```
 
-This will return the full path, with all parameters populated: `/user/123`.
+This will return the fully-populated path String: `/user/123`.
 
 ### Navigation
 

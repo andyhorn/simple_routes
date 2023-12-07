@@ -1,3 +1,8 @@
+## 1.0.0-beta.7
+
+- Improve migration guide
+- Improve README
+
 ## 1.0.0-beta.6
 
 - Rename `fullPath` property to `fullPathTemplate`
