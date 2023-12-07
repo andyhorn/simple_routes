@@ -20,10 +20,10 @@ abstract class BaseRoute {
   /// Get the fully-qualified path template for this route.
   ///
   /// e.g. `/auth/register/verify-email` or `/auth/register/verify-email/:token`
-  String get fullPath {
+  String get fullPathTemplate {
     var path = this is ChildRoute
         ? joinSegments([
-            (this as ChildRoute).parent.fullPath,
+            (this as ChildRoute).parent.fullPathTemplate,
             this.path,
           ])
         : this.path;
@@ -56,7 +56,7 @@ abstract class BaseRoute {
   ///
   /// This is useful for determining if a route is active.
   bool isCurrentRoute(BuildContext context) {
-    return GoRouterState.of(context).fullPath == fullPath;
+    return GoRouterState.of(context).fullPath == fullPathTemplate;
   }
 
   /// Determine if this route is a parent of the current route.
@@ -68,7 +68,8 @@ abstract class BaseRoute {
   /// This is useful for determining if a parent route is active.
   bool isParentRoute(BuildContext context) {
     final location = GoRouterState.of(context).fullPath;
-    return location != fullPath && (location?.startsWith(fullPath) ?? false);
+    return location != fullPathTemplate &&
+        (location?.startsWith(fullPathTemplate) ?? false);
   }
 
   /// Determine if this route is active in any way.
@@ -83,12 +84,16 @@ abstract class SimpleRoute extends BaseRoute {
 
   /// Navigate to this route.
   void go(BuildContext context) {
-    GoRouter.of(context).go(fullPath);
+    GoRouter.of(context).go(fullPathTemplate);
   }
 
   /// Push this route onto the stack.
   void push(BuildContext context) {
-    GoRouter.of(context).push(fullPath);
+    GoRouter.of(context).push(fullPathTemplate);
+  }
+
+  String fullPath() {
+    return fullPathTemplate;
   }
 }
 
@@ -102,7 +107,7 @@ abstract class DataRoute<Data extends SimpleRouteData> extends BaseRoute {
     BuildContext context, {
     required Data data,
   }) {
-    GoRouter.of(context).go(generate(data), extra: data.extra);
+    GoRouter.of(context).go(fullPath(data), extra: data.extra);
   }
 
   /// Push this route onto the stack using the supplied [data].
@@ -110,12 +115,12 @@ abstract class DataRoute<Data extends SimpleRouteData> extends BaseRoute {
     BuildContext context, {
     required Data data,
   }) {
-    GoRouter.of(context).push(generate(data), extra: data.extra);
+    GoRouter.of(context).push(fullPath(data), extra: data.extra);
   }
 
   /// Generate a populated path for this route using the supplied [data].
-  String generate(Data data) {
-    return _injectParams(fullPath, data).appendQuery(_getQuery(data));
+  String fullPath(Data data) {
+    return _injectParams(fullPathTemplate, data).appendQuery(_getQuery(data));
   }
 
   String _injectParams(String path, Data data) {
@@ -127,7 +132,7 @@ abstract class DataRoute<Data extends SimpleRouteData> extends BaseRoute {
   Map<String, String> _getQuery(Data data) {
     return data.query.entries.fold({}, (query, entry) {
       if (entry.value != null && entry.value!.isNotEmpty) {
-        query[entry.key.name] = entry.value!;
+        query[entry.key.name] = (entry.value!);
       }
 
       return query;

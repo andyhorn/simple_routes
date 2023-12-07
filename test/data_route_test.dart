@@ -85,7 +85,7 @@ void main() {
     group('#generate', () {
       test('generates the correct path', () {
         const route = _TestRoute();
-        final generated = route.generate(
+        final generated = route.fullPath(
           const _TestRouteData(
             testValue: 'test-value',
             testData: _TestData(),

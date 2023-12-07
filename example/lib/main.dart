@@ -29,7 +29,7 @@ final router = GoRouter(
           // When redirecting, use the `fullPath` property.
           // If your route has parameters, you should use the
           // `buildFullPath` method instead.
-          return const RootRoute().fullPath;
+          return const RootRoute().fullPathTemplate;
         }
 
         return null;
