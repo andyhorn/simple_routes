@@ -92,7 +92,7 @@ abstract class SimpleRoute extends BaseRoute {
     GoRouter.of(context).push(fullPathTemplate);
   }
 
-  String fullPath() {
+  String getFullPath() {
     return fullPathTemplate;
   }
 }

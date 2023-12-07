@@ -24,9 +24,9 @@ void main() {
       });
     });
 
-    group('#fullPath', () {
+    group('#getFullPath', () {
       test('returns a leading slash', () {
-        expect(root.fullPath(), '/');
+        expect(root.getFullPath(), '/');
       });
     });
   });
@@ -44,9 +44,9 @@ void main() {
       });
     });
 
-    group('#fullPath', () {
+    group('#getFullPath', () {
       test('returns the correct path', () {
-        expect(route.fullPath(), '/test');
+        expect(route.getFullPath(), '/test');
       });
     });
 
@@ -108,9 +108,9 @@ void main() {
       });
     });
 
-    group('#fullPath', () {
+    group('#getFullPath', () {
       test('returns the correct path', () {
-        expect(childRoute.fullPath(), '/test/child');
+        expect(childRoute.getFullPath(), '/test/child');
       });
     });
 
