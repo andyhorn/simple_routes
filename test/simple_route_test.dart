@@ -15,7 +15,7 @@ void main() {
   group('Duplicate segments', () {
     test('throws an error', () {
       expect(
-        () => const _DuplicateTestRoute().fullPathTemplate,
+        () => const _DuplicateTestRoute().fullPath(),
         throwsA(isA<AssertionError>().having(
           (e) => e.message,
           'message',
@@ -31,9 +31,9 @@ void main() {
       root = const _TestRootRoute();
     });
 
-    group('.fullPathTemplate', () {
+    group('#fullPath', () {
       test('returns leading slash', () {
-        expect(root.fullPathTemplate, '/');
+        expect(root.fullPath(), '/');
       });
     });
   });
@@ -45,9 +45,9 @@ void main() {
       childRoute = const _TestChildRoute();
     });
 
-    group('.fullPathTemplate', () {
+    group('#fullPath', () {
       test('adds leading slash', () {
-        expect(route.fullPathTemplate, '/test');
+        expect(route.fullPath(), '/test');
       });
     });
 
@@ -103,9 +103,9 @@ void main() {
   });
 
   group('Child route', () {
-    group('.fullPathTemplate', () {
+    group('#fullPath', () {
       test('joins with parents', () {
-        expect(childRoute.fullPathTemplate, '/test/child');
+        expect(childRoute.fullPath(), '/test/child');
       });
     });
 
@@ -162,7 +162,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: const _TestRoute().fullPathTemplate,
+            initialLocation: const _TestRoute().fullPath(),
             routes: [
               GoRoute(
                 path: const _TestRoute().goPath,
@@ -205,7 +205,7 @@ void main() {
         await tester.pumpWidget(
           MaterialApp.router(
             routerConfig: GoRouter(
-              initialLocation: const _TestRoute().fullPathTemplate,
+              initialLocation: const _TestRoute().fullPath(),
               routes: [
                 GoRoute(
                   path: const _TestRoute().goPath,
@@ -249,7 +249,7 @@ void main() {
         await tester.pumpWidget(
           MaterialApp.router(
             routerConfig: GoRouter(
-              initialLocation: const _TestRoute().fullPathTemplate,
+              initialLocation: const _TestRoute().fullPath(),
               routes: [
                 GoRoute(
                   path: const _TestRoute().goPath,
@@ -330,7 +330,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: const _TestRoute().fullPathTemplate,
+            initialLocation: const _TestRoute().fullPath(),
             routes: [
               GoRoute(
                 path: const _TestRoute().goPath,
@@ -369,7 +369,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: const _TestRoute().fullPathTemplate,
+            initialLocation: const _TestRoute().fullPath(),
             routes: [
               GoRoute(
                 path: const _TestRoute().goPath,

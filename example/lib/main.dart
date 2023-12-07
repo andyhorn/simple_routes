@@ -26,10 +26,8 @@ final router = GoRouter(
       redirect: (context, state) {
         // Use the GoRouterState extension methods to validate the route data.
         if (state.getParam(RouteParams.userId) == null) {
-          // When redirecting, use the `fullPath` property.
-          // If your route has parameters, you should use the
-          // `buildFullPath` method instead.
-          return const RootRoute().fullPathTemplate;
+          // When redirecting, use the `fullPath` method.
+          return const RootRoute().fullPath();
         }
 
         return null;

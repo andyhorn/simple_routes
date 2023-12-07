@@ -82,10 +82,10 @@ void main() {
       });
     });
 
-    group('#populatedWith', () {
+    group('#fullPath', () {
       test('generates the correct path', () {
         const route = _TestRoute();
-        final generated = route.populatedWith(
+        final generated = route.fullPath(
           const _TestRouteData(
             testValue: 'test-value',
             testData: _TestData(),
@@ -93,14 +93,6 @@ void main() {
           ),
         );
         expect(generated, '/test-value?valueTwo=test%20query');
-      });
-    });
-
-    group('.fullPathTemplate', () {
-      test('returns the correct template', () {
-        const route = _TestRoute();
-        final template = route.fullPathTemplate;
-        expect(template, '/:valueOne');
       });
     });
   });

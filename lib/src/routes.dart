@@ -29,24 +29,6 @@ abstract class BaseRoute {
     return segments.join('/');
   }
 
-  /// Get the full path template for this route, including any parent routes.
-  ///
-  /// e.g. `/user/:userId/posts/:postId`
-  String get fullPathTemplate {
-    var path = this is ChildRoute
-        ? joinSegments([
-            (this as ChildRoute).parent.fullPathTemplate,
-            this.path,
-          ])
-        : this.path;
-
-    if (!path.startsWith('/')) {
-      path = '/$path';
-    }
-
-    return path;
-  }
-
   /// Get the [GoRoute] `path` for this route.
   ///
   /// ```dart
@@ -68,7 +50,7 @@ abstract class BaseRoute {
   ///
   /// This is useful for determining if a route is active.
   bool isCurrentRoute(BuildContext context) {
-    return GoRouterState.of(context).fullPath == fullPathTemplate;
+    return GoRouterState.of(context).fullPath == _fullPathTemplate;
   }
 
   /// Determine if this route is a parent of the current route.
@@ -80,13 +62,28 @@ abstract class BaseRoute {
   /// This is useful for determining if a parent route is active.
   bool isParentRoute(BuildContext context) {
     final location = GoRouterState.of(context).fullPath;
-    return location != fullPathTemplate &&
-        (location?.startsWith(fullPathTemplate) ?? false);
+    return location != _fullPathTemplate &&
+        (location?.startsWith(_fullPathTemplate) ?? false);
   }
 
   /// Determine if this route is active in any way.
   bool isActive(BuildContext context) {
     return isCurrentRoute(context) || isParentRoute(context);
+  }
+
+  String get _fullPathTemplate {
+    var path = this is ChildRoute
+        ? joinSegments([
+            (this as ChildRoute).parent._fullPathTemplate,
+            this.path,
+          ])
+        : this.path;
+
+    if (!path.startsWith('/')) {
+      path = '/$path';
+    }
+
+    return path;
   }
 }
 
@@ -107,13 +104,17 @@ abstract class SimpleRoute extends BaseRoute {
 
   /// Navigate to this route.
   void go(BuildContext context) {
-    GoRouter.of(context).go(fullPathTemplate);
+    GoRouter.of(context).go(_fullPathTemplate);
   }
 
   /// Push this route onto the stack.
   void push(BuildContext context) {
-    GoRouter.of(context).push(fullPathTemplate);
+    GoRouter.of(context).push(_fullPathTemplate);
   }
+
+  /// Get the full path for this route.
+  /// e.g. '/my-route'
+  String fullPath() => _fullPathTemplate;
 }
 
 /// A route that contains one or more path and/or query parameters and/or
@@ -140,7 +141,7 @@ abstract class DataRoute<Data extends SimpleRouteData> extends BaseRoute {
     BuildContext context, {
     required Data data,
   }) {
-    GoRouter.of(context).go(populatedWith(data), extra: data.extra);
+    GoRouter.of(context).go(fullPath(data), extra: data.extra);
   }
 
   /// Push this route onto the stack using the supplied [data].
@@ -148,17 +149,17 @@ abstract class DataRoute<Data extends SimpleRouteData> extends BaseRoute {
     BuildContext context, {
     required Data data,
   }) {
-    GoRouter.of(context).push(populatedWith(data), extra: data.extra);
+    GoRouter.of(context).push(fullPath(data), extra: data.extra);
   }
 
-  /// Generate the populated path for this route using the supplied [data].
+  /// Generate the full, populated path for this route using the supplied [data].
   ///
   /// This method will inject the [data] parameters into the path template and
   /// append any query parameters.
   ///
   /// e.g. `/user/:userId` becomes `/user/123?query=my%20query`
-  String populatedWith(Data data) {
-    return _injectParams(fullPathTemplate, data).appendQuery(_getQuery(data));
+  String fullPath(Data data) {
+    return _injectParams(_fullPathTemplate, data).appendQuery(_getQuery(data));
   }
 
   String _injectParams(String path, Data data) {

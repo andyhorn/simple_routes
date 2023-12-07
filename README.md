@@ -63,11 +63,11 @@ class ProfileRoute extends SimpleRoute {
 }
 ```
 
-No need to add the leading slash for a root-level route; if your route is not a child route (more on this below), the leading slash will automatically be added when necessary.
+No need to add the leading slash for a root-level route; if your route is not a child route (more on this below), the leading slash will automatically be added, when necessary.
 
 ##### Route path segments
 
-If your route contains more than one _segment_, build your path using the `joinSegments` method.
+If your route contains more than one _path segment_, build your path using the `joinSegments` method.
 
 ```dart
 class UserProfileRoute extends SimpleRoute {
@@ -196,6 +196,8 @@ class UserRoute extends DataRoute<UserRouteData> {
 
 Because this route is a "data route," we must provide it with an instance of its route data class when navigating. More on this in the [Navigation](#navigation) section.
 
+Please note that the `parameters`, `query`, and `extra` overrides are entirely optional, depending on your use-case.
+
 ### Child routes
 
 To define a route that is a child of another route, implement the `ChildRoute` interface, providing the parent route type and overriding the `parent` property.
@@ -250,15 +252,17 @@ GoRouter(
 
         if (state.getParam(RouteParams.userId) == null) {
           // If the data is not present, redirect to another route 
-          // using the `fullPathTemplate` property - this is important, 
+          // using the `fullPath` method - this is important, 
           // as the `path` and `goPath` properties only include the 
           // route's segment(s), but not the full URI.
-          return const HomeRoute().fullPathTemplate;
+          return const HomeRoute().fullPath();
 
-          // Note: If you're redirecting to a data route, you must use
-          // the `populatedWith` method to populate the route's template
-          // parameters. See the "DataRoute generation" section below.
-          // return const UserRoute().populatedWith(UserRouteData(...));
+          // Note: If you're redirecting to a data route, the `fullPath`
+          // method will require an instance of your route data object. 
+          // For example:
+          // return const UserRoute().fullPath(UserRouteData(...));
+          // 
+          // See the "DataRoute generation" section below.
         }
 
         // If all of the data is present, return null to allow the 
@@ -295,7 +299,7 @@ GoRouter(
 
 #### DataRoute generation
 
-If you need to redirect to a DataRoute, or otherwise need the complete path for a DataRoute, you must use the `populatedWith` method to populate the route's template parameters.
+If you need the full path of a DataRoute, such as for generating a link or redirect, you will still use the `fullPath` method, but it will require an instance of your route's data class.
 
 For example, given the following route:
 
@@ -306,24 +310,17 @@ class MyRoute extends DataRoute<MyRouteData> {
   @override
   String get path => joinSegments(['user', RouteParams.userId.prefixed]);
 }
+```
 
-...
+The `fullPath` method will require an instance of the `MyRouteData` class.
 
-// This will not work!
-// The return value will be `/user/:userId`
+```dart
 redirect: (context, state) {
-  return const MyRoute().fullPathTemplate;
-}
-
-...
-
-// Instead, use `populatedWith`, like so:
-redirect: (context, state) {
-  return const MyRoute().populatedWith(MyRouteData(userId: '123'));
+  return const MyRoute().fullPath(MyRouteData(userId: '123'));
 }
 ```
 
-This will return the fully-populated path String: `/user/123`.
+This will return the full, populated path: `/user/123`.
 
 ### Navigation
 

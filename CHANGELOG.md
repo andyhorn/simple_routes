@@ -2,6 +2,7 @@
 
 - Improve migration guide
 - Improve README
+- Hide the full path template and expose a `fullPath` method on both route classes
 
 ## 1.0.0-beta.6
 
