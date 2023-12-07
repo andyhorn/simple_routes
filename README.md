@@ -1,6 +1,6 @@
 # Simple Routes
 
-Simple declarative route and navigation management for [go_router](https://pub.dev/packages/go_router).
+Simple, declarative route and navigation management for [go_router](https://pub.dev/packages/go_router).
 
 ## Stable release
 
