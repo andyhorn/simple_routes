@@ -1,3 +1,9 @@
+## 1.0.0-beta.9
+
+- Rename `joinSegments` to `fromSegments`
+- Only use the duplicate segment detection when in debug mode
+- Improve the duplicate segment error message
+
 ## 1.0.0-beta.8
 
 - Hide the full path template and expose a `fullPath` method on both route classes

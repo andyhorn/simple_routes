@@ -67,18 +67,18 @@ No need to add the leading slash for a root-level route; if your route is not a 
 
 ##### Route path segments
 
-If your route contains more than one _path segment_, build your path using the `joinSegments` method.
+If your route contains more than one _path segment_, build your path using the `fromSegments` method.
 
 ```dart
 class UserProfileRoute extends SimpleRoute {
   const UserProfileRoute();
 
   @override
-  String get path => joinSegments(['user', 'profile']);
+  String get path => fromSegments(['user', 'profile']);
 }
 ```
 
-This method provides protection against creating a path with duplicate segments.
+When in debug mode (or in tests), this method will check for duplicate segments and throw an assertion error if any are found.
 
 <a id="data-routes"></a>
 
@@ -186,11 +186,10 @@ class UserRoute extends DataRoute<UserRouteData> {
   // Use the `prefixed` property to automatically prefix the
   // enum value name with a colon (e.g. ":userId").
   //
-  // To define a path with multiple segments, use the `joinSegments` 
-  // method to join the segments with a forward-slash. This method also 
-  // gives you protection against creating a path with duplicate segments.
+  // To define a path with multiple segments, use the `fromSegments` 
+  // method to join the segments with a forward-slash.
   @override
-  String get path => joinSegments(['user', RouteParams.userId.prefixed]);
+  String get path => fromSegments(['user', RouteParams.userId.prefixed]);
 }
 ```
 
@@ -308,7 +307,7 @@ class MyRoute extends DataRoute<MyRouteData> {
   const MyRoute();
 
   @override
-  String get path => joinSegments(['user', RouteParams.userId.prefixed]);
+  String get path => fromSegments(['user', RouteParams.userId.prefixed]);
 }
 ```
 

@@ -6,7 +6,7 @@ This document is a guide for migrating between major package versions.
 
 This section will guide you through the breaking changes introduced in the 1.0.0 release and how to migrate your code.
 
-### Full path and populated path
+### Full path
 
 The `fullPath` property has been converted to a method.
 
@@ -224,9 +224,9 @@ RouteParams.myParam.prefixed,
 
 #### `join`
 
-The free-floating `join` method, which joined strings with a forward slash (`/`), has been replaced with a `joinSegments` method on the base route class.
+The free-floating `join` method, which joined strings with a forward slash (`/`), has been replaced with a `fromSegments` method on the base route class.
 
-This was done to avoid leaking the method into the global namespace and to clarify its purpose and behavior.
+This was done to avoid leaking the method into the global namespace.
 
 From this:
 
@@ -239,7 +239,7 @@ To this:
 
 ```dart
 @override
-String get path => joinSegments(['path', 'to', 'join']),
+String get path => fromSegments(['path', 'to', 'join']),
 ```
 
 #### `setParam`
