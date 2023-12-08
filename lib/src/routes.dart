@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:simple_routes/simple_routes.dart';
@@ -14,17 +15,22 @@ abstract class BaseRoute {
   ///
   /// e.g. ['auth', 'register', 'verify-email'] -> '/auth/register/verify-email'
   ///
-  /// This method will throw an assertion error if any segments are duplicated.
-  String joinSegments(List<String> segments) {
-    final duplicates = segments.where((s1) {
-      return segments.where((s2) => s1 == s2).length > 1;
-    }).toList();
+  /// In debug mode, an assertion error will be thrown if any duplicate
+  /// segments are detected.
+  String fromSegments(List<String> segments) {
+    if (kDebugMode) {
+      final duplicates = segments.where((s1) {
+        return segments.where((s2) => s1 == s2).length > 1;
+      }).toList();
 
-    assert(
-      duplicates.isEmpty,
-      'Error in $runtimeType - Segments should be unique.'
-      ' Found duplicates of: ${Set.from(duplicates)}',
-    );
+      assert(
+        duplicates.isEmpty,
+        '[SimpleRoutes] WARNING: Path segments should be unique.\n'
+        '$runtimeType: Duplicates of ${[
+          ...Set.from(duplicates).map((x) => '"$x"'),
+        ].join(', ')}',
+      );
+    }
 
     return segments.join('/');
   }
@@ -73,7 +79,7 @@ abstract class BaseRoute {
 
   String get _fullPathTemplate {
     var path = this is ChildRoute
-        ? joinSegments([
+        ? fromSegments([
             (this as ChildRoute).parent._fullPathTemplate,
             this.path,
           ])

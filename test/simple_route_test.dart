@@ -19,7 +19,7 @@ void main() {
         throwsA(isA<AssertionError>().having(
           (e) => e.message,
           'message',
-          'Error in _DuplicateTestRoute - Segments should be unique. Found duplicates of: {test, :param}',
+          '[SimpleRoutes] WARNING: Path segments should be unique.\n_DuplicateTestRoute: Duplicates of "test", ":param"',
         )),
       );
     });
@@ -438,7 +438,7 @@ class _DuplicateTestRoute extends SimpleRoute {
   const _DuplicateTestRoute();
 
   @override
-  String get path => joinSegments([
+  String get path => fromSegments([
         'test',
         'test',
         _TestRouteParams.param.prefixed,

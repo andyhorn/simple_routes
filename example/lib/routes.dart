@@ -67,7 +67,7 @@ class ProfileRoute extends DataRoute<ProfileRouteData> {
   // You can craft this template yourself, but the extension methods are
   // here to help.
   @override
-  String get path => joinSegments([
+  String get path => fromSegments([
         'profile',
         RouteParams.userId.prefixed,
       ]);
