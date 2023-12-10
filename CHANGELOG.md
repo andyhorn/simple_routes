@@ -1,3 +1,10 @@
+# CHANGELOG
+
+## 1.0.0
+
+- First stable release!
+- No changes from 1.0.0-beta.9 except to move from beta to stable
+
 ## 1.0.0-beta.9
 
 - Rename `joinSegments` to `fromSegments`
