@@ -404,6 +404,65 @@ void main() {
       expect(isActive, isTrue);
     });
   });
+
+  group('StatefulShellRoutes', () {
+    final rootKey = GlobalKey<NavigatorState>();
+    final shellKey = GlobalKey<NavigatorState>();
+
+    testWidgets('Navigates', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp.router(
+          routerConfig: GoRouter(
+            navigatorKey: rootKey,
+            initialLocation: const _TestRootRoute().fullPath(),
+            routes: [
+              GoRoute(
+                path: const _TestRootRoute().goPath,
+                builder: (context, state) {
+                  return Scaffold(
+                    body: Column(
+                      children: [
+                        const Text('Root Route'),
+                        ElevatedButton(
+                          onPressed: () => const _TestRoute().go(context),
+                          child: const Text('Click me'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              StatefulShellRoute.indexedStack(
+                builder: (context, state, shell) {
+                  return shell;
+                },
+                branches: [
+                  StatefulShellBranch(
+                    navigatorKey: shellKey,
+                    routes: [
+                      GoRoute(
+                        path: const _TestRoute().goPath,
+                        builder: (context, state) => const Scaffold(
+                          body: Text('Test Route'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('Root Route'), findsOneWidget);
+
+      await tester.tap(find.text('Click me'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Test Route'), findsOneWidget);
+    });
+  });
 }
 
 enum _TestRouteParams {
