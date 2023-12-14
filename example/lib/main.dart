@@ -8,21 +8,21 @@ import 'package:simple_routes/simple_routes.dart';
 
 // Define your root-level routes and sub-routes in the same way.
 final router = GoRouter(
+  debugLogDiagnostics: true,
   routes: [
     GoRoute(
-      // Use the route class' [path] property to define this segment of the
-      // route path.
-      path: const RootRoute().path,
+      // Use the [goPath] property to define the route's path.
+      path: const RootRoute().goPath,
       builder: (context, state) => const RootPage(),
       routes: [
         GoRoute(
-          path: const DashboardRoute().path,
+          path: const DashboardRoute().goPath,
           builder: (context, state) => const DashboardPage(),
         ),
       ],
     ),
     GoRoute(
-      path: const ProfileRoute().path,
+      path: const ProfileRoute().goPath,
       redirect: (context, state) {
         // Use the GoRouterState extension methods to validate the route data.
         if (state.getParam(RouteParams.userId) == null) {
@@ -42,7 +42,7 @@ final router = GoRouter(
       },
       routes: [
         GoRoute(
-          path: const ProfileEditRoute().path,
+          path: const ProfileEditRoute().goPath,
           builder: (context, state) => ProfileEditPage(
             filter: ProfileEditRouteData.fromState(state).filter,
           ),
