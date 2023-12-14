@@ -43,8 +43,6 @@ abstract class BaseRoute {
   /// ),
   /// ```
   String get goPath {
-    var path = this.path;
-
     if (this is ChildRoute) {
       return path.startsWith('/') ? path.substring(1) : path;
     } else {
@@ -78,18 +76,15 @@ abstract class BaseRoute {
   }
 
   String get _fullPathTemplate {
-    var path = this is ChildRoute
-        ? fromSegments([
-            (this as ChildRoute).parent._fullPathTemplate,
-            this.path,
-          ])
-        : this.path;
-
-    if (!path.startsWith('/')) {
-      path = '/$path';
+    if (this is! ChildRoute) {
+      return path.startsWith('/') ? path : '/$path';
     }
 
-    return path;
+    final parentRoute = (this as ChildRoute).parent._fullPathTemplate;
+    final childRoute = path.startsWith('/') ? path.substring(1) : path;
+    final fullPathTemplate = [parentRoute, childRoute].join('/');
+
+    return fullPathTemplate.replaceAll('//', '/');
   }
 }
 
