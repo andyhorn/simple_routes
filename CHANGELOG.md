@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 1.1.0
+
+- Fix typos in README and example project
+- Fix a bug in the `fullPath` method causing duplicate leading slashes in some scenarios
+- Add support for returning values when using the `push` method
+- Move `mocktail` to the dev dependencies
+- Add topics to the `pubspec.yaml` for `pub.dev`
+- Upgrade fvm Flutter version and add entry to .gitignore
+
 ## 1.0.0
 
 - First stable release!
