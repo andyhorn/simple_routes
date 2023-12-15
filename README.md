@@ -325,6 +325,10 @@ This will return the full, populated path: `/user/123`.
 
 Once your routes are defined and your router is configured, you can navigate between your routes using the `go` and `push` methods.
 
+#### Go
+
+Just like with GoRouter, the `go` method will navigate to a route, replacing the current route.
+
 ```dart
 onPressed: () => const HomeRoute().go(context),
 ```
@@ -342,7 +346,17 @@ onPressed: () => const UserRoute().go(
 ),
 ```
 
-**Note**: The `push` method signatures are identical to their corresponding SimpleRoute/DataRoute `go` methods.
+#### Push
+
+The `push` method will navigate to a route, pushing it onto the navigation stack. The method arguments are identical to their `go` counterparts, but the `push` method allows for an optional value to be awaited and returned.
+
+```dart
+onPressed: () async {
+  final result = await const HomeRoute().push(context);
+  debugPrint('The result is: $result');
+},
+```
+
 
 ## Advanced usage
 

@@ -479,6 +479,60 @@ void main() {
       expect(find.text('Test Route'), findsOneWidget);
     });
   });
+
+  group('Push and Return Values', () {
+    testWidgets('Push allows returned values', (tester) async {
+      String? returnValue;
+
+      await tester.pumpWidget(
+        MaterialApp.router(
+          routerConfig: GoRouter(
+            initialLocation: const _TestRoute().fullPath(),
+            routes: [
+              GoRoute(
+                path: const _TestRoute().goPath,
+                builder: (context, state) {
+                  return Scaffold(
+                    body: ElevatedButton(
+                      onPressed: () async {
+                        returnValue = await const _TestChildRoute().push(
+                          context,
+                        );
+                      },
+                      child: const Text('Click me first!'),
+                    ),
+                  );
+                },
+                routes: [
+                  GoRoute(
+                    path: const _TestChildRoute().goPath,
+                    builder: (context, state) {
+                      return Scaffold(
+                        body: ElevatedButton(
+                          onPressed: () => Navigator.of(context).pop(
+                            'hello world!',
+                          ),
+                          child: const Text('Click me second!'),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Click me first!'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Click me second!'));
+      await tester.pumpAndSettle();
+
+      expect(returnValue, 'hello world!');
+    });
+  });
 }
 
 enum _TestRouteParams {

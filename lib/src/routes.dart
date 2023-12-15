@@ -86,8 +86,8 @@ abstract class BaseRoute {
   }
 
   static String _ensureLeadingSlash(String path) {
-      return path.startsWith('/') ? path : '/$path';
-    }
+    return path.startsWith('/') ? path : '/$path';
+  }
 
   static String _ensureNoLeadingSlash(String path) {
     return path.startsWith('/') ? path.substring(1) : path;
@@ -123,8 +123,8 @@ abstract class SimpleRoute extends BaseRoute {
   }
 
   /// Push this route onto the stack.
-  void push(BuildContext context) {
-    GoRouter.of(context).push(_fullPathTemplate);
+  Future<T?> push<T extends Object?>(BuildContext context) {
+    return GoRouter.of(context).push(_fullPathTemplate);
   }
 
   /// Get the full path for this route.
@@ -160,11 +160,11 @@ abstract class DataRoute<Data extends SimpleRouteData> extends BaseRoute {
   }
 
   /// Push this route onto the stack using the supplied [data].
-  void push(
+  Future<T?> push<T extends Object?>(
     BuildContext context, {
     required Data data,
   }) {
-    GoRouter.of(context).push(fullPath(data), extra: data.extra);
+    return GoRouter.of(context).push(fullPath(data), extra: data.extra);
   }
 
   /// Generate the full, populated path for this route using the supplied [data].
