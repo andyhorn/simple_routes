@@ -489,6 +489,8 @@ class _TestRootRoute extends SimpleRoute {
   const _TestRootRoute();
 
   @override
+  final String path = '';
+}
 
 class _TestSlashRoute extends SimpleRoute {
   const _TestSlashRoute();
@@ -512,17 +514,17 @@ class _TestRoute extends SimpleRoute {
   const _TestRoute();
 
   @override
-  String get path => 'test';
+  final String path = 'test';
 }
 
 class _TestChildRoute extends SimpleRoute implements ChildRoute<_TestRoute> {
   const _TestChildRoute();
 
   @override
-  _TestRoute get parent => const _TestRoute();
+  final _TestRoute parent = const _TestRoute();
 
   @override
-  String get path => 'child';
+  final String path = 'child';
 }
 
 class _DuplicateTestRoute extends SimpleRoute {

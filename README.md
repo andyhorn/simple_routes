@@ -57,7 +57,7 @@ class ProfileRoute extends SimpleRoute {
   const ProfileRoute();
 
   @override
-  String get path => 'profile';
+  final String path = 'profile';
 }
 ```
 
@@ -66,6 +66,8 @@ No need to add the leading slash for a root-level route; if your route is not a 
 ##### Route path segments
 
 If your route contains more than one _path segment_, build your path using the `fromSegments` method.
+
+Note that, if your route uses this helper method, it will need to be declared as a getter, rather than a property.
 
 ```dart
 class UserProfileRoute extends SimpleRoute {
@@ -206,12 +208,12 @@ class UserDetailsRoute extends DataRoute<UserRouteData> implements ChildRoute<Us
   // Define the route path segment. No need to worry about 
   // leading slashes - they will be added automatically.
   @override
-  String get path => 'details';
+  final String path = 'details';
 
   // Define the parent route. This will be used to 
   // construct the full path for this route.
   @override
-  UserRoute get parent => const UserRoute();
+  final UserRoute parent = const UserRoute();
 }
 ```
 

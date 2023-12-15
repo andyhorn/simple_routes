@@ -104,14 +104,14 @@ abstract class BaseRoute {
 
 /// A route that contains no parameters.
 ///
-/// Override the `path` getter to declare the path segment for this route.
+/// Override the `path` property to declare the path segment for this route.
 ///
 /// ```dart
 /// class MyRoute extends SimpleRoute {
 ///   const MyRoute();
 ///
 ///   @override
-///   String get path => 'my-route';
+///   final String path = 'my-route';
 /// }
 /// ```
 abstract class SimpleRoute extends BaseRoute {
