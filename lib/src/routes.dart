@@ -44,9 +44,9 @@ abstract class BaseRoute {
   /// ```
   String get goPath {
     if (this is ChildRoute) {
-      return path.startsWith('/') ? path.substring(1) : path;
+      return _ensureNoLeadingSlash(path);
     } else {
-      return path.startsWith('/') ? path : '/$path';
+      return _ensureLeadingSlash(path);
     }
   }
 
@@ -77,14 +77,28 @@ abstract class BaseRoute {
 
   String get _fullPathTemplate {
     if (this is! ChildRoute) {
+      return _ensureLeadingSlash(path);
+    }
+
+    final parentPath = _getParentPath();
+    final normalized = _ensureLeadingSlash(parentPath);
+    return _join(normalized, path);
+  }
+
+  static String _ensureLeadingSlash(String path) {
       return path.startsWith('/') ? path : '/$path';
     }
 
-    final parentRoute = (this as ChildRoute).parent._fullPathTemplate;
-    final childRoute = path.startsWith('/') ? path.substring(1) : path;
-    final fullPathTemplate = [parentRoute, childRoute].join('/');
+  static String _ensureNoLeadingSlash(String path) {
+    return path.startsWith('/') ? path.substring(1) : path;
+  }
 
-    return fullPathTemplate.replaceAll('//', '/');
+  static String _join(String parent, String path) {
+    return '$parent/$path'.replaceAll('//', '/');
+  }
+
+  String _getParentPath() {
+    return (this as ChildRoute).parent._fullPathTemplate;
   }
 }
 

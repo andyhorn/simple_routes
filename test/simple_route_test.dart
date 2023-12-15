@@ -102,6 +102,22 @@ void main() {
     });
   });
 
+  group('Slash route', () {
+    group('#fullPath', () {
+      test('returns slash', () {
+        expect(const _TestSlashRoute().fullPath(), '/');
+      });
+    });
+  });
+
+  group('Slash child route', () {
+    group('#fullPath', () {
+      test('returns proper path', () {
+        expect(const _TestSlashChildRoute().fullPath(), '/child');
+      });
+    });
+  });
+
   group('Child route', () {
     group('#fullPath', () {
       test('joins with parents', () {
@@ -473,7 +489,23 @@ class _TestRootRoute extends SimpleRoute {
   const _TestRootRoute();
 
   @override
-  String get path => '';
+
+class _TestSlashRoute extends SimpleRoute {
+  const _TestSlashRoute();
+
+  @override
+  final String path = '/';
+}
+
+class _TestSlashChildRoute extends SimpleRoute
+    implements ChildRoute<_TestSlashRoute> {
+  const _TestSlashChildRoute();
+
+  @override
+  final _TestSlashRoute parent = const _TestSlashRoute();
+
+  @override
+  final String path = 'child';
 }
 
 class _TestRoute extends SimpleRoute {
