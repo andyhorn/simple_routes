@@ -19,6 +19,6 @@ dev_dependencies:
   mocktail: ^1.0.1
 
 topics:
-  - go_router
+  - go-router
   - navigation
   - routing
