@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.1.2
+
+- Update go_router
+
 ## 1.1.1
 
 - Fix a typo in the "go-router" topic in the pubspec file
