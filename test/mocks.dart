@@ -21,10 +21,10 @@ class MockGoRouter extends Mock implements GoRouter {
 
 class MockGoRouterProvider extends StatelessWidget {
   const MockGoRouterProvider({
+    super.key,
     required this.goRouter,
     required this.child,
-    Key? key,
-  }) : super(key: key);
+  });
 
   final GoRouter goRouter;
   final Widget child;
