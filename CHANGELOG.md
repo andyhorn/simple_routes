@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.1.3
+
+- Improvements made to the README
+
 ## 1.1.2
 
 - Update go_router
