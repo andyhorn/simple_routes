@@ -8,20 +8,21 @@ See the [Migration Guide](doc/migration_guide.md) for more information on migrat
 
 ## Features
 
-Simple Routes is a companion package to [GoRouter](https://pub.dev/packages/go_router) that provides a simple, type-safe way to define your app's routes and navigate between them.
+`simple_routes` is a companion package to [GoRouter](https://pub.dev/packages/go_router) that provides a simple, declarative way to define your app's routes.
 
-- Eliminate "magic strings" and the bugs that come with them
-- Simplify route definitions and navigation invocation
-- Enforce type-safe routing requirements
-- Inject and extract path parameters, query parameters, and "extra" route data
+By using `simple_routes`, you can eliminate magic strings, simplify your route definitions and navigation, and enforce type-safe routing requirements.
 
 ## Table of Contents
   * [Getting started](#getting-started)
   * [Usage](#usage)
+    * [TL;DR](#tldr)
     * [Route definitions](#route-definitions)
       * [Basic routing with SimpleRoutes](#basic-routes)
         * [Route path segments](#route-path-segments)
       * [Path parameters and DataRoutes](#data-routes)
+        * [Parameters](#parameters)
+        * [Query](#query)
+        * [Extra](#extra)
       * [Child routes](#child-routes)
     * [GoRouter Configuration](#gorouter-configuration)
       * [Route redirection with DataRoute](#route-redirection-with-dataroute)
@@ -38,11 +39,64 @@ This package is intended to be used with the [GoRouter](https://pub.dev/packages
 
 ```
 dependencies:
-  go_router: ^12.0.0
-  simple_routes: [latest-version]
+  go_router: [latest]
+  simple_routes: [latest]
 ```
 
 ## Usage
+
+### TL;DR
+
+Define your routes as children of `SimpleRoute`, then use `.go` or `.push` to navigate.
+
+```dart
+class HomeRoute extends SimpleRoute {
+  const HomeRoute();
+
+  @override
+  final String path = 'home';
+}
+
+...
+
+const HomeRoute().go(context);
+```
+
+For routes with parameters, extend the `DataRoute` class and define an accompanying data class. Then, use the `.go` or `.push` method to navigate, providing an instance of your data class.
+
+```dart
+// Define your route
+class UserRoute extends DataRoute<UserRouteData> {
+  const UserRoute();
+
+  @override
+  String get path => fromSegments(['user', RouteParams.userId.prefixed]);
+}
+
+// Define the route data
+class UserRouteData extends SimpleRouteData {
+  const UserRouteData({
+    required this.userId,
+  });
+
+  final String userId;
+
+  @override
+  Map<Enum, String> get parameters => {
+    RouteParams.userId: userId,
+  };
+}
+
+...
+
+// Navigate to the route using the data class
+const UserRoute().go(
+  context,
+  data: UserRouteData(
+    userId: '123',
+  ),
+);
+```
 
 ### Route definitions
 
@@ -67,8 +121,6 @@ No need to add the leading slash for a root-level route; if your route is not a 
 
 If your route contains more than one _path segment_, build your path using the `fromSegments` method.
 
-Note that, if your route uses this helper method, it will need to be declared as a getter, rather than a property.
-
 ```dart
 class UserProfileRoute extends SimpleRoute {
   const UserProfileRoute();
@@ -86,92 +138,37 @@ When in debug mode (or in tests), this method will check for duplicate segments 
 
 For routes that require parameters, extend `DataRoute` instead. This will allow you to define a data class that will be used to pass data to your route.
 
-For example, let's create a class that we want passed between routes using GoRouter's "extra" property.
+For example, say you have a route that requires a user ID. First, define an enum value that represents the "userId" parameter.
 
 ```dart
-// Some class or object that you want to pass with your route.
-class MyExtraData {
-  const MyExtraData(this.someValue);
-  final String someValue;
-}
-```
-
-Next, we'll need to define our route parameters in an enum.
-
-```dart
-// Define any route parameters and query parameters as enum values.
-// These will be used to match path parameters in the template and 
-// add query parameters to the URL.
 enum RouteParams {
   userId,
-  query,
 }
 ```
 
-Next, let's define our route data class.
+Next, define your route data class, mapping the `userId` value to the enum value defined earlier.
 
 ```dart
-// Define a data class that extends SimpleRouteData
-//
-// This class should carry any data that your route requires, 
-// including path parameters, query parameters, and
-// "extra" data that you want to pass to your route.
 class UserRouteData extends SimpleRouteData {
   const UserRouteData({
     required this.userId,
-    required this.extraData,
-    this.queryValue,
   });
 
-  // For example, a "user ID" parameter for the path
-  // e.g. /user/:userId
+  // Tip: Define a factory constructor to easily create an instance of your data class
+  factory UserRouteData.fromState(GoRouterState state) {
+    final userId = state.getParam(RouteParams.userId);
+
+    return UserRouteData(
+      userId: userId,
+    );
+  }
+
   final String userId;
 
-  // Or a query parameter
-  final String? queryValue;
-
-  // Or any other data that you want discretely passed to your route.
-  final MyExtraData extraData;
-
-  // Override the `parameters` property with a map of your
-  // route's path parameters (identified by the Enum). 
   @override
   Map<Enum, String> get parameters => {
     RouteParams.userId: userId,
   };
-
-  // Override the `query` property with a map of your route's 
-  // query parameters. These will be automatically URL encoded
-  // and appended to the end of your path.
-  //
-  // The query map allows null values, so you don't have to worry 
-  // about whether or not to include a query parameter.
-  @override
-  Map<Enum, String?> get query => {
-    RouteParams.query: queryValue,
-  };
-
-  // Override the `extra` property with any extra data that you 
-  // want passed along with your route.
-  @override
-  MyExtraData get extra => extraData;
-
-  // Use a factory constructor to simplify extracting data from 
-  // the GoRouterState in a redirect or builder callback.
-  factory UserRouteData.fromState(GoRouterState state) {
-
-    // Use the extension methods to simplify extracting 
-    // data from the GoRouterState.
-    final userId = state.getParam(RouteParams.userId)!;
-    final queryValue = state.getQuery(RouteParams.query);
-    final extraData = state.getExtra<MyExtraData>()!;
-
-    return UserRouteData(
-      userId: userId,
-      queryValue: queryValue,
-      extraData: extraData,
-    );
-  }
 }
 ```
 
@@ -195,11 +192,20 @@ class UserRoute extends DataRoute<UserRouteData> {
 
 Because this route is a "data route," we must provide it with an instance of its route data class when navigating. More on this in the [Navigation](#navigation) section.
 
-Please note that the `parameters`, `query`, and `extra` overrides are entirely optional, depending on your use-case.
+Please note that the `Map<Enum, String> parameters`, `Map<Enum, String?> query`, and `Object? extra` overrides are entirely optional, depending on your needs.
+
+##### Parameters
+Any values supplied in the `parameters` map will be mapped to the route template. For example, the `userId` value will be mapped to the `:userId` segment in the route path.
+
+##### Query
+Any values supplied in the `query` map will be added to the route as URL-encoded query parameters. For example, a `query` value of `{'search': 'some query'}` will be added to the route as `?search=some%20query`.
+
+##### Extra
+The `extra` property is a catch-all for any additional data you may need to pass to your route. This can be any object and will be added to the `GoRouterState` object for the route.
 
 ### Child routes
 
-To define a route that is a child of another route, implement the `ChildRoute` interface, providing the parent route type and overriding the `parent` property.
+To define a route that is a child of another route, implement the `ChildRoute` interface.
 
 ```dart
 class UserDetailsRoute extends DataRoute<UserRouteData> implements ChildRoute<UserRoute> {
@@ -216,6 +222,8 @@ class UserDetailsRoute extends DataRoute<UserRouteData> implements ChildRoute<Us
   final UserRoute parent = const UserRoute();
 }
 ```
+
+In the example above, the generated route will be `/user/:userId/details`.
 
 **Note**: Routes that are children of a `DataRoute` must also be a `DataRoute` themselves, even if they don't require any data. In cases like these, you can re-use the parent's data class and factory constructor.
 
@@ -273,8 +281,6 @@ GoRouter(
 
         return UserScreen(
           userId: routeData.userId,
-          query: routeData.queryValue,
-          extra: routeData.extraData,
         );
       },
       routes: [
@@ -298,7 +304,7 @@ GoRouter(
 
 #### DataRoute generation
 
-If you need the full path of a DataRoute, such as for generating a link or redirect, you will still use the `fullPath` method, but it will require an instance of your route's data class.
+If you need the full path of a DataRoute, such as for generating a link or redirect, the `fullPath` method will require an instance of your route's data class.
 
 For example, given the following route:
 
@@ -340,8 +346,6 @@ onPressed: () => const UserRoute().go(
   context,
   data: UserRouteData(
     userId: '123',
-    queryValue: 'some query value',
-    extraData: MyExtraData('some extra data'),
   ),
 ),
 ```
