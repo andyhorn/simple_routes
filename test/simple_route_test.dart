@@ -155,7 +155,7 @@ void main() {
               GoRoute(
                 path: const _TestRoute().goPath,
                 builder: (context, state) {
-                  isCurrentRoute = const _TestRoute().isCurrentRoute(context);
+                  isCurrentRoute = const _TestRoute().isCurrentRoute(state);
                   return const Scaffold(
                     body: Text('Test Route'),
                   );
@@ -194,7 +194,7 @@ void main() {
               GoRoute(
                 path: '/other-page',
                 builder: (context, state) {
-                  isCurrentRoute = const _TestRoute().isCurrentRoute(context);
+                  isCurrentRoute = const _TestRoute().isCurrentRoute(state);
                   return const Scaffold(
                     body: Text('Test Route'),
                   );
@@ -237,7 +237,7 @@ void main() {
                     GoRoute(
                       path: const _TestChildRoute().goPath,
                       builder: (context, state) {
-                        isParent = const _TestRoute().isParentRoute(context);
+                        isParent = const _TestRoute().isParentRoute(state);
                         return const Scaffold(
                           body: Text('Test Route'),
                         );
@@ -281,7 +281,7 @@ void main() {
                 GoRoute(
                   path: '/other-path',
                   builder: (context, state) {
-                    isParent = const _TestRoute().isParentRoute(context);
+                    isParent = const _TestRoute().isParentRoute(state);
                     return const Scaffold(
                       body: Text('Test Route'),
                     );
@@ -323,7 +323,7 @@ void main() {
               GoRoute(
                 path: const _TestRoute().goPath,
                 builder: (context, state) {
-                  isActive = const _TestRoute().isActive(context);
+                  isActive = const _TestRoute().isActive(state);
                   return const Scaffold(
                     body: Text('Test Route'),
                   );
@@ -362,7 +362,7 @@ void main() {
               GoRoute(
                 path: '/other-page',
                 builder: (context, state) {
-                  isActive = const _TestRoute().isCurrentRoute(context);
+                  isActive = const _TestRoute().isCurrentRoute(state);
                   return const Scaffold(
                     body: Text('Test Route'),
                   );
@@ -401,7 +401,7 @@ void main() {
                   GoRoute(
                     path: const _TestChildRoute().goPath,
                     builder: (context, state) {
-                      isActive = const _TestRoute().isActive(context);
+                      isActive = const _TestRoute().isActive(state);
                       return const Scaffold(
                         body: Text('Test Route'),
                       );

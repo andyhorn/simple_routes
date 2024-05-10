@@ -53,8 +53,8 @@ abstract class BaseRoute {
   /// Determine if this route is an exact match for the current location.
   ///
   /// This is useful for determining if a route is active.
-  bool isCurrentRoute(BuildContext context) {
-    return GoRouterState.of(context).fullPath == _fullPathTemplate;
+  bool isCurrentRoute(GoRouterState state) {
+    return state.fullPath == _fullPathTemplate;
   }
 
   /// Determine if this route is a parent of the current route.
@@ -64,15 +64,19 @@ abstract class BaseRoute {
   /// true.
   ///
   /// This is useful for determining if a parent route is active.
-  bool isParentRoute(BuildContext context) {
-    final location = GoRouterState.of(context).fullPath;
-    return location != _fullPathTemplate &&
-        (location?.startsWith(_fullPathTemplate) ?? false);
+  bool isParentRoute(GoRouterState state) {
+    final location = state.fullPath;
+
+    if (location == null || location == _fullPathTemplate) {
+      return false;
+    }
+
+    return location.startsWith(_fullPathTemplate);
   }
 
   /// Determine if this route is active in any way.
-  bool isActive(BuildContext context) {
-    return isCurrentRoute(context) || isParentRoute(context);
+  bool isActive(GoRouterState state) {
+    return isCurrentRoute(state) || isParentRoute(state);
   }
 
   String get _fullPathTemplate {
