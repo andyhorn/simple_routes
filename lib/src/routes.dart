@@ -148,7 +148,7 @@ abstract class SimpleRoute extends BaseRoute {
 ///   const MyRoute();
 ///
 ///   @override
-///   String get path => joinSegments(['my-route', RouteParams.id.prefixed]);
+///   String get path => joinSegments(['my-route', RouteParams.id.template]);
 /// }
 /// ```
 abstract class SimpleDataRoute<Data extends SimpleRouteData> extends BaseRoute {
