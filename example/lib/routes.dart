@@ -53,7 +53,7 @@ class ProfileRouteData extends SimpleRouteData {
 }
 
 // Define your route as a child of [DataRoute].
-class ProfileRoute extends DataRoute<ProfileRouteData> {
+class ProfileRoute extends SimpleDataRoute<ProfileRouteData> {
   const ProfileRoute();
 
   // Override the [path] getter to define the path of this route.
@@ -77,7 +77,7 @@ class ProfileRoute extends DataRoute<ProfileRouteData> {
 
 // Define your route as a child of [DataRoute] with its appropriate data type
 // and implement the [ChildRoute] interface.
-class ProfileEditRoute extends DataRoute<ProfileRouteData>
+class ProfileEditRoute extends SimpleDataRoute<ProfileRouteData>
     implements ChildRoute<ProfileRoute> {
   const ProfileEditRoute();
 

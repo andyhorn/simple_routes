@@ -9,7 +9,7 @@ import 'mocks.dart';
 void main() {
   late GoRouter router;
 
-  group('$DataRoute', () {
+  group('$SimpleDataRoute', () {
     setUp(() {
       router = MockGoRouter();
     });
@@ -132,7 +132,7 @@ class _TestRouteData extends SimpleRouteData {
   Object? get extra => testData;
 }
 
-class _TestRoute extends DataRoute<_TestRouteData> {
+class _TestRoute extends SimpleDataRoute<_TestRouteData> {
   const _TestRoute();
 
   @override

@@ -144,15 +144,15 @@ abstract class SimpleRoute extends BaseRoute {
 /// `:id` path parameter (declared by the `RouteParams.id` enum value).
 ///
 /// ```dart
-/// class MyRoute extends DataRoute<MyRouteData> {
+/// class MyRoute extends SimpleDataRoute<MyRouteData> {
 ///   const MyRoute();
 ///
 ///   @override
 ///   String get path => joinSegments(['my-route', RouteParams.id.prefixed]);
 /// }
 /// ```
-abstract class DataRoute<Data extends SimpleRouteData> extends BaseRoute {
-  const DataRoute();
+abstract class SimpleDataRoute<Data extends SimpleRouteData> extends BaseRoute {
+  const SimpleDataRoute();
 
   static final _queryRegex = RegExp(r'\?.+$');
 
