@@ -47,8 +47,8 @@ class ProfileRouteData extends SimpleRouteData {
   // Override the [parameters] getter to define the path parameters for this
   // route, using the enum you defined above.
   @override
-  Map<Enum, String> get parameters => {
-        RouteParams.userId: userId,
+  Map<String, String> get parameters => {
+        RouteParams.userId.name: userId,
       };
 }
 
@@ -110,7 +110,7 @@ class ProfileEditRouteData extends ProfileRouteData {
   // Provide an implementation of the [query] getter to define the
   // query parameters for this route.
   @override
-  Map<Enum, String?> get query => {
-        RouteParams.filter: filter,
+  Map<String, String?> get query => {
+        RouteParams.filter.name: filter,
       };
 }
