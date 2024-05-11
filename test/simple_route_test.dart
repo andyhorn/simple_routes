@@ -588,7 +588,7 @@ class _DuplicateTestRoute extends SimpleRoute {
   String get path => fromSegments([
         'test',
         'test',
-        _TestRouteParams.param.prefixed,
-        _TestRouteParams.param.prefixed,
+        _TestRouteParams.param.template,
+        _TestRouteParams.param.template,
       ]);
 }

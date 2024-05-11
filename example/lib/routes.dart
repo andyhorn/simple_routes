@@ -69,7 +69,7 @@ class ProfileRoute extends SimpleDataRoute<ProfileRouteData> {
   @override
   String get path => fromSegments([
         'profile',
-        RouteParams.userId.prefixed,
+        RouteParams.userId.template,
       ]);
 }
 
