@@ -66,11 +66,11 @@ For routes with parameters, extend the `DataRoute` class and define an accompany
 
 ```dart
 // Define your route
-class UserRoute extends DataRoute<UserRouteData> {
+class UserRoute extends SimpleDataRoute<UserRouteData> {
   const UserRoute();
 
   @override
-  String get path => fromSegments(['user', RouteParams.userId.prefixed]);
+  String get path => fromSegments(['user', RouteParams.userId.template]);
 }
 
 // Define the route data
@@ -142,7 +142,7 @@ For routes that require parameters, extend `SimpleDataRoute` instead. This will 
 
 For example, say you have a route that requires a user ID. First, define an enum value that represents the "userId" parameter.
 
-While you can define these parameters using a String with a colon (`:`) prefix, it is recommended to define them as enum values and use the `.prefixed` and `.name` getters.
+While you can define these parameters using a String with a colon (`:`) prefix, it is recommended to define them as enum values and use the `.template` and `.name` getters.
 
 ```dart
 enum RouteParams {
@@ -178,7 +178,7 @@ class UserRouteData extends SimpleRouteData {
 }
 ```
 
-Finally, we can define our route, extending the `DataRoute` class.
+Finally, we can define our route, extending the `SimpleDataRoute` class.
 
 ```dart
 // Define the route as a SimpleDataRoute, typed for your data class.
@@ -186,14 +186,14 @@ class UserRoute extends SimpleDataRoute<UserRouteData> {
   const UserRoute();
 
   // Define the route path using the appropriate String or enum value.
-  // Use the `prefixed` property to automatically prefix the
+  // Use the `template` property to automatically prefix the
   // enum value name with a colon (e.g. ":userId").
   //
   // To define a path with multiple segments, use the `fromSegments` 
   // method to join the segments with a forward-slash. This helper method
   // provides additional protections during development.
   @override
-  String get path => fromSegments(['user', RouteParams.userId.prefixed]);
+  String get path => fromSegments(['user', RouteParams.userId.template]);
 }
 ```
 
@@ -215,7 +215,7 @@ The `extra` property is a catch-all for any additional data you may need to pass
 To define a route that is a child of another route, implement the `ChildRoute` interface.
 
 ```dart
-class UserDetailsRoute extends DataRoute<UserRouteData> implements ChildRoute<UserRoute> {
+class UserDetailsRoute extends SimpleDataRoute<UserRouteData> implements ChildRoute<UserRoute> {
   const UserDetailsRoute();
 
   // Define the route path segment. No need to worry about 
@@ -238,7 +238,7 @@ However, if they require their own data, the data class must provide its data **
 
 ### GoRouter configuration
 
-Configuring `GoRouter` is easy. When defining a `GoRoute`, create an instance of your class and pass the `goPath` property to the `path` parameter.
+Configuring `GoRouter` is easy. When defining a `GoRoute`, create an instance of your class and pass the `goPath` property to the `path` argument.
 
 ```dart
 GoRoute(
@@ -320,7 +320,7 @@ class MyRoute extends DataRoute<MyRouteData> {
   const MyRoute();
 
   @override
-  String get path => fromSegments(['user', RouteParams.userId.prefixed]);
+  String get path => fromSegments(['user', RouteParams.userId.template]);
 }
 ```
 
