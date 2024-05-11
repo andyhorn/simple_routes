@@ -100,8 +100,8 @@ class ProfileEditRouteData extends ProfileRouteData {
   // [GoRouterState].
   factory ProfileEditRouteData.fromState(GoRouterState state) {
     return ProfileEditRouteData(
-      userId: state.param(RouteParams.userId.name)!,
-      filter: state.query(RouteParams.filter.name),
+      userId: state.pathParameters[RouteParams.userId.name]!,
+      filter: state.uri.queryParameters[RouteParams.filter.name],
     );
   }
 
