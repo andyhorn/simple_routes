@@ -10,10 +10,6 @@ enum TestEnum {
   valueTwo,
 }
 
-class TestClassOne {}
-
-class TestClassTwo {}
-
 void main() {
   group('GoRouterStateExtensions', () {
     late GoRouterState state;
@@ -22,7 +18,7 @@ void main() {
       state = MockGoRouterState();
     });
 
-    group('#getParam', () {
+    group('#param', () {
       group('when the param exists', () {
         setUp(() {
           when(() => state.pathParameters).thenReturn({
@@ -31,7 +27,7 @@ void main() {
         });
 
         test('returns the value', () {
-          expect(state.getParam(TestEnum.valueOne), 'value-one');
+          expect(state.param(TestEnum.valueOne.name), 'value-one');
         });
       });
 
@@ -41,12 +37,12 @@ void main() {
         });
 
         test('returns null', () {
-          expect(state.getParam(TestEnum.valueOne), null);
+          expect(state.param(TestEnum.valueOne.name), null);
         });
       });
     });
 
-    group('#getQuery', () {
+    group('#query', () {
       group('when the query value exists', () {
         setUp(() {
           when(() => state.uri).thenReturn(Uri.parse(
@@ -54,49 +50,7 @@ void main() {
         });
 
         test('returns the value', () {
-          expect(state.getQuery(TestEnum.valueOne), 'value-one');
-        });
-      });
-    });
-
-    group('#getExtra', () {
-      group('when the extra data is present', () {
-        setUp(() {
-          when(() => state.extra).thenReturn(TestClassOne());
-        });
-
-        test('returns the extra data', () {
-          expect(state.getExtra<TestClassOne>(), isA<TestClassOne>());
-        });
-      });
-
-      group('when the extra data is null', () {
-        setUp(() {
-          when(() => state.extra).thenReturn(null);
-        });
-
-        test('returns null', () {
-          expect(state.getExtra<TestClassOne>(), null);
-        });
-      });
-
-      group('when the extra data is of the wrong type', () {
-        setUp(() {
-          when(() => state.extra).thenReturn(TestClassTwo());
-        });
-
-        test('returns null', () {
-          expect(state.getExtra<TestClassOne>(), isNull);
-        });
-      });
-
-      group('when the generic argument is not provided', () {
-        setUp(() {
-          when(() => state.extra).thenReturn(TestClassOne());
-        });
-
-        test('returns null', () {
-          expect(state.getExtra(), isNull);
+          expect(state.query(TestEnum.valueOne.name), 'value-one');
         });
       });
     });

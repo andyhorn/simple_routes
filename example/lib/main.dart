@@ -25,7 +25,7 @@ final router = GoRouter(
       path: const ProfileRoute().goPath,
       redirect: (context, state) {
         // Use the GoRouterState extension methods to validate the route data.
-        if (state.getParam(RouteParams.userId) == null) {
+        if (state.param(RouteParams.userId.name) == null) {
           // When redirecting, use the `fullPath` method.
           return const RootRoute().fullPath();
         }
