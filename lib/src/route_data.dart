@@ -13,14 +13,14 @@ abstract class SimpleRouteData {
   ///   final String userId;
   ///
   ///   @override
-  ///   Map<Enum, String> get parameters => {
+  ///   Map<String, String> get parameters => {
   ///     // The `userId` value will be injected into the path,
   ///     // replacing the `:userId` template parameter.
-  ///     RouteParams.userId: userId,
+  ///     'userId': userId,
   ///   };
   /// }
   /// ```
-  Map<Enum, String> get parameters => const {};
+  Map<String, String> get parameters => const {};
 
   /// Inject "extra" data into the [GoRouterState].
   ///
@@ -52,12 +52,12 @@ abstract class SimpleRouteData {
   ///   final String? redirect;
   ///
   ///   @override
-  ///   Map<Enum, String?> get query => {
+  ///   Map<String, String?> get query => {
   ///     // The value of `redirect`, if not null, will be
   ///     // appended to the route as a URI-encoded query
   ///     // parameter, using the `redirect` key.
   ///     // e.g. `?redirect=/home`
-  ///     QueryParams.redirect: redirect,
+  ///     'redirect': redirect,
   ///   };
   /// }
   /// ```
@@ -69,7 +69,7 @@ abstract class SimpleRouteData {
   /// `getQuery()` extension method.
   ///
   /// ```dart
-  /// final redirect = context.getQuery(QueryParams.redirect);
+  /// final redirect = context.getQuery('redirect');
   /// ```
-  Map<Enum, String?> get query => const {};
+  Map<String, String?> get query => const {};
 }

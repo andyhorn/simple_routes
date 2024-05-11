@@ -82,8 +82,8 @@ class UserRouteData extends SimpleRouteData {
   final String userId;
 
   @override
-  Map<Enum, String> get parameters => {
-    RouteParams.userId: userId,
+  Map<String, String> get parameters => {
+    RouteParams.userId.name: userId,
   };
 }
 
@@ -97,6 +97,8 @@ const UserRoute().go(
   ),
 );
 ```
+
+**Note:** It is recommended to use an `Enum` for your route parameters instead of using "magic strings."
 
 ### Route definitions
 
@@ -140,6 +142,8 @@ For routes that require parameters, extend `DataRoute` instead. This will allow 
 
 For example, say you have a route that requires a user ID. First, define an enum value that represents the "userId" parameter.
 
+While you can define these parameters using a String with a colon (`:`) prefix, it is recommended to define them as enum values and use the `.prefixed` and `.name` getters.
+
 ```dart
 enum RouteParams {
   userId,
@@ -166,8 +170,10 @@ class UserRouteData extends SimpleRouteData {
   final String userId;
 
   @override
-  Map<Enum, String> get parameters => {
-    RouteParams.userId: userId,
+  Map<String, String> get parameters => {
+    // Use the `.name` getter to get the String representation
+    // e.g. 'userId'
+    RouteParams.userId.name: userId,
   };
 }
 ```
@@ -192,7 +198,7 @@ class UserRoute extends DataRoute<UserRouteData> {
 
 Because this route is a "data route," we must provide it with an instance of its route data class when navigating. More on this in the [Navigation](#navigation) section.
 
-Please note that the `Map<Enum, String> parameters`, `Map<Enum, String?> query`, and `Object? extra` overrides are entirely optional, depending on your needs.
+Please note that the `Map<String, String> parameters`, `Map<String, String?> query`, and `Object? extra` overrides are entirely optional, depending on your needs.
 
 ##### Parameters
 Any values supplied in the `parameters` map will be mapped to the route template. For example, the `userId` value will be mapped to the `:userId` segment in the route path.
@@ -395,7 +401,7 @@ and your app is at the location of `/base/sub`:
 
 ```dart
 // current location: '/base/sub'
-if (const SubRoute().isCurrentRoute(context)) {
+if (const SubRoute().isCurrentRoute(state)) {
   debugPrint('We are at SubRoute!');
 }
 ```
@@ -410,7 +416,7 @@ For example, if your app is at the location of `/base/sub`:
 
 ```dart
 // current location: '/base/sub'
-if (const BaseRoute().isParentRoute(context)) {
+if (const BaseRoute().isParentRoute(state)) {
   debugPrint('We are at a child of BaseRoute!');
 }
 ```
@@ -423,7 +429,7 @@ For example, if we are at the `/base/sub` location and use `isParentRoute`, it w
 
 ```dart
 // current location: '/base/sub'
-if (const SubRoute().isParentRoute(context)) {
+if (const SubRoute().isParentRoute(state)) {
   debugPrint('We are at a child of SubRoute!');
 }
 ```
@@ -440,7 +446,7 @@ For example, if your app is at the location of `/base/sub`:
 
 ```dart
 // current location: '/base/sub'
-if (const BaseRoute().isActive(context)) {
+if (const BaseRoute().isActive(state)) {
   debugPrint('BaseRoute is active!');
 }
 ```
@@ -451,7 +457,7 @@ If your app is at the location of `/base`:
 
 ```dart
 // current location: '/base'
-if (const BaseRoute().isActive(context)) {
+if (const BaseRoute().isActive(state)) {
   debugPrint('BaseRoute is active!');
 }
 ```

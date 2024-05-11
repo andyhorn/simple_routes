@@ -119,13 +119,13 @@ class _TestRouteData extends SimpleRouteData {
   final _TestData testData;
 
   @override
-  Map<Enum, String> get parameters => {
-        _TestEnum.valueOne: testValue,
+  Map<String, String> get parameters => {
+        _TestEnum.valueOne.name: testValue,
       };
 
   @override
-  Map<Enum, String?> get query => {
-        _TestEnum.valueTwo: testQuery,
+  Map<String, String?> get query => {
+        _TestEnum.valueTwo.name: testQuery,
       };
 
   @override

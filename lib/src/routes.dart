@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:simple_routes/simple_routes.dart';
-import 'package:simple_routes/src/extensions/string_extensions.dart';
 
 /// An abstract class to serve as the parent for all routes.
 abstract class BaseRoute {
@@ -155,6 +154,8 @@ abstract class SimpleRoute extends BaseRoute {
 abstract class DataRoute<Data extends SimpleRouteData> extends BaseRoute {
   const DataRoute();
 
+  static final _queryRegex = RegExp(r'\?.+$');
+
   /// Navigate to this route using the supplied [data].
   void go(
     BuildContext context, {
@@ -178,23 +179,67 @@ abstract class DataRoute<Data extends SimpleRouteData> extends BaseRoute {
   ///
   /// e.g. `/user/:userId` becomes `/user/123?query=my%20query`
   String fullPath(Data data) {
-    return _injectParams(_fullPathTemplate, data).appendQuery(_getQuery(data));
+    final path = _injectParams(_fullPathTemplate, data);
+    final query = _getQuery(data);
+
+    return _appendQuery(path, query);
   }
 
   String _injectParams(String path, Data data) {
     return data.parameters.entries.fold(path, (path, entry) {
-      return path.setParam(entry.key, entry.value);
+      return path.replaceAll(':${entry.key}', entry.value);
     });
   }
 
   Map<String, String> _getQuery(Data data) {
     return data.query.entries.fold({}, (query, entry) {
       if (entry.value != null && entry.value!.isNotEmpty) {
-        query[entry.key.name] = (entry.value!);
+        query[entry.key] = (entry.value!);
       }
 
       return query;
     });
+  }
+
+  /// Append a query string to the [path], if [query] is not null or empty.
+  String _appendQuery(String path, Map<String, String?> query) {
+    final filtered = query.entries
+        .where((e) => e.value?.isNotEmpty ?? false)
+        .map((e) => MapEntry(e.key, e.value!));
+
+    if (filtered.isEmpty) {
+      return path;
+    }
+
+    var queryString = _toQueryString(Map.fromEntries(filtered));
+
+    if (_queryRegex.hasMatch(path)) {
+      // If this path already ends in a query string, append the new query
+      // string to the existing one.
+      queryString = queryString.replaceFirst('?', '&');
+    }
+
+    return '$path$queryString';
+  }
+
+  /// Generate a query string from a map of parameters.
+  ///
+  /// For example, `query({'key': 'my value'})` returns `'?key=my%20value'`.
+  ///
+  /// **Note**: All keys and values are URI encoded.
+  String _toQueryString(Map<String, String> params) {
+    if (params.isEmpty) {
+      return '';
+    }
+
+    final components = params.entries.map((e) {
+      final key = Uri.encodeComponent(e.key);
+      final value = Uri.encodeComponent(e.value);
+
+      return '$key=$value';
+    });
+
+    return '?${components.join('&')}';
   }
 }
 
