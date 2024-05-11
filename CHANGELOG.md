@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 2.0.0
+## 2.0.0-rc.1
 
 - Change location helpers (`isCurrentRoute`, `isParentRoute`, `isActive`) to accept a `GoRouterState` instead of a `BuildContext`
 - Change the `DataRoute` `parameters` and `query` properties from `Map<Enum, String>` to `Map<String, String>`
