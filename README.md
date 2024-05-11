@@ -19,7 +19,7 @@ By using `simple_routes`, you can eliminate magic strings, simplify your route d
     * [Route definitions](#route-definitions)
       * [Basic routing with SimpleRoutes](#basic-routes)
         * [Route path segments](#route-path-segments)
-      * [Path parameters and DataRoutes](#data-routes)
+      * [Path parameters and SimpleDataRoutes](#simple-data-routes)
         * [Parameters](#parameters)
         * [Query](#query)
         * [Extra](#extra)
@@ -134,11 +134,11 @@ class UserProfileRoute extends SimpleRoute {
 
 When in debug mode (or in tests), this method will check for duplicate segments and throw an assertion error if any are found.
 
-<a id="data-routes"></a>
+<a id="simple-data-routes"></a>
 
-#### Route parameters and DataRoutes
+#### Route parameters and SimpleDataRoutes
 
-For routes that require parameters, extend `DataRoute` instead. This will allow you to define a data class that will be used to pass data to your route.
+For routes that require parameters, extend `SimpleDataRoute` instead. This will allow you to define a data class that will be used to pass data to your route.
 
 For example, say you have a route that requires a user ID. First, define an enum value that represents the "userId" parameter.
 
@@ -181,16 +181,17 @@ class UserRouteData extends SimpleRouteData {
 Finally, we can define our route, extending the `DataRoute` class.
 
 ```dart
-// Define the route as a DataRoute, typed for your data class.
-class UserRoute extends DataRoute<UserRouteData> {
+// Define the route as a SimpleDataRoute, typed for your data class.
+class UserRoute extends SimpleDataRoute<UserRouteData> {
   const UserRoute();
 
-  // Define the route path using the appropriate enum value.
+  // Define the route path using the appropriate String or enum value.
   // Use the `prefixed` property to automatically prefix the
   // enum value name with a colon (e.g. ":userId").
   //
   // To define a path with multiple segments, use the `fromSegments` 
-  // method to join the segments with a forward-slash.
+  // method to join the segments with a forward-slash. This helper method
+  // provides additional protections during development.
   @override
   String get path => fromSegments(['user', RouteParams.userId.prefixed]);
 }
@@ -231,9 +232,9 @@ class UserDetailsRoute extends DataRoute<UserRouteData> implements ChildRoute<Us
 
 In the example above, the generated route will be `/user/:userId/details`.
 
-**Note**: Routes that are children of a `DataRoute` must also be a `DataRoute` themselves, even if they don't require any data. In cases like these, you can re-use the parent's data class and factory constructor.
+**Note**: Routes that are children of a `SimpleDataRoute` must also be a `SimpleDataRoute` themselves, even if they don't require any data. In cases like these, you can re-use the parent's data class and constructor(s).
 
-However, if they require their own data, the data class must provide it **and** the data necessary for the parent(s).
+However, if they require their own data, the data class must provide its data **and** the data of its parent(s).
 
 ### GoRouter configuration
 
