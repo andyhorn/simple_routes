@@ -5,6 +5,7 @@
 - Change location helpers (`isCurrentRoute`, `isParentRoute`, `isActive`) to accept a `GoRouterState` instead of a `BuildContext`
 - Change the `DataRoute` `parameters` and `query` properties from `Map<Enum, String>` to `Map<String, String>`
 - Rename `DataRoute` to `SimpleDataRoute`
+- Rename `Enum#prefixed` to `Enum#template` to be more clear
 
 ## 1.1.3
 

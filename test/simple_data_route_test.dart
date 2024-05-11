@@ -136,5 +136,5 @@ class _TestRoute extends SimpleDataRoute<_TestRouteData> {
   const _TestRoute();
 
   @override
-  String get path => _TestEnum.valueOne.prefixed;
+  String get path => _TestEnum.valueOne.template;
 }

@@ -7,9 +7,9 @@ enum TestParams {
 
 void main() {
   group('EnumExtensions', () {
-    group('#prefixed', () {
+    group('#template', () {
       test('returns prefixed value', () {
-        expect(TestParams.testParamOne.prefixed, ':testParamOne');
+        expect(TestParams.testParamOne.template, ':testParamOne');
       });
     });
   });
