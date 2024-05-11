@@ -4,7 +4,6 @@
 import 'package:example/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:simple_routes/simple_routes.dart';
 
 // Define your root-level routes and sub-routes in the same way.
 final router = GoRouter(
@@ -25,7 +24,7 @@ final router = GoRouter(
       path: const ProfileRoute().goPath,
       redirect: (context, state) {
         // Use the GoRouterState extension methods to validate the route data.
-        if (state.getParam(RouteParams.userId) == null) {
+        if (state.pathParameters[RouteParams.userId.name] == null) {
           // When redirecting, use the `fullPath` method.
           return const RootRoute().fullPath();
         }

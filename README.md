@@ -160,7 +160,7 @@ class UserRouteData extends SimpleRouteData {
 
   // Tip: Define a factory constructor to easily create an instance of your data class
   factory UserRouteData.fromState(GoRouterState state) {
-    final userId = state.getParam(RouteParams.userId);
+    final userId = state.pathParameters[RouteParams.userId.name]!;
 
     return UserRouteData(
       userId: userId,
@@ -264,7 +264,7 @@ GoRouter(
         // Use the extension methods to validate that any and all 
         // required values are present.
 
-        if (state.getParam(RouteParams.userId) == null) {
+        if (state.pathParameters[RouteParams.userId.name] == null) {
           // If the data is not present, redirect to another route 
           // using the `fullPath` method - this is important, 
           // as the `path` and `goPath` properties only include the 
@@ -367,7 +367,6 @@ onPressed: () async {
   debugPrint('The result is: $result');
 },
 ```
-
 
 ## Advanced usage
 

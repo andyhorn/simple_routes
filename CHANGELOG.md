@@ -6,6 +6,7 @@
 - Change the `DataRoute` `parameters` and `query` properties from `Map<Enum, String>` to `Map<String, String>`
 - Rename `DataRoute` to `SimpleDataRoute`
 - Rename `Enum#prefixed` to `Enum#template` to be more clear
+- Remove the `GoRouterState` extension methods as they were not providing much value
 
 ## 1.1.3
 
