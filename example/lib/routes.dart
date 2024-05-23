@@ -3,27 +3,15 @@ import 'package:simple_routes/simple_routes.dart';
 
 // Simple base route
 
-// Declare your route as a child of [SimpleRoute] or
-// [DataRoute] (see more below).
+// Declare your route as a child of [SimpleRoute].
 class RootRoute extends SimpleRoute {
-  const RootRoute();
-
-  // override the [path] to define the path of this route.
-  @override
-  final String path = '/';
+  const RootRoute() : super('/');
 }
 
 // Simple child route
-// Declare your child route as a child of [SimpleRoute] and an implementation
-// of the [ChildRoute] interface.
+// Declare your child route and implement the [ChildRoute] interface.
 class DashboardRoute extends SimpleRoute implements ChildRoute<RootRoute> {
-  const DashboardRoute();
-
-  // override the [path] to define the path of this route.
-  // Note: This should be everything that comes _after_ the parent's path,
-  // without any leading slash. e.g. 'dashboard'.
-  @override
-  final String path = 'dashboard';
+  const DashboardRoute() : super('dashboard');
 
   // override the [parent] getter to return an instance of the parent route.
   @override
@@ -52,38 +40,21 @@ class ProfileRouteData extends SimpleRouteData {
       };
 }
 
-// Define your route as a child of [DataRoute].
+// Define your route as a child of [SimpleDataRoute].
 class ProfileRoute extends SimpleDataRoute<ProfileRouteData> {
-  const ProfileRoute();
-
-  // Override the [path] getter to define the path of this route.
-  // Since this is a [DataRoute], it should contain some dynamic variable, such
-  // as a userId. e.g. '/profile/:userId'.
-  //
-  // Use the `prefixed` property to add the colon (:) prefix to your
-  // parameter in the template, and use the [join] method to join the path
-  // segments together.
-  //
-  // You can craft this template yourself, but the extension methods are
-  // here to help.
-  @override
-  String get path => fromSegments([
-        'profile',
-        RouteParams.userId.template,
-      ]);
+  // Since this is a [SimpleDataRoute], the path should contain some dynamic
+  // variable, such as a userId. Make sure to prefix the value with a colon (:),
+  // just as you would in your GoRoute definition.
+  const ProfileRoute() : super('profile/:userId');
 }
 
 // Child data route
 
-// Define your route as a child of [DataRoute] with its appropriate data type
-// and implement the [ChildRoute] interface.
+// Define your route as a child of [SimpleDataRoute] with its appropriate data
+// type and implement the [ChildRoute] interface.
 class ProfileEditRoute extends SimpleDataRoute<ProfileRouteData>
     implements ChildRoute<ProfileRoute> {
-  const ProfileEditRoute();
-
-  // override the [path] getter with this route's path.
-  @override
-  String get path => 'edit';
+  const ProfileEditRoute() : super('edit');
 
   // override the [parent] getter to return an instance of this route's parent.
   @override

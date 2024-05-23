@@ -10,18 +10,18 @@ final router = GoRouter(
   debugLogDiagnostics: true,
   routes: [
     GoRoute(
-      // Use the [goPath] property to define the route's path.
-      path: const RootRoute().goPath,
+      // Use the [path] property to define the route's path.
+      path: const RootRoute().path,
       builder: (context, state) => const RootPage(),
       routes: [
         GoRoute(
-          path: const DashboardRoute().goPath,
+          path: const DashboardRoute().path,
           builder: (context, state) => const DashboardPage(),
         ),
       ],
     ),
     GoRoute(
-      path: const ProfileRoute().goPath,
+      path: const ProfileRoute().path,
       redirect: (context, state) {
         // Use the GoRouterState extension methods to validate the route data.
         if (state.pathParameters[RouteParams.userId.name] == null) {
@@ -41,10 +41,7 @@ final router = GoRouter(
       },
       routes: [
         GoRoute(
-          path: const ProfileEditRoute().goPath,
-          builder: (context, state) => ProfileEditPage(
-            filter: ProfileEditRouteData.fromState(state).filter,
-          ),
+          path: const ProfileEditRoute().path,
         ),
       ],
     ),
