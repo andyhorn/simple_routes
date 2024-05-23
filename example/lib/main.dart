@@ -35,7 +35,7 @@ final router = GoRouter(
         // Use a factory to extract your route data.
         // This is especially useful if you have multiple routes that use the
         // same data class or if your route has many parameters.
-        final profileRouteData = ProfileEditRouteData.fromState(state);
+        final profileRouteData = ProfileRouteData.fromState(state);
 
         return ProfilePage(userId: profileRouteData.userId);
       },
@@ -43,6 +43,12 @@ final router = GoRouter(
         GoRoute(
           path: const ProfileEditRoute().path,
           builder: (context, state) => const ProfileEditPage(),
+        ),
+        GoRoute(
+          path: const AdditionalDataRoute().path,
+          builder: (context, state) => AdditionalRouteDataPage(
+            queryValue: AdditionalRouteData.fromState(state).queryValue,
+          ),
         ),
       ],
     ),
@@ -98,11 +104,22 @@ class NavButtons extends StatelessWidget {
         ElevatedButton(
           onPressed: () => const ProfileEditRoute().go(
             context,
-            data: const ProfileEditRouteData(
+            data: const ProfileRouteData(
               userId: '123',
             ),
           ),
           child: const Text('Go to profile edit'),
+        ),
+        const SizedBox(height: 12),
+        ElevatedButton(
+          onPressed: () => const AdditionalDataRoute().go(
+            context,
+            data: const AdditionalRouteData(
+              userId: '123',
+              queryValue: 'hello world!',
+            ),
+          ),
+          child: const Text('Go to Additional Data route'),
         ),
       ],
     );
@@ -163,7 +180,7 @@ class ProfileEditPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final profileRouteData = ProfileEditRouteData.fromState(
+    final profileRouteData = ProfileRouteData.fromState(
       GoRouterState.of(context),
     );
 
@@ -171,6 +188,27 @@ class ProfileEditPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text('Profile edit page for ${profileRouteData.userId}'),
+        const NavButtons(),
+      ],
+    );
+  }
+}
+
+class AdditionalRouteDataPage extends StatelessWidget {
+  const AdditionalRouteDataPage({
+    super.key,
+    this.queryValue,
+  });
+
+  final String? queryValue;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text('Additional Data Route'),
+        Text('Query value: $queryValue'),
         const NavButtons(),
       ],
     );
