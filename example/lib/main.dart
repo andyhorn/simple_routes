@@ -32,7 +32,7 @@ final router = GoRouter(
         return null;
       },
       builder: (context, state) {
-        // Use a factory class to extract your route data.
+        // Use a factory to extract your route data.
         // This is especially useful if you have multiple routes that use the
         // same data class or if your route has many parameters.
         final profileRouteData = ProfileEditRouteData.fromState(state);
@@ -42,6 +42,7 @@ final router = GoRouter(
       routes: [
         GoRoute(
           path: const ProfileEditRoute().path,
+          builder: (context, state) => const ProfileEditPage(),
         ),
       ],
     ),
@@ -99,7 +100,6 @@ class NavButtons extends StatelessWidget {
             context,
             data: const ProfileEditRouteData(
               userId: '123',
-              filter: 'filterValue',
             ),
           ),
           child: const Text('Go to profile edit'),
@@ -159,10 +159,7 @@ class ProfilePage extends StatelessWidget {
 class ProfileEditPage extends StatelessWidget {
   const ProfileEditPage({
     super.key,
-    required this.filter,
   });
-
-  final String? filter;
 
   @override
   Widget build(BuildContext context) {
@@ -174,7 +171,6 @@ class ProfileEditPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text('Profile edit page for ${profileRouteData.userId}'),
-        Text('Filter: ${filter ?? 'none'}'),
         const NavButtons(),
       ],
     );

@@ -64,24 +64,13 @@ class ProfileEditRoute extends SimpleDataRoute<ProfileRouteData>
 class ProfileEditRouteData extends ProfileRouteData {
   const ProfileEditRouteData({
     required super.userId,
-    required this.filter,
   });
 
-  // Define a factory constructor to easily extract the route data from
-  // [GoRouterState].
+  // Define a factory or named constructor to easily extract the route data
+  // from a [GoRouterState].
   factory ProfileEditRouteData.fromState(GoRouterState state) {
     return ProfileEditRouteData(
-      userId: state.pathParameters[RouteParams.userId.name]!,
-      filter: state.uri.queryParameters[RouteParams.filter.name],
+      userId: state.pathParameters['userId']!,
     );
   }
-
-  final String? filter;
-
-  // Provide an implementation of the [query] getter to define the
-  // query parameters for this route.
-  @override
-  Map<String, String?> get query => {
-        RouteParams.filter.name: filter,
-      };
 }
