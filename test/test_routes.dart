@@ -4,16 +4,16 @@ class TestEmptyRoute extends SimpleRoute {
   const TestEmptyRoute() : super('');
 }
 
-class TestSlashRoute extends SimpleRoute {
-  const TestSlashRoute() : super(SimpleRoute.root);
+class TestRootRoute extends SimpleRoute {
+  const TestRootRoute() : super(SimpleRoute.root);
 }
 
-class TestSlashChildRoute extends SimpleRoute
-    implements ChildRoute<TestSlashRoute> {
-  const TestSlashChildRoute() : super('child');
+class TestRootChildRoute extends SimpleRoute
+    implements ChildRoute<TestRootRoute> {
+  const TestRootChildRoute() : super('child');
 
   @override
-  final TestSlashRoute parent = const TestSlashRoute();
+  final TestRootRoute parent = const TestRootRoute();
 }
 
 class TestBaseRoute extends SimpleRoute {

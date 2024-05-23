@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:simple_routes/simple_routes.dart';
 
 import 'mocks.dart';
 import 'test_routes.dart';
@@ -13,33 +12,26 @@ void main() {
   late TestBaseRoute route;
   late TestChildRoute childRoute;
 
-  group('Duplicate segments', () {
-    test('throws an error', () {
-      expect(
-        () => const _DuplicateTestRoute().fullPath(),
-        throwsA(isA<AssertionError>().having(
-          (e) => e.message,
-          'message',
-          '[SimpleRoutes] WARNING: Path segments should be unique.\n_DuplicateTestRoute: Duplicates of "test", ":param"',
-        )),
-      );
-    });
-  });
-
   group('Empty route', () {
     setUp(() {
       router = MockGoRouter();
       root = const TestEmptyRoute();
     });
 
+    group('.path', () {
+      test('returns correct path', () {
+        expect(root.path, equals('/'));
+      });
+    });
+
     group('#fullPath', () {
-      test('returns leading slash', () {
+      test('returns correct path', () {
         expect(root.fullPath(), '/');
       });
     });
   });
 
-  group('Root route', () {
+  group('Base route', () {
     setUp(() {
       router = MockGoRouter();
       route = const TestBaseRoute();
@@ -47,14 +39,14 @@ void main() {
     });
 
     group('#fullPath', () {
-      test('adds leading slash', () {
-        expect(route.fullPath(), '/test');
+      test('return correct path', () {
+        expect(route.fullPath(), '/base');
       });
     });
 
-    group('.goPath', () {
+    group('.path', () {
       test('returns correct path', () {
-        expect(route.goPath, '/test');
+        expect(route.path, '/base');
       });
     });
 
@@ -76,12 +68,12 @@ void main() {
 
         await tester.tap(find.text('click me'));
 
-        verify(() => router.go('/test')).called(1);
+        verify(() => router.go('/base')).called(1);
       });
     });
 
     group('#push', () {
-      testWidgets('pushed the correct path', (tester) async {
+      testWidgets('pushes the correct path', (tester) async {
         await tester.pumpWidget(
           MaterialApp(
             home: MockGoRouterProvider(
@@ -98,37 +90,49 @@ void main() {
 
         await tester.tap(find.text('click me'));
 
-        verify(() => router.push('/test')).called(1);
+        verify(() => router.push('/base')).called(1);
       });
     });
   });
 
-  group('Slash route', () {
+  group('Root route', () {
+    group('.path', () {
+      test('returns correct path', () {
+        expect(const TestRootRoute().path, equals('/'));
+      });
+    });
+
     group('#fullPath', () {
-      test('returns slash', () {
+      test('returns correct path', () {
         expect(const TestRootRoute().fullPath(), '/');
       });
     });
   });
 
-  group('Slash child route', () {
+  group(TestRootChildRoute, () {
+    group('.path', () {
+      test('returns correct path', () {
+        expect(const TestRootChildRoute().path, equals('child'));
+      });
+    });
+
     group('#fullPath', () {
-      test('returns proper path', () {
-        expect(const TestSlashChildRoute().fullPath(), '/child');
+      test('returns correct path', () {
+        expect(const TestRootChildRoute().fullPath(), '/child');
       });
     });
   });
 
-  group('Child route', () {
+  group(TestChildRoute, () {
     group('#fullPath', () {
-      test('joins with parents', () {
-        expect(childRoute.fullPath(), '/test/child');
+      test('returns correct path', () {
+        expect(childRoute.fullPath(), '/base/child');
       });
     });
 
-    group('.goPath', () {
-      test('returns correct route', () {
-        expect(childRoute.goPath, 'child');
+    group('.path', () {
+      test('returns correct path', () {
+        expect(childRoute.path, 'child');
       });
     });
   });
@@ -154,7 +158,7 @@ void main() {
                 },
               ),
               GoRoute(
-                path: const TestBaseRoute().goPath,
+                path: const TestBaseRoute().path,
                 builder: (context, state) {
                   isCurrentRoute = const TestBaseRoute().isCurrentRoute(state);
                   return const Scaffold(
@@ -182,7 +186,7 @@ void main() {
             initialLocation: const TestBaseRoute().fullPath(),
             routes: [
               GoRoute(
-                path: const TestBaseRoute().goPath,
+                path: const TestBaseRoute().path,
                 builder: (context, state) {
                   return Scaffold(
                     body: ElevatedButton(
@@ -225,7 +229,7 @@ void main() {
               initialLocation: const TestBaseRoute().fullPath(),
               routes: [
                 GoRoute(
-                  path: const TestBaseRoute().goPath,
+                  path: const TestBaseRoute().path,
                   builder: (context, state) {
                     return Scaffold(
                       body: ElevatedButton(
@@ -236,7 +240,7 @@ void main() {
                   },
                   routes: [
                     GoRoute(
-                      path: const TestChildRoute().goPath,
+                      path: const TestChildRoute().path,
                       builder: (context, state) {
                         isParent = const TestBaseRoute().isParentRoute(state);
                         return const Scaffold(
@@ -269,7 +273,7 @@ void main() {
               initialLocation: const TestBaseRoute().fullPath(),
               routes: [
                 GoRoute(
-                  path: const TestBaseRoute().goPath,
+                  path: const TestBaseRoute().path,
                   builder: (context, state) {
                     return Scaffold(
                       body: ElevatedButton(
@@ -322,7 +326,7 @@ void main() {
                 },
               ),
               GoRoute(
-                path: const TestBaseRoute().goPath,
+                path: const TestBaseRoute().path,
                 builder: (context, state) {
                   isActive = const TestBaseRoute().isActive(state);
                   return const Scaffold(
@@ -350,7 +354,7 @@ void main() {
             initialLocation: const TestBaseRoute().fullPath(),
             routes: [
               GoRoute(
-                path: const TestBaseRoute().goPath,
+                path: const TestBaseRoute().path,
                 builder: (context, state) {
                   return Scaffold(
                     body: ElevatedButton(
@@ -389,7 +393,7 @@ void main() {
             initialLocation: const TestBaseRoute().fullPath(),
             routes: [
               GoRoute(
-                path: const TestBaseRoute().goPath,
+                path: const TestBaseRoute().path,
                 builder: (context, state) {
                   return Scaffold(
                     body: ElevatedButton(
@@ -400,7 +404,7 @@ void main() {
                 },
                 routes: [
                   GoRoute(
-                    path: const TestChildRoute().goPath,
+                    path: const TestChildRoute().path,
                     builder: (context, state) {
                       isActive = const TestBaseRoute().isActive(state);
                       return const Scaffold(
@@ -434,7 +438,7 @@ void main() {
             initialLocation: const TestEmptyRoute().fullPath(),
             routes: [
               GoRoute(
-                path: const TestEmptyRoute().goPath,
+                path: const TestEmptyRoute().path,
                 builder: (context, state) {
                   return Scaffold(
                     body: Column(
@@ -458,7 +462,7 @@ void main() {
                     navigatorKey: shellKey,
                     routes: [
                       GoRoute(
-                        path: const TestBaseRoute().goPath,
+                        path: const TestBaseRoute().path,
                         builder: (context, state) => const Scaffold(
                           body: Text('Test Route'),
                         ),
@@ -491,7 +495,7 @@ void main() {
             initialLocation: const TestBaseRoute().fullPath(),
             routes: [
               GoRoute(
-                path: const TestBaseRoute().goPath,
+                path: const TestBaseRoute().path,
                 builder: (context, state) {
                   return Scaffold(
                     body: ElevatedButton(
@@ -506,7 +510,7 @@ void main() {
                 },
                 routes: [
                   GoRoute(
-                    path: const TestChildRoute().goPath,
+                    path: const TestChildRoute().path,
                     builder: (context, state) {
                       return Scaffold(
                         body: ElevatedButton(
@@ -534,20 +538,4 @@ void main() {
       expect(returnValue, 'hello world!');
     });
   });
-}
-
-enum _TestRouteParams {
-  param,
-}
-
-class _DuplicateTestRoute extends SimpleRoute {
-  const _DuplicateTestRoute();
-
-  @override
-  String get path => fromSegments([
-        'test',
-        'test',
-        _TestRouteParams.param.template,
-        _TestRouteParams.param.template,
-      ]);
 }
