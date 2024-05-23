@@ -5,7 +5,7 @@ import 'package:simple_routes/simple_routes.dart';
 
 // Declare your route as a child of [SimpleRoute].
 class RootRoute extends SimpleRoute {
-  const RootRoute() : super('/');
+  const RootRoute() : super(SimpleRoute.root);
 }
 
 // Simple child route
