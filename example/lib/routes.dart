@@ -20,24 +20,24 @@ class DashboardRoute extends SimpleRoute implements ChildRoute<RootRoute> {
 
 // Simple data route
 
-// Define an enum to use as the path parameter templates for your routes.
-enum RouteParams {
-  userId,
-  filter,
-}
-
 // Define some data for your route as a child of [SimpleRouteData].
 class ProfileRouteData extends SimpleRouteData {
   const ProfileRouteData({required this.userId});
 
+  // Use a factory or named constructor to extract the necessary data from an
+  // instance of [GoRouterState]. This encapsulates any validation or parsing
+  // logic inside the data class instead of doing it inside the route builder.
+  ProfileRouteData.fromState(GoRouterState state)
+      : userId = state.pathParameters['userId']!;
+
   final String userId;
 
-  // Override the [parameters] getter to define the path parameters for this
-  // route, using the enum you defined above.
+  // Override the [parameters] getter to define the parameters for this route.
+  //
+  // In this case, we want to inject the [userId] value into the path, replacing
+  // `:userId` in the path template.
   @override
-  Map<String, String> get parameters => {
-        RouteParams.userId.name: userId,
-      };
+  Map<String, String> get parameters => {'userId': userId};
 }
 
 // Define your route as a child of [SimpleDataRoute].
