@@ -1,51 +1,25 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:simple_routes/simple_routes.dart';
 
 /// An abstract class to serve as the parent for all routes.
 abstract class BaseRoute {
-  const BaseRoute();
+  const BaseRoute(this._path);
+  final String _path;
 
-  /// The path segment for this route. e.g. 'verify-email'.
-  abstract final String path;
-
-  /// Join a List<String> of path segments into a forward slash-separated path.
+  /// The path segment for this route, e.g. 'verify-email', used to configure
+  /// the `GoRoute.path` for this route.
   ///
-  /// e.g. ['auth', 'register', 'verify-email'] -> '/auth/register/verify-email'
-  ///
-  /// In debug mode, an assertion error will be thrown if any duplicate
-  /// segments are detected.
-  String fromSegments(List<String> segments) {
-    if (kDebugMode) {
-      final duplicates = segments.where((s1) {
-        return segments.where((s2) => s1 == s2).length > 1;
-      }).toList();
-
-      assert(
-        duplicates.isEmpty,
-        '[SimpleRoutes] WARNING: Path segments should be unique.\n'
-        '$runtimeType: Duplicates of ${[
-          ...Set.from(duplicates).map((x) => '"$x"'),
-        ].join(', ')}',
-      );
-    }
-
-    return segments.join('/');
-  }
-
-  /// Get the [GoRoute] `path` for this route.
-  ///
-  /// ```dart
+  ///  ```dart
   /// GoRoute(
-  ///   path: const MyRoute().goPath,
+  ///   path: const MyRoute().path,
   /// ),
   /// ```
-  String get goPath {
+  String get path {
     if (this is ChildRoute) {
-      return _ensureNoLeadingSlash(path);
+      return _ensureNoLeadingSlash(_path);
     } else {
-      return _ensureLeadingSlash(path);
+      return _ensureLeadingSlash(_path);
     }
   }
 
@@ -118,7 +92,9 @@ abstract class BaseRoute {
 /// }
 /// ```
 abstract class SimpleRoute extends BaseRoute {
-  const SimpleRoute();
+  const SimpleRoute(super._path);
+
+  static const root = '/';
 
   /// Navigate to this route.
   void go(BuildContext context) {
@@ -152,7 +128,7 @@ abstract class SimpleRoute extends BaseRoute {
 /// }
 /// ```
 abstract class SimpleDataRoute<Data extends SimpleRouteData> extends BaseRoute {
-  const SimpleDataRoute();
+  const SimpleDataRoute(super._path);
 
   static final _queryRegex = RegExp(r'\?.+$');
 
