@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2.0.0-rc.2
+
+- Get rid of the `path` property override and, instead, supply the path segment into the `super` ctor
+- Eliminated the `goPath` property (use the `path` property instead)
+- Improved example and documentation
+
 ## 2.0.0-rc.1
 
 - Change location helpers (`isCurrentRoute`, `isParentRoute`, `isActive`) to accept a `GoRouterState` instead of a `BuildContext`
