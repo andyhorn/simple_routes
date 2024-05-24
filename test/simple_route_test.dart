@@ -2,58 +2,51 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:simple_routes/simple_routes.dart';
 
 import 'mocks.dart';
+import 'test_routes.dart';
 
 void main() {
   late GoRouter router;
-  late _TestRootRoute root;
-  late _TestRoute route;
-  late _TestChildRoute childRoute;
-
-  group('Duplicate segments', () {
-    test('throws an error', () {
-      expect(
-        () => const _DuplicateTestRoute().fullPath(),
-        throwsA(isA<AssertionError>().having(
-          (e) => e.message,
-          'message',
-          '[SimpleRoutes] WARNING: Path segments should be unique.\n_DuplicateTestRoute: Duplicates of "test", ":param"',
-        )),
-      );
-    });
-  });
+  late TestEmptyRoute root;
+  late TestBaseRoute route;
+  late TestChildRoute childRoute;
 
   group('Empty route', () {
     setUp(() {
       router = MockGoRouter();
-      root = const _TestRootRoute();
+      root = const TestEmptyRoute();
+    });
+
+    group('.path', () {
+      test('returns correct path', () {
+        expect(root.path, equals('/'));
+      });
     });
 
     group('#fullPath', () {
-      test('returns leading slash', () {
+      test('returns correct path', () {
         expect(root.fullPath(), '/');
       });
     });
   });
 
-  group('Root route', () {
+  group('Base route', () {
     setUp(() {
       router = MockGoRouter();
-      route = const _TestRoute();
-      childRoute = const _TestChildRoute();
+      route = const TestBaseRoute();
+      childRoute = const TestChildRoute();
     });
 
     group('#fullPath', () {
-      test('adds leading slash', () {
-        expect(route.fullPath(), '/test');
+      test('return correct path', () {
+        expect(route.fullPath(), '/base');
       });
     });
 
-    group('.goPath', () {
+    group('.path', () {
       test('returns correct path', () {
-        expect(route.goPath, '/test');
+        expect(route.path, '/base');
       });
     });
 
@@ -65,7 +58,7 @@ void main() {
               goRouter: router,
               child: Builder(builder: (context) {
                 return ElevatedButton(
-                  onPressed: () => const _TestRoute().go(context),
+                  onPressed: () => const TestBaseRoute().go(context),
                   child: const Text('click me'),
                 );
               }),
@@ -75,19 +68,19 @@ void main() {
 
         await tester.tap(find.text('click me'));
 
-        verify(() => router.go('/test')).called(1);
+        verify(() => router.go('/base')).called(1);
       });
     });
 
     group('#push', () {
-      testWidgets('pushed the correct path', (tester) async {
+      testWidgets('pushes the correct path', (tester) async {
         await tester.pumpWidget(
           MaterialApp(
             home: MockGoRouterProvider(
               goRouter: router,
               child: Builder(builder: (context) {
                 return ElevatedButton(
-                  onPressed: () => const _TestRoute().push(context),
+                  onPressed: () => const TestBaseRoute().push(context),
                   child: const Text('click me'),
                 );
               }),
@@ -97,37 +90,49 @@ void main() {
 
         await tester.tap(find.text('click me'));
 
-        verify(() => router.push('/test')).called(1);
+        verify(() => router.push('/base')).called(1);
       });
     });
   });
 
-  group('Slash route', () {
+  group('Root route', () {
+    group('.path', () {
+      test('returns correct path', () {
+        expect(const TestRootRoute().path, equals('/'));
+      });
+    });
+
     group('#fullPath', () {
-      test('returns slash', () {
-        expect(const _TestSlashRoute().fullPath(), '/');
+      test('returns correct path', () {
+        expect(const TestRootRoute().fullPath(), '/');
       });
     });
   });
 
-  group('Slash child route', () {
+  group(TestRootChildRoute, () {
+    group('.path', () {
+      test('returns correct path', () {
+        expect(const TestRootChildRoute().path, equals('child'));
+      });
+    });
+
     group('#fullPath', () {
-      test('returns proper path', () {
-        expect(const _TestSlashChildRoute().fullPath(), '/child');
+      test('returns correct path', () {
+        expect(const TestRootChildRoute().fullPath(), '/child');
       });
     });
   });
 
-  group('Child route', () {
+  group(TestChildRoute, () {
     group('#fullPath', () {
-      test('joins with parents', () {
-        expect(childRoute.fullPath(), '/test/child');
+      test('returns correct path', () {
+        expect(childRoute.fullPath(), '/base/child');
       });
     });
 
-    group('.goPath', () {
-      test('returns correct route', () {
-        expect(childRoute.goPath, 'child');
+    group('.path', () {
+      test('returns correct path', () {
+        expect(childRoute.path, 'child');
       });
     });
   });
@@ -146,16 +151,16 @@ void main() {
                 builder: (context, state) {
                   return Scaffold(
                     body: ElevatedButton(
-                      onPressed: () => const _TestRoute().go(context),
+                      onPressed: () => const TestBaseRoute().go(context),
                       child: const Text('click me'),
                     ),
                   );
                 },
               ),
               GoRoute(
-                path: const _TestRoute().goPath,
+                path: const TestBaseRoute().path,
                 builder: (context, state) {
-                  isCurrentRoute = const _TestRoute().isCurrentRoute(context);
+                  isCurrentRoute = const TestBaseRoute().isCurrentRoute(state);
                   return const Scaffold(
                     body: Text('Test Route'),
                   );
@@ -178,10 +183,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: const _TestRoute().fullPath(),
+            initialLocation: const TestBaseRoute().fullPath(),
             routes: [
               GoRoute(
-                path: const _TestRoute().goPath,
+                path: const TestBaseRoute().path,
                 builder: (context, state) {
                   return Scaffold(
                     body: ElevatedButton(
@@ -194,7 +199,7 @@ void main() {
               GoRoute(
                 path: '/other-page',
                 builder: (context, state) {
-                  isCurrentRoute = const _TestRoute().isCurrentRoute(context);
+                  isCurrentRoute = const TestBaseRoute().isCurrentRoute(state);
                   return const Scaffold(
                     body: Text('Test Route'),
                   );
@@ -221,23 +226,23 @@ void main() {
         await tester.pumpWidget(
           MaterialApp.router(
             routerConfig: GoRouter(
-              initialLocation: const _TestRoute().fullPath(),
+              initialLocation: const TestBaseRoute().fullPath(),
               routes: [
                 GoRoute(
-                  path: const _TestRoute().goPath,
+                  path: const TestBaseRoute().path,
                   builder: (context, state) {
                     return Scaffold(
                       body: ElevatedButton(
-                        onPressed: () => const _TestChildRoute().go(context),
+                        onPressed: () => const TestChildRoute().go(context),
                         child: const Text('click me'),
                       ),
                     );
                   },
                   routes: [
                     GoRoute(
-                      path: const _TestChildRoute().goPath,
+                      path: const TestChildRoute().path,
                       builder: (context, state) {
-                        isParent = const _TestRoute().isParentRoute(context);
+                        isParent = const TestBaseRoute().isParentRoute(state);
                         return const Scaffold(
                           body: Text('Test Route'),
                         );
@@ -265,10 +270,10 @@ void main() {
         await tester.pumpWidget(
           MaterialApp.router(
             routerConfig: GoRouter(
-              initialLocation: const _TestRoute().fullPath(),
+              initialLocation: const TestBaseRoute().fullPath(),
               routes: [
                 GoRoute(
-                  path: const _TestRoute().goPath,
+                  path: const TestBaseRoute().path,
                   builder: (context, state) {
                     return Scaffold(
                       body: ElevatedButton(
@@ -281,7 +286,7 @@ void main() {
                 GoRoute(
                   path: '/other-path',
                   builder: (context, state) {
-                    isParent = const _TestRoute().isParentRoute(context);
+                    isParent = const TestBaseRoute().isParentRoute(state);
                     return const Scaffold(
                       body: Text('Test Route'),
                     );
@@ -314,16 +319,16 @@ void main() {
                 builder: (context, state) {
                   return Scaffold(
                     body: ElevatedButton(
-                      onPressed: () => const _TestRoute().go(context),
+                      onPressed: () => const TestBaseRoute().go(context),
                       child: const Text('click me'),
                     ),
                   );
                 },
               ),
               GoRoute(
-                path: const _TestRoute().goPath,
+                path: const TestBaseRoute().path,
                 builder: (context, state) {
-                  isActive = const _TestRoute().isActive(context);
+                  isActive = const TestBaseRoute().isActive(state);
                   return const Scaffold(
                     body: Text('Test Route'),
                   );
@@ -346,10 +351,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: const _TestRoute().fullPath(),
+            initialLocation: const TestBaseRoute().fullPath(),
             routes: [
               GoRoute(
-                path: const _TestRoute().goPath,
+                path: const TestBaseRoute().path,
                 builder: (context, state) {
                   return Scaffold(
                     body: ElevatedButton(
@@ -362,7 +367,7 @@ void main() {
               GoRoute(
                 path: '/other-page',
                 builder: (context, state) {
-                  isActive = const _TestRoute().isCurrentRoute(context);
+                  isActive = const TestBaseRoute().isCurrentRoute(state);
                   return const Scaffold(
                     body: Text('Test Route'),
                   );
@@ -385,23 +390,23 @@ void main() {
       await tester.pumpWidget(
         MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: const _TestRoute().fullPath(),
+            initialLocation: const TestBaseRoute().fullPath(),
             routes: [
               GoRoute(
-                path: const _TestRoute().goPath,
+                path: const TestBaseRoute().path,
                 builder: (context, state) {
                   return Scaffold(
                     body: ElevatedButton(
-                      onPressed: () => const _TestChildRoute().go(context),
+                      onPressed: () => const TestChildRoute().go(context),
                       child: const Text('click me'),
                     ),
                   );
                 },
                 routes: [
                   GoRoute(
-                    path: const _TestChildRoute().goPath,
+                    path: const TestChildRoute().path,
                     builder: (context, state) {
-                      isActive = const _TestRoute().isActive(context);
+                      isActive = const TestBaseRoute().isActive(state);
                       return const Scaffold(
                         body: Text('Test Route'),
                       );
@@ -430,17 +435,17 @@ void main() {
         MaterialApp.router(
           routerConfig: GoRouter(
             navigatorKey: rootKey,
-            initialLocation: const _TestRootRoute().fullPath(),
+            initialLocation: const TestEmptyRoute().fullPath(),
             routes: [
               GoRoute(
-                path: const _TestRootRoute().goPath,
+                path: const TestEmptyRoute().path,
                 builder: (context, state) {
                   return Scaffold(
                     body: Column(
                       children: [
                         const Text('Root Route'),
                         ElevatedButton(
-                          onPressed: () => const _TestRoute().go(context),
+                          onPressed: () => const TestBaseRoute().go(context),
                           child: const Text('Click me'),
                         ),
                       ],
@@ -457,7 +462,7 @@ void main() {
                     navigatorKey: shellKey,
                     routes: [
                       GoRoute(
-                        path: const _TestRoute().goPath,
+                        path: const TestBaseRoute().path,
                         builder: (context, state) => const Scaffold(
                           body: Text('Test Route'),
                         ),
@@ -487,15 +492,15 @@ void main() {
       await tester.pumpWidget(
         MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: const _TestRoute().fullPath(),
+            initialLocation: const TestBaseRoute().fullPath(),
             routes: [
               GoRoute(
-                path: const _TestRoute().goPath,
+                path: const TestBaseRoute().path,
                 builder: (context, state) {
                   return Scaffold(
                     body: ElevatedButton(
                       onPressed: () async {
-                        returnValue = await const _TestChildRoute().push(
+                        returnValue = await const TestChildRoute().push(
                           context,
                         );
                       },
@@ -505,7 +510,7 @@ void main() {
                 },
                 routes: [
                   GoRoute(
-                    path: const _TestChildRoute().goPath,
+                    path: const TestChildRoute().path,
                     builder: (context, state) {
                       return Scaffold(
                         body: ElevatedButton(
@@ -533,62 +538,4 @@ void main() {
       expect(returnValue, 'hello world!');
     });
   });
-}
-
-enum _TestRouteParams {
-  param,
-}
-
-class _TestRootRoute extends SimpleRoute {
-  const _TestRootRoute();
-
-  @override
-  final String path = '';
-}
-
-class _TestSlashRoute extends SimpleRoute {
-  const _TestSlashRoute();
-
-  @override
-  final String path = '/';
-}
-
-class _TestSlashChildRoute extends SimpleRoute
-    implements ChildRoute<_TestSlashRoute> {
-  const _TestSlashChildRoute();
-
-  @override
-  final _TestSlashRoute parent = const _TestSlashRoute();
-
-  @override
-  final String path = 'child';
-}
-
-class _TestRoute extends SimpleRoute {
-  const _TestRoute();
-
-  @override
-  final String path = 'test';
-}
-
-class _TestChildRoute extends SimpleRoute implements ChildRoute<_TestRoute> {
-  const _TestChildRoute();
-
-  @override
-  final _TestRoute parent = const _TestRoute();
-
-  @override
-  final String path = 'child';
-}
-
-class _DuplicateTestRoute extends SimpleRoute {
-  const _DuplicateTestRoute();
-
-  @override
-  String get path => fromSegments([
-        'test',
-        'test',
-        _TestRouteParams.param.prefixed,
-        _TestRouteParams.param.prefixed,
-      ]);
 }

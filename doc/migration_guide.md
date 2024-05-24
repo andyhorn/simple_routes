@@ -2,6 +2,106 @@
 
 This document is a guide for migrating between major package versions.
 
+## 1.x.x -> 2.0.0
+
+The main impetus for this update was to simplify the API and consists, mostly, of removing restrictions.
+
+I was trying to do too much in the previous versions, which actually made the package _more_ difficult to use.
+
+This update brings SimpleRoutes more inline with its spirit: simplifying routing.
+
+### Paths
+
+In v2, defining a route's path is now done via the `super` constructor. Simply move your path from the `path` property override to the constructor.
+
+```dart
+@override
+String get path => 'users/:userId';
+```
+
+becomes
+
+```dart
+const UserDetailsRoute() : super('users/:userId');
+```
+
+### GoRoute Config
+
+The `goPath` property has been eliminated and replaced with the `path` property to more closely match the `GoRoute` API.
+
+```dart
+GoRoute(
+    path: const UserDetailsRoute().goPath,
+),
+```
+
+becomes
+
+```dart
+GoRoute(
+    path: const UserDetailsRoute().path,
+),
+```
+
+**Note**: I know I made you change from `path` to `goPath` in the previous major version bump. We all make mistakes, right?
+
+### Route Data Properties
+
+In an effort to make SimpleRoutes more simple, all of the route data properties have been changed from requiring an `Enum` key to accepting a `String` and trusting that you know what you're doing.
+
+```dart
+@override
+Map<Enum, String> get properties => {
+    RouteParams.userId: userId,
+};
+```
+
+becomes
+
+```dart
+Map<String, String> get properties => {
+    'userId': userId,
+};
+```
+
+and
+
+```dart
+Map<Enum, String?> get query => {
+    RouteParams.queryKey: query,
+};
+```
+
+becomes
+
+```dart
+Map<String, String?> get query => {
+    'queryKey': query,
+};
+```
+
+### GoRouterState Extensions
+
+All of the `GoRouterState` extensions have been removed. These were initially intended to provide some real value, but become nothing more than wrappers around the `GoRouterState` properties, so they were removed.
+
+### Location
+
+The route location methods (`isCurrentRoute`, `isParentRoute`, `isActive`) have been modified to accept a `GoRouterState` object instead of a `BuildContext`.
+
+Requiring the `BuildContext` was supposed to make them easier to use, but they prevented these methods from being usable inside a `GoRoute` builder or redirect.
+
+If you're using one of these inside a widget, just use `GoRouterState.of(context)` to acquire the state object.
+
+```dart
+const MyRoute().isActive(context);
+```
+
+becomes
+
+```dart
+const MyRoute().isActive(GoRouterState.of(context));
+```
+
 ## 0.0.11 -> 1.0.0
 
 This section will guide you through the breaking changes introduced in the 1.0.0 release and how to migrate your code.

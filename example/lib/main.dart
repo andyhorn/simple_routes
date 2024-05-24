@@ -4,28 +4,27 @@
 import 'package:example/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:simple_routes/simple_routes.dart';
 
 // Define your root-level routes and sub-routes in the same way.
 final router = GoRouter(
   debugLogDiagnostics: true,
   routes: [
     GoRoute(
-      // Use the [goPath] property to define the route's path.
-      path: const RootRoute().goPath,
+      // Use the [path] property to define the route's path.
+      path: const RootRoute().path,
       builder: (context, state) => const RootPage(),
       routes: [
         GoRoute(
-          path: const DashboardRoute().goPath,
+          path: const DashboardRoute().path,
           builder: (context, state) => const DashboardPage(),
         ),
       ],
     ),
     GoRoute(
-      path: const ProfileRoute().goPath,
+      path: const ProfileRoute().path,
       redirect: (context, state) {
         // Use the GoRouterState extension methods to validate the route data.
-        if (state.getParam(RouteParams.userId) == null) {
+        if (state.pathParameters['userId'] == null) {
           // When redirecting, use the `fullPath` method.
           return const RootRoute().fullPath();
         }
@@ -33,18 +32,22 @@ final router = GoRouter(
         return null;
       },
       builder: (context, state) {
-        // Use a factory class to extract your route data.
+        // Use a factory to extract your route data.
         // This is especially useful if you have multiple routes that use the
         // same data class or if your route has many parameters.
-        final profileRouteData = ProfileEditRouteData.fromState(state);
+        final profileRouteData = ProfileRouteData.fromState(state);
 
         return ProfilePage(userId: profileRouteData.userId);
       },
       routes: [
         GoRoute(
-          path: const ProfileEditRoute().goPath,
-          builder: (context, state) => ProfileEditPage(
-            filter: ProfileEditRouteData.fromState(state).filter,
+          path: const ProfileEditRoute().path,
+          builder: (context, state) => const ProfileEditPage(),
+        ),
+        GoRoute(
+          path: const AdditionalDataRoute().path,
+          builder: (context, state) => AdditionalRouteDataPage(
+            queryValue: AdditionalRouteData.fromState(state).queryValue,
           ),
         ),
       ],
@@ -101,12 +104,22 @@ class NavButtons extends StatelessWidget {
         ElevatedButton(
           onPressed: () => const ProfileEditRoute().go(
             context,
-            data: const ProfileEditRouteData(
+            data: const ProfileRouteData(
               userId: '123',
-              filter: 'filterValue',
             ),
           ),
           child: const Text('Go to profile edit'),
+        ),
+        const SizedBox(height: 12),
+        ElevatedButton(
+          onPressed: () => const AdditionalDataRoute().go(
+            context,
+            data: const AdditionalRouteData(
+              userId: '123',
+              queryValue: 'hello world!',
+            ),
+          ),
+          child: const Text('Go to Additional Data route'),
         ),
       ],
     );
@@ -163,14 +176,11 @@ class ProfilePage extends StatelessWidget {
 class ProfileEditPage extends StatelessWidget {
   const ProfileEditPage({
     super.key,
-    required this.filter,
   });
-
-  final String? filter;
 
   @override
   Widget build(BuildContext context) {
-    final profileRouteData = ProfileEditRouteData.fromState(
+    final profileRouteData = ProfileRouteData.fromState(
       GoRouterState.of(context),
     );
 
@@ -178,7 +188,27 @@ class ProfileEditPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text('Profile edit page for ${profileRouteData.userId}'),
-        Text('Filter: ${filter ?? 'none'}'),
+        const NavButtons(),
+      ],
+    );
+  }
+}
+
+class AdditionalRouteDataPage extends StatelessWidget {
+  const AdditionalRouteDataPage({
+    super.key,
+    this.queryValue,
+  });
+
+  final String? queryValue;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text('Additional Data Route'),
+        Text('Query value: $queryValue'),
         const NavButtons(),
       ],
     );

@@ -1,116 +1,133 @@
+// ignore_for_file: slash_for_doc_comments
+
 import 'package:go_router/go_router.dart';
 import 'package:simple_routes/simple_routes.dart';
 
-// Simple base route
+/*** Basic Route Example ***/
 
-// Declare your route as a child of [SimpleRoute] or
-// [DataRoute] (see more below).
+// Declare a route class as a child of [SimpleRoute] and pass its "path" to
+// the `super` constructor.
+//
+// In this example, we're using the constant `SimpleRoute.root` value, which is
+// a forward slash ('/').
 class RootRoute extends SimpleRoute {
-  const RootRoute();
-
-  // override the [path] to define the path of this route.
-  @override
-  final String path = '/';
+  const RootRoute() : super(SimpleRoute.root);
 }
 
-// Simple child route
-// Declare your child route as a child of [SimpleRoute] and an implementation
-// of the [ChildRoute] interface.
+/*** Basic Child Route Example ***/
+
+// Declare a route class, extending [SimpleRoute] and implement the
+// [ChildRoute] interface, supplying the parent route's type.
 class DashboardRoute extends SimpleRoute implements ChildRoute<RootRoute> {
-  const DashboardRoute();
+  // Pass the path of this route to the `super` constructor.
+  //
+  // Do not add any leading or trailing slashes - just the path segment for
+  // this route.
+  const DashboardRoute() : super('dashboard');
 
-  // override the [path] to define the path of this route.
-  // Note: This should be everything that comes _after_ the parent's path,
-  // without any leading slash. e.g. 'dashboard'.
-  @override
-  final String path = 'dashboard';
-
-  // override the [parent] getter to return an instance of the parent route.
+  // Override the [parent] getter to return an instance of the parent route.
   @override
   RootRoute get parent => const RootRoute();
 }
 
-// Simple data route
+/*** Data Route Example ***/
 
-// Define an enum to use as the path parameter templates for your routes.
-enum RouteParams {
-  userId,
-  filter,
-}
-
-// Define some data for your route as a child of [SimpleRouteData].
+// Before defining the route class, we must define a data class as a child of
+// the [SimpleRouteData] base class.
+//
+// This class will be responsible for supplying the data needed to generate the
+// URL for your route.
+//
+// In this example, the "profile" route will require a value for the user ID,
+// so our data class will need a `userId` property. This value will then be
+// used in the [parameters] map to tell SimpleRoutes what and how to inject
+// the value.
 class ProfileRouteData extends SimpleRouteData {
   const ProfileRouteData({required this.userId});
 
+  // Use a factory or named constructor to extract the necessary data from an
+  // instance of [GoRouterState]. This encapsulates any validation or parsing
+  // logic inside the data class instead of doing it inside the route builder.
+  ProfileRouteData.fromState(GoRouterState state)
+      : userId = state.pathParameters['userId']!;
+
   final String userId;
 
-  // Override the [parameters] getter to define the path parameters for this
-  // route, using the enum you defined above.
+  // Override the [parameters] getter to define the parameters for this route.
+  //
+  // In this case, we want to inject the [userId] value into the path, replacing
+  // ":userId" in the path template.
   @override
-  Map<Enum, String> get parameters => {
-        RouteParams.userId: userId,
-      };
+  Map<String, String> get parameters => {'userId': userId};
 }
 
-// Define your route as a child of [DataRoute].
-class ProfileRoute extends DataRoute<ProfileRouteData> {
-  const ProfileRoute();
-
-  // Override the [path] getter to define the path of this route.
-  // Since this is a [DataRoute], it should contain some dynamic variable, such
-  // as a userId. e.g. '/profile/:userId'.
-  //
-  // Use the `prefixed` property to add the colon (:) prefix to your
-  // parameter in the template, and use the [join] method to join the path
-  // segments together.
-  //
-  // You can craft this template yourself, but the extension methods are
-  // here to help.
-  @override
-  String get path => fromSegments([
-        'profile',
-        RouteParams.userId.prefixed,
-      ]);
+// Then, define your route as a child of [SimpleDataRoute], providing the type
+// of your data class.
+class ProfileRoute extends SimpleDataRoute<ProfileRouteData> {
+  // Since this is a [SimpleDataRoute], the path should contain some dynamic
+  // variable, such as a userId. Make sure to prefix the value with a colon (:),
+  // just as you would in your GoRoute definition.
+  const ProfileRoute() : super('profile/:userId');
 }
 
-// Child data route
+/*** Data Route Child Example ***/
 
-// Define your route as a child of [DataRoute] with its appropriate data type
-// and implement the [ChildRoute] interface.
-class ProfileEditRoute extends DataRoute<ProfileRouteData>
+// If you have child routes of a data route, they will also need to be data
+// routes. This is because the parent route(s) need their data, even if this
+// route does not.
+//
+// If the child route does not require any unique data of its own, simply extend
+// the [SimpleDataRoute] base class with the data type of its parent.
+class ProfileEditRoute extends SimpleDataRoute<ProfileRouteData>
     implements ChildRoute<ProfileRoute> {
-  const ProfileEditRoute();
-
-  // override the [path] getter with this route's path.
-  @override
-  String get path => 'edit';
+  const ProfileEditRoute() : super('edit');
 
   // override the [parent] getter to return an instance of this route's parent.
   @override
   ProfileRoute get parent => const ProfileRoute();
 }
 
-class ProfileEditRouteData extends ProfileRouteData {
-  const ProfileEditRouteData({
+// If, however, your child route requires its own data, such as a path parameter
+// or query params, you will need to create a new route data class. You can
+// create an entirely new route data class OR you can extend the parent's route
+// data class.
+class AdditionalRouteData extends ProfileRouteData {
+  const AdditionalRouteData({
+    // Make sure to provide any data needed by the parent route(s).
     required super.userId,
-    required this.filter,
+    this.queryValue,
   });
 
-  // Define a factory constructor to easily extract the route data from
-  // [GoRouterState].
-  factory ProfileEditRouteData.fromState(GoRouterState state) {
-    return ProfileEditRouteData(
-      userId: state.getParam(RouteParams.userId)!,
-      filter: state.getQuery(RouteParams.filter),
-    );
-  }
+  AdditionalRouteData.fromState(GoRouterState state)
+      : queryValue = state.uri.queryParameters['queryName'],
+        super(userId: state.pathParameters['userId']!);
 
-  final String? filter;
+  final String? queryValue;
 
-  // Provide an implementation of the [query] getter to define the
-  // query parameters for this route.
+  // If you don't need to add any parameters, you can get away with not
+  // overriding the parameters. Since we're extending the parent's route data
+  // class and providing it with its data, it will properly inject the
+  // parameters.
+  //
+  // @override
+  // Map<String, String> get parameters => {
+  //   'userId': userId,
+  // };
+
+  // Supply the data unique to this route. For example, an optional query
+  // param. If the value is null, it will not be added to the URL.
+  //
+  // All query parameter values are URL encoded.
   @override
-  Map<Enum, String?> get query => {
-        RouteParams.filter: filter,
+  Map<String, String?> get query => {
+        'queryName': queryValue,
       };
+}
+
+class AdditionalDataRoute extends SimpleDataRoute<AdditionalRouteData>
+    implements ChildRoute<ProfileRoute> {
+  const AdditionalDataRoute() : super('additional');
+
+  @override
+  ProfileRoute get parent => const ProfileRoute();
 }
