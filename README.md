@@ -203,8 +203,8 @@ Below is a full example of a GoRouter configuration, including a route protected
 
 ```dart
 GoRouter(
-  // Note that the initialLocation should use the "fullPath" property
-  // to include any parent routes, if applicable.
+  // Note that the initialLocation should use the "fullPath" method to
+	// ensure it uses the fully-qualified URI.
   initialLocation: const HomeRoute().fullPath(),
   routes: [
     GoRoute(
@@ -214,9 +214,7 @@ GoRouter(
     GoRoute(
       path: const UserRoute().path,
       redirect: (context, state) {
-        // Use the extension methods to validate that any and all
-        // required values are present.
-
+				// Validate the presence of the necessary parameters.
         if (state.pathParameters['userId'] == null) {
           // If the data is not present, redirect to another route
           // using the `fullPath` method.
@@ -343,6 +341,7 @@ and your app is at the location of `/base/sub`:
 
 ```dart
 // current location: '/base/sub'
+final state = GoRouterState.of(context);
 if (const SubRoute().isCurrentRoute(state)) {
   debugPrint('We are at SubRoute!');
 }
@@ -358,6 +357,7 @@ For example, if your app is at the location of `/base/sub`:
 
 ```dart
 // current location: '/base/sub'
+final state = GoRouterState.of(context);
 if (const BaseRoute().isParentRoute(state)) {
   debugPrint('We are at a child of BaseRoute!');
 }
@@ -371,6 +371,7 @@ For example, if we are at the `/base/sub` location and use `isParentRoute`, it w
 
 ```dart
 // current location: '/base/sub'
+final state = GoRouterState.of(context);
 if (const SubRoute().isParentRoute(state)) {
   debugPrint('Success!'); // will not be executed
 }
@@ -388,6 +389,7 @@ For example, if your app is at the location of `/base/sub`:
 
 ```dart
 // current location: '/base/sub'
+final state = GoRouterState.of(context);
 if (const BaseRoute().isActive(state)) {
   debugPrint('BaseRoute is active!');
 }
@@ -399,6 +401,7 @@ If your app is at the location of `/base`:
 
 ```dart
 // current location: '/base'
+final state = GoRouterState.of(context);
 if (const BaseRoute().isActive(state)) {
   debugPrint('BaseRoute is active!');
 }
