@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2.0.0-rc.3
+
+- Fixed typos in README
+- Improved location matcher section of README
+
 ## 2.0.0-rc.2
 
 - Get rid of the `path` property override and, instead, supply the path segment into the `super` ctor
@@ -81,21 +86,22 @@ This release includes a significant rework of the API to improve the developer e
 Please see the [Migration Guide](doc/migration_guide.md) for information on how to migrate your code to this version from the pre-release versions.
 
 ### New Features
-  * Path parameters are now injected automatically, based on the `parameters` property
-  * Query parameters are now appended automatically, based on the `query` property
-  * Extra data is now injected automatically, based on the `extra` property
-  * Automatic leading-slash management - no more worrying about whether or not to add a leading slash to your route's `path`
-  * Get the full path of a `DataRoute`, with all template parameters populated, using the new `generate` method
+
+- Path parameters are now injected automatically, based on the `parameters` property
+- Query parameters are now appended automatically, based on the `query` property
+- Extra data is now injected automatically, based on the `extra` property
+- Automatic leading-slash management - no more worrying about whether or not to add a leading slash to your route's `path`
+- Get the full path of a `DataRoute`, with all template parameters populated, using the new `generate` method
 
 ### Breaking Changes
 
 This release includes a few breaking changes.
 
-  * The `query` parameter of the `go` method has been removed
-  * The `push` argument of the `go` method has been removed
-  * A new `goPath` property has been added to the `SimpleRoute` class and should be used when defining your `GoRoute`s
-  * The `inject` method has been removed from the `DataRoute` class
-  * The helper methods have all been removed in favor of extensions and class methods
+- The `query` parameter of the `go` method has been removed
+- The `push` argument of the `go` method has been removed
+- A new `goPath` property has been added to the `SimpleRoute` class and should be used when defining your `GoRoute`s
+- The `inject` method has been removed from the `DataRoute` class
+- The helper methods have all been removed in favor of extensions and class methods
 
 ## 0.0.11
 
@@ -139,8 +145,8 @@ Instead of writing:
 
 ```dart
 const MyRoute().go(
-  context, 
-  const MyRouteData('some-value'), 
+  context,
+  const MyRouteData('some-value'),
   {'key': 'value'},
 );
 ```
@@ -149,8 +155,8 @@ You will now need to write it as:
 
 ```dart
 const MyRoute().go(
-  context, 
-  data: const MyRouteData('some-value'), 
+  context,
+  data: const MyRouteData('some-value'),
   query: {'key': 'value'},
 );
 ```
