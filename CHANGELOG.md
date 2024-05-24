@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.0.0
+
+New major version release! See the release candidate notes below.
+
 ## 2.0.0-rc.3
 
 - Fixed typos in README
