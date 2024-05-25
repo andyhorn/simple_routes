@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2.0.1
+
+- Remove unused extensions
+- Update missing info in documentation
+
 ## 2.0.0
 
 New major version release! See the release candidate notes below.
@@ -12,6 +17,7 @@ New major version release! See the release candidate notes below.
 ## 2.0.0-rc.2
 
 - Get rid of the `path` property override and, instead, supply the path segment into the `super` ctor
+- Change extensions (ended up not using them, removed in 2.0.1)
 - Eliminated the `goPath` property (use the `path` property instead)
 - Improved example and documentation
 
