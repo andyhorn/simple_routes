@@ -1,6 +1,6 @@
 name: simple_routes
 description: Simple, declarative route and navigation management for go_router.
-version: 2.0.2
+version: 2.0.2+2
 homepage: https://github.com/andyhorn/simple_routes
 
 environment:
@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  go_router: ">=12.0.0"
+  go_router: ">=12.0.0 <16.0.0"
 
 dev_dependencies:
   flutter_test:
