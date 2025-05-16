@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.0.2
+- Update Flutter version to 3.29.3
+- Update dependencies
+
 ## 2.0.1
 
 - Remove unused extensions
