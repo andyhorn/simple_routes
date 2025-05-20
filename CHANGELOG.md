@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 2.0.3
+- Bump version to remove extra "+" tag
+
 ## 2.0.2
 - Update Flutter version to 3.29.3
 - Update dependencies
