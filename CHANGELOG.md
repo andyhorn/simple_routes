@@ -1,18 +1,21 @@
 # CHANGELOG
 
-## 2.0.3
+## 2.0.4 - 9/29/2025
+- Add support for go_router <17.0.0
+
+## 2.0.3 - 5/20/2025
 - Bump version to remove extra "+" tag
 
-## 2.0.2
+## 2.0.2 - 5/13/2025
 - Update Flutter version to 3.29.3
 - Update dependencies
 
-## 2.0.1
+## 2.0.1 - 5/25/2024
 
 - Remove unused extensions
 - Update missing info in documentation
 
-## 2.0.0
+## 2.0.0 - 5/23/2024
 
 New major version release! See the release candidate notes below.
 
