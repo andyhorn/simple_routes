@@ -32,12 +32,9 @@ final router = GoRouter(
         return null;
       },
       builder: (context, state) {
-        // Use a factory to extract your route data.
-        // This is especially useful if you have multiple routes that use the
-        // same data class or if your route has many parameters.
-        final profileRouteData = ProfileRouteData.fromState(state);
+        final profileData = state.profileData;
 
-        return ProfilePage(userId: profileRouteData.userId);
+        return ProfilePage(userId: profileData.userId);
       },
       routes: [
         GoRoute(
@@ -47,7 +44,7 @@ final router = GoRouter(
         GoRoute(
           path: const AdditionalDataRoute().path,
           builder: (context, state) => AdditionalRouteDataPage(
-            queryValue: AdditionalRouteData.fromState(state).queryValue,
+            queryValue: state.additionalDataData.queryValue,
           ),
         ),
       ],
@@ -96,7 +93,7 @@ class NavButtons extends StatelessWidget {
         ElevatedButton(
           onPressed: () => const ProfileRoute().go(
             context,
-            data: const ProfileRouteData(userId: '123'),
+            data: const ProfileData(userId: '123'),
           ),
           child: const Text('Go to profile'),
         ),
@@ -104,7 +101,7 @@ class NavButtons extends StatelessWidget {
         ElevatedButton(
           onPressed: () => const ProfileEditRoute().go(
             context,
-            data: const ProfileRouteData(
+            data: const ProfileEditData(
               userId: '123',
             ),
           ),
@@ -114,7 +111,7 @@ class NavButtons extends StatelessWidget {
         ElevatedButton(
           onPressed: () => const AdditionalDataRoute().go(
             context,
-            data: const AdditionalRouteData(
+            data: const AdditionalDataData(
               userId: '123',
               queryValue: 'hello world!',
             ),
@@ -180,14 +177,12 @@ class ProfileEditPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final profileRouteData = ProfileRouteData.fromState(
-      GoRouterState.of(context),
-    );
+    final profileData = GoRouterState.of(context).profileEditData;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text('Profile edit page for ${profileRouteData.userId}'),
+        Text('Profile edit page for ${profileData.userId}'),
         const NavButtons(),
       ],
     );

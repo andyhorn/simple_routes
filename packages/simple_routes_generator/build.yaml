@@ -1,0 +1,8 @@
+builders:
+  simple_routes_generator:
+    import: "package:simple_routes_generator/simple_routes_generator.dart"
+    builder_factories: ["simpleRouteBuilder"]
+    build_extensions: { ".dart": [".simple_routes.g.part"] }
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]
