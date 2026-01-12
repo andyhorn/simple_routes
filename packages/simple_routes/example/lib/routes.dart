@@ -20,6 +20,12 @@ class Profile extends _$Profile {
 @Route('edit', parent: Profile)
 class ProfileEdit extends _$ProfileEdit {}
 
+@Route('settings', parent: Profile)
+class ProfileSettings extends _$ProfileSettings {}
+
+@Route('child', parent: Dashboard)
+class DashboardChild extends _$DashboardChild {}
+
 @Route('additional', parent: Profile)
 class AdditionalData extends _$AdditionalData {
   const AdditionalData({this.queryValue});

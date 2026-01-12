@@ -35,7 +35,11 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
 
     final path = annotation.read('path').stringValue;
     final parentReader = annotation.read('parent');
-    final parent = parentReader.isNull ? null : parentReader.typeValue;
+    final parentType = parentReader.isNull ? null : parentReader.typeValue;
+
+    final isData =
+        dataSources.isNotEmpty ||
+        (parentType is InterfaceType && _isSimpleDataRoute(parentType));
 
     final library = Library((l) {
       l.body.add(_generateBaseClass(blueprint));
@@ -43,11 +47,11 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
         _generateRouteClass(
           blueprint,
           path,
-          dataSources.isNotEmpty,
-          parent as InterfaceType?,
+          isData,
+          parentType as InterfaceType?,
         ),
       );
-      if (dataSources.isNotEmpty) {
+      if (isData) {
         l.body.add(_generateDataClass(blueprint, dataSources, allPathParams));
         l.body.add(
           _generateStateExtension(blueprint, dataSources, allPathParams),
@@ -342,70 +346,37 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     List<_RouteInfo> hierarchy,
     List<String> allPathParams,
   ) {
-    final dataSources = <_DataSource>[];
-    final satisfiedPathParams = <String>{};
+    final dataSources = <String, _DataSource>{};
 
-    // 1. Check current blueprint for all fields/getters
-    final explicitDataSources = [
-      ...blueprint.fields
-          .where((f) => !f.isStatic)
-          .map((f) => _DataSource(f.name, f.type, f)),
-      ...blueprint.accessors
-          .where((a) => a.isGetter && !a.isStatic && !a.isSynthetic)
-          .map((g) => _DataSource(g.name, g.returnType, g)),
-    ];
+    // Process hierarchy from leaf to root to collect all fields/getters.
+    // Leaf-most definition wins in case of overrides.
+    for (var i = 0; i < hierarchy.length; i++) {
+      final currentBlueprint = hierarchy[i].element;
+      final explicitSources = [
+        ...currentBlueprint.fields
+            .where((f) => !f.isStatic)
+            .map((f) => _DataSource(f.name, f.type, f)),
+        ...currentBlueprint.accessors
+            .where((a) => a.isGetter && !a.isStatic && !a.isSynthetic)
+            .map((g) => _DataSource(g.name, g.returnType, g)),
+      ];
 
-    for (final source in explicitDataSources) {
-      dataSources.add(source);
-      for (final paramName in allPathParams) {
-        if (_matchesParam(source, paramName)) {
-          satisfiedPathParams.add(paramName);
+      for (final source in explicitSources) {
+        if (!dataSources.containsKey(source.name)) {
+          dataSources[source.name] = source;
         }
       }
     }
 
-    // 2. Inherit missing path params from parents
-    for (final paramName in allPathParams) {
-      if (!satisfiedPathParams.contains(paramName)) {
-        for (var i = 1; i < hierarchy.length; i++) {
-          final parentBlueprint = hierarchy[i].element;
-          final parentSources = [
-            ...parentBlueprint.fields
-                .where((f) => !f.isStatic)
-                .map((f) => _DataSource(f.name, f.type, f)),
-            ...parentBlueprint.accessors
-                .where((a) => a.isGetter && !a.isStatic && !a.isSynthetic)
-                .map((g) => _DataSource(g.name, g.returnType, g)),
-          ];
-
-          _DataSource? matchingSource;
-          for (final source in parentSources) {
-            if (_matchesParam(source, paramName)) {
-              matchingSource = source;
-              break;
-            }
-          }
-
-          if (matchingSource != null) {
-            dataSources.add(matchingSource);
-            satisfiedPathParams.add(paramName);
-            break;
-          }
-        }
-      }
-    }
-
-    return dataSources;
+    return dataSources.values.toList();
   }
 
-  bool _matchesParam(_DataSource source, String paramName) {
-    final pathAnnotation = const TypeChecker.fromRuntime(
-      Path,
-    ).firstAnnotationOf(source.element);
-    if (pathAnnotation != null) {
-      return pathAnnotation.getField('name')?.toStringValue() == paramName;
+  bool _isSimpleDataRoute(InterfaceType type) {
+    if (type.element.name == 'SimpleDataRoute') return true;
+    for (final supertype in type.allSupertypes) {
+      if (supertype.element.name == 'SimpleDataRoute') return true;
     }
-    return source.name == paramName;
+    return false;
   }
 }
 

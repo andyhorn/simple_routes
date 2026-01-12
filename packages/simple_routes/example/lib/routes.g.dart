@@ -75,6 +75,47 @@ extension ProfileEditStateX on GoRouterState {
       ProfileEditData(id: pathParameters['userId']!);
 }
 
+abstract class _$ProfileSettings {
+  const _$ProfileSettings();
+}
+
+class ProfileSettingsRoute extends SimpleDataRoute<ProfileSettingsData>
+    implements ChildRoute<ProfileRoute> {
+  const ProfileSettingsRoute() : super('settings');
+
+  @override
+  ProfileRoute get parent => const ProfileRoute();
+}
+
+class ProfileSettingsData extends SimpleRouteData {
+  const ProfileSettingsData({required this.id});
+
+  final String id;
+
+  @override
+  Map<String, String> get parameters => {'userId': id};
+
+  @override
+  Map<String, String?> get query => {};
+}
+
+extension ProfileSettingsStateX on GoRouterState {
+  ProfileSettingsData get profileSettingsData =>
+      ProfileSettingsData(id: pathParameters['userId']!);
+}
+
+abstract class _$DashboardChild {
+  const _$DashboardChild();
+}
+
+class DashboardChildRoute extends SimpleRoute
+    implements ChildRoute<DashboardRoute> {
+  const DashboardChildRoute() : super('child');
+
+  @override
+  DashboardRoute get parent => const DashboardRoute();
+}
+
 abstract class _$AdditionalData {
   const _$AdditionalData();
 }
