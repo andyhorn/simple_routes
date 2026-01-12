@@ -22,10 +22,13 @@ jobs:
         with:
           sdk: stable
       - name: Restore packages
-        run: flutter pub get
+        run: |
+          dart pub global activate melos
+          melos bootstrap
       - name: Analyze
-        run: flutter analyze
+        run: melos run analyze
       - name: Test
-        run: flutter test
+        run: melos run test
       - name: Publish
+        working-directory: packages/simple_routes
         run: dart pub publish --force
