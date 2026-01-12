@@ -234,5 +234,77 @@ abstract class User {
         },
       );
     });
+
+    test('generates route with bool and enum parameters', () async {
+      await testBuilder(
+        simpleRouteBuilder(BuilderOptions.empty),
+        {
+          ...annotationsAsset,
+          'a|lib/routes.dart': '''
+import 'package:simple_routes_annotations/simple_routes_annotations.dart';
+
+part 'routes.g.dart';
+
+enum MyStatus { active, inactive }
+
+@Route('dashboard')
+abstract class Dashboard {
+  @Query()
+  bool get isAdmin;
+  
+  @Query()
+  MyStatus get status;
+}
+''',
+        },
+        outputs: {
+          'a|lib/routes.simple_routes.g.part': decodedMatches(
+            allOf(
+              contains("== 'true'"),
+              contains(
+                "MyStatus.values.byName(state.uri.queryParameters['status']!)",
+              ),
+              contains("'isAdmin': isAdmin.toString()"),
+              contains("'status': status.name"),
+            ),
+          ),
+        },
+      );
+    });
+
+    test('generates route with numeric and DateTime parameters', () async {
+      await testBuilder(
+        simpleRouteBuilder(BuilderOptions.empty),
+        {
+          ...annotationsAsset,
+          'a|lib/routes.dart': '''
+import 'package:simple_routes_annotations/simple_routes_annotations.dart';
+
+part 'routes.g.dart';
+
+@Route('metrics')
+abstract class Metrics {
+  @Query()
+  double get value;
+  
+  @Query()
+  DateTime get timestamp;
+}
+''',
+        },
+        outputs: {
+          'a|lib/routes.simple_routes.g.part': decodedMatches(
+            allOf(
+              contains("double.parse(state.uri.queryParameters['value']!)"),
+              contains(
+                "DateTime.parse(state.uri.queryParameters['timestamp']!)",
+              ),
+              contains("'value': value.toString()"),
+              contains("'timestamp': timestamp.toIso8601String()"),
+            ),
+          ),
+        },
+      );
+    });
   });
 }

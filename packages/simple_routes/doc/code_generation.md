@@ -135,9 +135,11 @@ This factory handles:
 
 ## Type Support
 
-The generator currently supports:
-- `String`: Default type for parameters.
-- `int`: Automatically parsed using `int.parse`.
-- `double`: Automatically parsed using `double.parse`.
-- `Enum`: (Handled as String, you can map them in your UI).
+The generator currently supports several types for path and query parameters:
+
+- `String`: Default type.
+- `int`, `double`, `num`: Automatically parsed using `.parse()`.
+- `bool`: Parsed from the string `'true'`.
+- `Enum`: Automatically converted using `.name` and restored via `values.byName()`.
+- `DateTime`: Automatically converted using `.toIso8601String()` and restored via `DateTime.parse()`.
 - `Custom Objects`: Supported via the `@Extra` annotation.

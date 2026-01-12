@@ -163,9 +163,10 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
           for (final source in dataSources) {
             if (source.isPath) {
               final paramName = source.paramName ?? source.name;
-              mapValues[paramName] = source.type.isDartCoreString
-                  ? refer(source.name)
-                  : refer(source.name).property('toString').call([]);
+              mapValues[paramName] = _serializeType(
+                refer(source.name),
+                source.type,
+              );
             }
           }
           m.body = literalMap(mapValues).code;
@@ -184,14 +185,10 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
           for (final source in dataSources) {
             if (source.isQuery) {
               final queryName = source.paramName ?? source.name;
-              if (source.type.isDartCoreString) {
-                mapValues[queryName] = refer(source.name);
-              } else {
-                mapValues[queryName] =
-                    source.type.nullabilitySuffix == NullabilitySuffix.none
-                    ? refer(source.name).property('toString').call([])
-                    : refer(source.name).nullSafeProperty('toString').call([]);
-              }
+              mapValues[queryName] = _serializeType(
+                refer(source.name),
+                source.type,
+              );
             }
           }
           m.body = literalMap(mapValues).code;
@@ -269,9 +266,61 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
       return refer('int').property('parse').call([expr]);
     }
 
+    if (type.isDartCoreDouble) {
+      return refer('double').property('parse').call([expr]);
+    }
+
+    if (type.isDartCoreNum) {
+      return refer('num').property('parse').call([expr]);
+    }
+
+    if (type.getDisplayString(withNullability: false) == 'DateTime') {
+      return refer('DateTime').property('parse').call([expr]);
+    }
+
+    if (type.isDartCoreBool) {
+      return expr.equalTo(literalString('true'));
+    }
+
+    if (type is InterfaceType && type.element is EnumElement) {
+      final enumName = type.element.name;
+      final byNameCall = refer(
+        enumName,
+      ).property('values').property('byName').call([expr]);
+
+      if (isNullable) {
+        return source
+            .notEqualTo(literalNull)
+            .conditional(byNameCall, literalNull);
+      }
+      return byNameCall;
+    }
+
     return isNullable
         ? source.nullSafeProperty('toString').call([])
         : source.nullChecked.property('toString').call([]);
+  }
+
+  Expression _serializeType(Expression source, DartType type) {
+    final isNullable = type.nullabilitySuffix != NullabilitySuffix.none;
+
+    if (type.isDartCoreString) return source;
+
+    if (type is InterfaceType && type.element is EnumElement) {
+      return isNullable
+          ? source.nullSafeProperty('name')
+          : source.property('name');
+    }
+
+    if (type.getDisplayString(withNullability: false) == 'DateTime') {
+      return isNullable
+          ? source.nullSafeProperty('toIso8601String').call([])
+          : source.property('toIso8601String').call([]);
+    }
+
+    return isNullable
+        ? source.nullSafeProperty('toString').call([])
+        : source.property('toString').call([]);
   }
 
   List<_RouteInfo> _getHierarchy(
