@@ -31,7 +31,7 @@ final router = GoRouter(
         return null;
       },
       builder: (context, state) {
-        final profileData = state.profileData;
+        final profileData = state.profile;
 
         return ProfilePage(userId: profileData.id);
       },
@@ -43,7 +43,7 @@ final router = GoRouter(
         GoRoute(
           path: const AdditionalDataRoute().path,
           builder: (context, state) => AdditionalRouteDataPage(
-            queryValue: state.additionalDataData.queryValue,
+            queryValue: state.additionalData.queryValue,
           ),
         ),
       ],
@@ -92,7 +92,7 @@ class NavButtons extends StatelessWidget {
         ElevatedButton(
           onPressed: () => const ProfileRoute().go(
             context,
-            data: const ProfileData(id: '123'),
+            data: const ProfileRouteData(id: '123'),
           ),
           child: const Text('Go to profile'),
         ),
@@ -100,7 +100,7 @@ class NavButtons extends StatelessWidget {
         ElevatedButton(
           onPressed: () => const ProfileEditRoute().go(
             context,
-            data: const ProfileEditData(
+            data: const ProfileEditRouteData(
               id: '123',
             ),
           ),
@@ -110,7 +110,7 @@ class NavButtons extends StatelessWidget {
         ElevatedButton(
           onPressed: () => const AdditionalDataRoute().go(
             context,
-            data: const AdditionalDataData(
+            data: const AdditionalDataRouteData(
               id: '123',
               queryValue: 'hello world!',
             ),
@@ -176,7 +176,7 @@ class ProfileEditPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final profileData = GoRouterState.of(context).profileEditData;
+    final profileData = GoRouterState.of(context).profileEdit;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,

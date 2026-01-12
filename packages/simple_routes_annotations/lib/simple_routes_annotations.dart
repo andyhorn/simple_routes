@@ -35,15 +35,27 @@ class Query {
 ///
 /// ```dart
 /// @Route('users/:userId')
-/// class UserRoute extends _$UserRoute {
-///   @Path('userId')
-///   final String id;
+/// abstract class UserRoute with _$UserRoute {
+///   const factory UserRoute({
+///     @Path('userId') required String id,
+///   }) = _UserRoute;
 /// }
 /// ```
 @immutable
 class Path {
-  const Path(this.name);
+  const Path([this.name]);
 
-  /// The name of the path parameter in the template.
-  final String name;
+  /// The name of the path parameter in the template. If null, the field name is used.
+  final String? name;
+}
+
+/// Annotation to define an extra parameter.
+///
+/// ```dart
+/// @Extra()
+/// final MyExtraData extra;
+/// ```
+@immutable
+class Extra {
+  const Extra();
 }

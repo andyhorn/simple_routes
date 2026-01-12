@@ -4,32 +4,40 @@ import 'package:simple_routes/simple_routes.dart';
 part 'routes.g.dart';
 
 @Route('/')
-class Root extends _$Root {}
+abstract class Root {}
 
 @Route('dashboard')
-class Dashboard extends _$Dashboard {}
+abstract class Dashboard {}
 
 @Route('profile/:userId')
-class Profile extends _$Profile {
-  const Profile({required this.id});
-
+abstract class Profile {
   @Path('userId')
-  final String id;
+  String get id;
 }
 
 @Route('edit', parent: Profile)
-class ProfileEdit extends _$ProfileEdit {}
+abstract class ProfileEdit {
+  @Path('userId')
+  String get id;
+}
 
 @Route('settings', parent: Profile)
-class ProfileSettings extends _$ProfileSettings {}
+abstract class ProfileSettings {
+  @Path('userId')
+  String get id;
+
+  @Query()
+  String? get theme;
+}
 
 @Route('child', parent: Dashboard)
-class DashboardChild extends _$DashboardChild {}
+abstract class DashboardChild {}
 
 @Route('additional', parent: Profile)
-class AdditionalData extends _$AdditionalData {
-  const AdditionalData({this.queryValue});
+abstract class AdditionalData {
+  @Path('userId')
+  String get id;
 
   @Query('queryName')
-  final String? queryValue;
+  String? get queryValue;
 }
