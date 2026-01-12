@@ -28,6 +28,7 @@ Any dynamic segment in your route path (e.g., `:userId`) must be represented in 
 - Use `@Path()` on a getter or field.
 - If the name of the getter/field differs from the path segment, provide the name: `@Path('userId') String get id;`.
 - If they match, you can omit the name: `@Path() String get userId;`.
+- **Validation**: The generator will throw an error if a path parameter in the template is missing a corresponding `@Path` annotation, or if an `@Path` annotation doesn't match a parameter in the template.
 
 ### Query Parameters (`@Query`)
 
