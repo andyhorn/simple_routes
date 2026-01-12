@@ -35,12 +35,7 @@ abstract class SimpleRouteData {
   /// }
   /// ```
   ///
-  /// This data will be stored on `GoRouterState.extra` and can be accessed
-  /// directly or by using the `getExtra<T>()` extension method.
-  ///
-  /// ```dart
-  /// final extra = context.getExtra<MyExtraDataClass>();
-  /// ```
+  /// This data will be stored on `GoRouterState.extra`.
   Object? get extra => null;
 
   /// Query parameters to be appended to the route.
@@ -65,11 +60,6 @@ abstract class SimpleRouteData {
   /// If the value is null or empty, the query parameter will not be appended.
   ///
   /// These values can be accessed directly on the
-  /// `GoRouterState.uri.queryParameters` map or by using the
-  /// `getQuery()` extension method.
-  ///
-  /// ```dart
-  /// final redirect = context.getQuery('redirect');
-  /// ```
+  /// `GoRouterState.uri.queryParameters` map.
   Map<String, String?> get query => const {};
 }

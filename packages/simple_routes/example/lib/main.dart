@@ -176,8 +176,9 @@ class ProfileEditPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final profileData =
-        ProfileEditRouteData.fromState(GoRouterState.of(context));
+    final profileData = ProfileEditRouteData.fromState(
+      GoRouterState.of(context),
+    );
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
