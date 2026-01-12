@@ -6,7 +6,9 @@ This is the Melos workspace for the `simple_routes` package.
 
 ```text
 packages/
-  simple_routes/ - The core simple_routes package
+  simple_routes/             - The core simple_routes package
+  simple_routes_annotations/ - Annotations for code generation
+  simple_routes_generator/   - Code generator for simple_routes
 ```
 
 ## Getting Started

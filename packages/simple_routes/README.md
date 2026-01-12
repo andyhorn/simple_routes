@@ -16,15 +16,18 @@ By using `simple_routes`, you can eliminate magic strings, simplify your route d
 
 - [Getting started](#getting-started)
 - [Usage](#usage)
-  - [TL;DR](#tldr)
-  - [Route definitions](#route-definitions)
-    - [Basic routing with SimpleRoutes](#basic-routes)
-      - [Route path segments](#route-path-segments)
-    - [Path parameters and SimpleDataRoutes](#simple-data-routes)
-      - [Parameters](#parameters)
-      - [Query](#query)
-      - [Extra](#extra)
-    - [Child routes](#child-routes)
+  - [Code Generation (Recommended)](#code-generation-recommended)
+    - [Defining Routes](#defining-routes)
+    - [Routes with Parameters](#routes-with-parameters)
+    - [Child Routes](#child-routes)
+    - [Query Parameters](#query-parameters)
+    - [Generating the Code](#generating-the-code)
+    - [Usage and Navigation](#usage-and-navigation)
+    - [Extracting Data](#extracting-data)
+  - [Manual Route Definition](#manual-route-definition)
+    - [Basic (manual) routes](#basic-manual-routes)
+    - [Route parameters (manual)](#route-parameters-manual)
+    - [Child routes (manual)](#child-routes-manual)
   - [GoRouter Configuration](#gorouter-configuration)
     - [Route redirection with DataRoute](#route-redirection-with-dataroute)
   - [Navigation](#navigation)
@@ -36,68 +39,128 @@ By using `simple_routes`, you can eliminate magic strings, simplify your route d
 
 ## Getting started
 
-This package is intended to be used with the [GoRouter](https://pub.dev/packages/go_router) package.
+Add `simple_routes` and `simple_routes_annotations` to your `pubspec.yaml`:
 
-```
+```yaml
 dependencies:
   go_router: [latest]
   simple_routes: [latest]
+  simple_routes_annotations: [latest]
+```
+
+Add `simple_routes_generator` and `build_runner` to your `dev_dependencies`:
+
+```yaml
+dev_dependencies:
+  build_runner: [latest]
+  simple_routes_generator: [latest]
 ```
 
 ## Usage
 
-### TL;DR
+### Code Generation (Recommended)
 
-Define your routes as children of `SimpleRoute`, then use `.go` or `.push` to navigate.
+Code generation is the recommended way to use `simple_routes`. It automates the creation of route and data classes, ensures type safety, and provides convenient extensions for extracting data from `GoRouterState`.
+
+#### Defining Routes
+
+Define your routes as "blueprint" classes and annotate them with `@Route`. These classes should extend the generated base class (prefixed with `_$`).
 
 ```dart
-class HomeRoute extends SimpleRoute {
-  const HomeRoute() : super('home');
-}
+import 'package:simple_routes/simple_routes.dart';
 
-...
+part 'routes.g.dart';
 
-const HomeRoute().go(context);
+@Route('/')
+class Root extends _$Root {}
+
+@Route('dashboard')
+class Dashboard extends _$Dashboard {}
 ```
 
-For routes with parameters, extend the `DataRoute` class and define an accompanying data class. Then, use the `.go` or `.push` method to navigate, providing an instance of your data class.
+#### Routes with Parameters
+
+For routes with path parameters, simply define them as final fields or getters in your blueprint class. Use the `@Path()` annotation if the field name differs from the template parameter name.
 
 ```dart
-// Define your route
-class UserRoute extends SimpleDataRoute<UserRouteData> {
-  const UserRoute() : super('user/:userId');
+@Route('profile/:userId')
+class Profile extends _$Profile {
+  const Profile({required this.id});
+
+  @Path('userId')
+  final String id;
 }
+```
 
-// Define the route data
-class UserRouteData extends SimpleRouteData {
-  const UserRouteData({
-    required this.userId,
-  });
+#### Child Routes
 
-  final String userId;
+To define a child route, use the `parent` property in the `@Route` annotation.
 
-  @override
-  Map<String, String> get parameters => {
-    'userId': userId,
-  };
+```dart
+@Route('edit', parent: Profile)
+class ProfileEdit extends _$ProfileEdit {
+  const ProfileEdit({required this.id});
+
+  @Path('userId')
+  final String id;
 }
+```
 
-...
+#### Query Parameters
 
-// Navigate to the route using the data class
-const UserRoute().go(
+Use the `@Query()` annotation to define query parameters.
+
+```dart
+@Route('search')
+class Search extends _$Search {
+  const Search({this.query});
+
+  @Query('q')
+  final String? query;
+}
+```
+
+#### Generating the Code
+
+Run the build runner to generate the necessary code:
+
+```bash
+dart run build_runner build
+```
+
+#### Usage and Navigation
+
+The generator creates a `[ClassName]Route` class and a `[ClassName]Data` class (if the route has data).
+
+To navigate:
+
+```dart
+// Simple route
+const DashboardRoute().go(context);
+
+// Route with data
+const ProfileRoute().go(
   context,
-  data: UserRouteData(
-    userId: '123',
-  ),
+  data: ProfileData(id: '123'),
 );
 ```
 
-### Route definitions
+#### Extracting Data
 
-<a id="basic-routes"></a>
+The generator provides an extension on `GoRouterState` to easily extract data:
 
-#### Basic (simple) routes
+```dart
+builder: (context, state) {
+  final data = state.profileData;
+  return ProfileScreen(userId: data.id);
+}
+```
+
+### Manual Route Definition
+
+If you prefer not to use code generation, you can define your routes manually. This approach gives you full control but requires more boilerplate.
+
+#### Basic (manual) routes
 
 Define your routes as classes that extend the `SimpleRoute` base class and supply its path segment to the `super` constructor.
 
@@ -109,9 +172,7 @@ class ProfileRoute extends SimpleRoute {
 
 No need to add the leading slash for a root-level route; if your route is not a child route (more on this below), the leading slash will automatically be added, when necessary.
 
-<a id="simple-data-routes"></a>
-
-#### Route parameters and SimpleDataRoutes
+#### Route parameters (manual)
 
 For routes that require parameters, extend `SimpleDataRoute` instead. This will allow you to define a data class that will be used to pass data to your route.
 
@@ -167,7 +228,7 @@ class UserRoute extends SimpleDataRoute<UserRouteData> {
 
 Because this route is a "data route," we must provide it with an instance of its route data class when navigating. More on this in the [Navigation](#navigation) section.
 
-### Child routes
+#### Child routes (manual)
 
 To define a route that is a child of another route, implement the `ChildRoute` interface.
 
