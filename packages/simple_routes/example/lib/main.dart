@@ -31,7 +31,7 @@ final router = GoRouter(
         return null;
       },
       builder: (context, state) {
-        final profileData = state.profile;
+        final profileData = ProfileRouteData.fromState(state);
 
         return ProfilePage(userId: profileData.id);
       },
@@ -43,7 +43,7 @@ final router = GoRouter(
         GoRoute(
           path: const AdditionalDataRoute().path,
           builder: (context, state) => AdditionalRouteDataPage(
-            queryValue: state.additionalData.queryValue,
+            queryValue: AdditionalDataRouteData.fromState(state).queryValue,
           ),
         ),
       ],
@@ -176,7 +176,8 @@ class ProfileEditPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final profileData = GoRouterState.of(context).profileEdit;
+    final profileData =
+        ProfileEditRouteData.fromState(GoRouterState.of(context));
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,

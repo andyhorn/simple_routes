@@ -61,11 +61,6 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
           parentType as InterfaceType?,
         ),
       );
-      if (isData) {
-        l.body.add(
-          _generateStateExtension(blueprint, dataSources, allPathParams),
-        );
-      }
     });
 
     final emitter = DartEmitter();
@@ -78,7 +73,8 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     List<String> allPathParams,
   ) {
     return Class((c) {
-      c.name = '${blueprint.name}RouteData';
+      final className = '${blueprint.name}RouteData';
+      c.name = className;
       c.implements.add(refer('SimpleRouteData'));
 
       // Add fields
@@ -106,6 +102,50 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
               }),
             );
           }
+        }),
+      );
+
+      // Add fromState factory
+      c.constructors.add(
+        Constructor((ctor) {
+          ctor.name = 'fromState';
+          ctor.factory = true;
+          ctor.requiredParameters.add(
+            Parameter((p) {
+              p.name = 'state';
+              p.type = refer('GoRouterState');
+            }),
+          );
+
+          final namedArgs = <String, Expression>{};
+          for (final source in dataSources) {
+            if (source.isPath) {
+              final paramName = source.paramName ?? source.name;
+              namedArgs[source.name] = _parseType(
+                refer(
+                  'state',
+                ).property('pathParameters').index(literalString(paramName)),
+                source.type,
+              );
+            } else if (source.isQuery) {
+              final queryName = source.paramName ?? source.name;
+              namedArgs[source.name] = _parseType(
+                refer('state')
+                    .property('uri')
+                    .property('queryParameters')
+                    .index(literalString(queryName)),
+                source.type,
+              );
+            } else if (source.isExtra) {
+              namedArgs[source.name] = refer('state')
+                  .property('extra')
+                  .asA(
+                    refer(source.type.getDisplayString(withNullability: true)),
+                  );
+            }
+          }
+
+          ctor.body = refer(className).call([], namedArgs).code;
         }),
       );
 
@@ -214,53 +254,6 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
           }),
         );
       }
-    });
-  }
-
-  Extension _generateStateExtension(
-    ClassElement blueprint,
-    List<_DataSource> dataSources,
-    List<String> allPathParams,
-  ) {
-    final dataClassName = '${blueprint.name}RouteData';
-    return Extension((e) {
-      e.name = '${blueprint.name}StateX';
-      e.on = refer('GoRouterState');
-
-      e.methods.add(
-        Method((m) {
-          final getterName =
-              '${blueprint.name[0].toLowerCase()}${blueprint.name.substring(1)}';
-          m.name = getterName;
-          m.returns = refer(dataClassName);
-          m.type = MethodType.getter;
-
-          final namedArgs = <String, Expression>{};
-          for (final source in dataSources) {
-            if (source.isPath) {
-              final paramName = source.paramName ?? source.name;
-              namedArgs[source.name] = _parseType(
-                refer('pathParameters').index(literalString(paramName)),
-                source.type,
-              );
-            } else if (source.isQuery) {
-              final queryName = source.paramName ?? source.name;
-              namedArgs[source.name] = _parseType(
-                refer(
-                  'uri',
-                ).property('queryParameters').index(literalString(queryName)),
-                source.type,
-              );
-            } else if (source.isExtra) {
-              namedArgs[source.name] = refer(
-                'extra',
-              ).asA(refer(source.type.getDisplayString(withNullability: true)));
-            }
-          }
-
-          m.body = refer(dataClassName).call([], namedArgs).code;
-        }),
-      );
     });
   }
 

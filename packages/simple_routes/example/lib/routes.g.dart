@@ -17,6 +17,9 @@ class DashboardRoute extends SimpleRoute {
 class ProfileRouteData implements SimpleRouteData {
   const ProfileRouteData({required this.id});
 
+  factory ProfileRouteData.fromState(GoRouterState state) =>
+      ProfileRouteData(id: state.pathParameters['userId']!);
+
   final String id;
 
   @override
@@ -30,13 +33,11 @@ class ProfileRoute extends SimpleDataRoute<ProfileRouteData> {
   const ProfileRoute() : super('profile/:userId');
 }
 
-extension ProfileStateX on GoRouterState {
-  ProfileRouteData get profile =>
-      ProfileRouteData(id: pathParameters['userId']!);
-}
-
 class ProfileEditRouteData implements SimpleRouteData {
   const ProfileEditRouteData({required this.id});
+
+  factory ProfileEditRouteData.fromState(GoRouterState state) =>
+      ProfileEditRouteData(id: state.pathParameters['userId']!);
 
   final String id;
 
@@ -55,16 +56,17 @@ class ProfileEditRoute extends SimpleDataRoute<ProfileEditRouteData>
   ProfileRoute get parent => const ProfileRoute();
 }
 
-extension ProfileEditStateX on GoRouterState {
-  ProfileEditRouteData get profileEdit =>
-      ProfileEditRouteData(id: pathParameters['userId']!);
-}
-
 class ProfileSettingsRouteData implements SimpleRouteData {
   const ProfileSettingsRouteData({
     required this.id,
     this.theme,
   });
+
+  factory ProfileSettingsRouteData.fromState(GoRouterState state) =>
+      ProfileSettingsRouteData(
+        id: state.pathParameters['userId']!,
+        theme: state.uri.queryParameters['theme'],
+      );
 
   final String id;
 
@@ -85,13 +87,6 @@ class ProfileSettingsRoute extends SimpleDataRoute<ProfileSettingsRouteData>
   ProfileRoute get parent => const ProfileRoute();
 }
 
-extension ProfileSettingsStateX on GoRouterState {
-  ProfileSettingsRouteData get profileSettings => ProfileSettingsRouteData(
-        id: pathParameters['userId']!,
-        theme: uri.queryParameters['theme'],
-      );
-}
-
 class DashboardChildRoute extends SimpleRoute
     implements ChildRoute<DashboardRoute> {
   const DashboardChildRoute() : super('child');
@@ -105,6 +100,12 @@ class AdditionalDataRouteData implements SimpleRouteData {
     required this.id,
     this.queryValue,
   });
+
+  factory AdditionalDataRouteData.fromState(GoRouterState state) =>
+      AdditionalDataRouteData(
+        id: state.pathParameters['userId']!,
+        queryValue: state.uri.queryParameters['queryName'],
+      );
 
   final String id;
 
@@ -123,11 +124,4 @@ class AdditionalDataRoute extends SimpleDataRoute<AdditionalDataRouteData>
 
   @override
   ProfileRoute get parent => const ProfileRoute();
-}
-
-extension AdditionalDataStateX on GoRouterState {
-  AdditionalDataRouteData get additionalData => AdditionalDataRouteData(
-        id: pathParameters['userId']!,
-        queryValue: uri.queryParameters['queryName'],
-      );
 }
