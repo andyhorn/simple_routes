@@ -1,5 +1,5 @@
 class PathParser {
-  static final RegExp _paramRegExp = RegExp(r':([a-zA-Z0-9_]+)');
+  static const Pattern _paramRegExp = r':([a-zA-Z0-9_]+)';
 
   /// Extracts parameter names from a path template.
   ///
