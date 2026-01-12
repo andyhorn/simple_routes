@@ -50,8 +50,12 @@ abstract class _$ProfileEdit {
   const _$ProfileEdit();
 }
 
-class ProfileEditRoute extends SimpleDataRoute<ProfileEditData> {
+class ProfileEditRoute extends SimpleDataRoute<ProfileEditData>
+    implements ChildRoute<ProfileRoute> {
   const ProfileEditRoute() : super('edit');
+
+  @override
+  ProfileRoute get parent => const ProfileRoute();
 }
 
 class ProfileEditData extends SimpleRouteData {
@@ -75,8 +79,12 @@ abstract class _$AdditionalData {
   const _$AdditionalData();
 }
 
-class AdditionalDataRoute extends SimpleDataRoute<AdditionalDataData> {
+class AdditionalDataRoute extends SimpleDataRoute<AdditionalDataData>
+    implements ChildRoute<ProfileRoute> {
   const AdditionalDataRoute() : super('additional');
+
+  @override
+  ProfileRoute get parent => const ProfileRoute();
 }
 
 class AdditionalDataData extends SimpleRouteData {

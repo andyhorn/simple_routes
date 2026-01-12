@@ -16,14 +16,14 @@ class Profile extends _$Profile {
   final String id;
 }
 
-@Route('edit')
+@Route('edit', parent: Profile)
 class ProfileEdit extends _$ProfileEdit {
   const ProfileEdit({required this.id});
   @Path('userId')
   final String id;
 }
 
-@Route('additional')
+@Route('additional', parent: Profile)
 class AdditionalData extends _$AdditionalData {
   const AdditionalData({required this.id, this.queryValue});
   @Path('userId')

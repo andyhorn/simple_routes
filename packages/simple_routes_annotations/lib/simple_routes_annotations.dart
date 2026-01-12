@@ -8,10 +8,13 @@ import 'package:meta/meta.dart';
 /// ```
 @immutable
 class Route {
-  const Route(this.path);
+  const Route(this.path, {this.parent});
 
   /// The path for this route.
   final String path;
+
+  /// The parent route blueprint class.
+  final Type? parent;
 }
 
 /// Annotation to define a query parameter.
