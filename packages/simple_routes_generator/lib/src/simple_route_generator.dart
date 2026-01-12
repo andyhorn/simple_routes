@@ -25,22 +25,17 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     }
 
     final blueprint = element;
+    final hierarchy = _getHierarchy(blueprint, annotation);
+    final allPathParams = _collectPathParams(hierarchy);
+    final dataSources = _collectDataSources(
+      blueprint,
+      hierarchy,
+      allPathParams,
+    );
+
     final path = annotation.read('path').stringValue;
     final parentReader = annotation.read('parent');
     final parent = parentReader.isNull ? null : parentReader.typeValue;
-    final params = PathParser.parseParams(path);
-
-    // Filter fields and manual getters
-    final fields = blueprint.fields.where((f) => !f.isStatic).toList();
-    final getters = blueprint.accessors
-        .where((a) => a.isGetter && !a.isStatic && !a.isSynthetic)
-        .toList();
-
-    // Combined list of "data sources" (fields or manual getters)
-    final dataSources = [
-      ...fields.map((f) => _DataSource(f.name, f.type, f)),
-      ...getters.map((g) => _DataSource(g.name, g.returnType, g)),
-    ];
 
     final library = Library((l) {
       l.body.add(_generateBaseClass(blueprint));
@@ -53,8 +48,10 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
         ),
       );
       if (dataSources.isNotEmpty) {
-        l.body.add(_generateDataClass(blueprint, dataSources, params));
-        l.body.add(_generateStateExtension(blueprint, dataSources, params));
+        l.body.add(_generateDataClass(blueprint, dataSources, allPathParams));
+        l.body.add(
+          _generateStateExtension(blueprint, dataSources, allPathParams),
+        );
       }
     });
 
@@ -302,6 +299,120 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
         ? source.nullSafeProperty('toString').call([])
         : source.nullChecked.property('toString').call([]);
   }
+
+  List<_RouteInfo> _getHierarchy(
+    ClassElement element,
+    ConstantReader annotation,
+  ) {
+    final result = <_RouteInfo>[];
+    var currentElement = element;
+    var currentAnnotation = annotation;
+
+    while (true) {
+      final path = currentAnnotation.read('path').stringValue;
+      result.add(_RouteInfo(currentElement, path));
+
+      final parentReader = currentAnnotation.read('parent');
+      if (parentReader.isNull) break;
+
+      final parentType = parentReader.typeValue;
+      if (parentType is! InterfaceType) break;
+
+      currentElement = parentType.element as ClassElement;
+      final nextAnnotation = const TypeChecker.fromRuntime(
+        Route,
+      ).firstAnnotationOf(currentElement);
+
+      if (nextAnnotation == null) break;
+      currentAnnotation = ConstantReader(nextAnnotation);
+    }
+
+    return result;
+  }
+
+  List<String> _collectPathParams(List<_RouteInfo> hierarchy) {
+    return hierarchy
+        .expand((h) => PathParser.parseParams(h.path))
+        .toSet()
+        .toList();
+  }
+
+  List<_DataSource> _collectDataSources(
+    ClassElement blueprint,
+    List<_RouteInfo> hierarchy,
+    List<String> allPathParams,
+  ) {
+    final dataSources = <_DataSource>[];
+    final satisfiedPathParams = <String>{};
+
+    // 1. Check current blueprint for all fields/getters
+    final explicitDataSources = [
+      ...blueprint.fields
+          .where((f) => !f.isStatic)
+          .map((f) => _DataSource(f.name, f.type, f)),
+      ...blueprint.accessors
+          .where((a) => a.isGetter && !a.isStatic && !a.isSynthetic)
+          .map((g) => _DataSource(g.name, g.returnType, g)),
+    ];
+
+    for (final source in explicitDataSources) {
+      dataSources.add(source);
+      for (final paramName in allPathParams) {
+        if (_matchesParam(source, paramName)) {
+          satisfiedPathParams.add(paramName);
+        }
+      }
+    }
+
+    // 2. Inherit missing path params from parents
+    for (final paramName in allPathParams) {
+      if (!satisfiedPathParams.contains(paramName)) {
+        for (var i = 1; i < hierarchy.length; i++) {
+          final parentBlueprint = hierarchy[i].element;
+          final parentSources = [
+            ...parentBlueprint.fields
+                .where((f) => !f.isStatic)
+                .map((f) => _DataSource(f.name, f.type, f)),
+            ...parentBlueprint.accessors
+                .where((a) => a.isGetter && !a.isStatic && !a.isSynthetic)
+                .map((g) => _DataSource(g.name, g.returnType, g)),
+          ];
+
+          _DataSource? matchingSource;
+          for (final source in parentSources) {
+            if (_matchesParam(source, paramName)) {
+              matchingSource = source;
+              break;
+            }
+          }
+
+          if (matchingSource != null) {
+            dataSources.add(matchingSource);
+            satisfiedPathParams.add(paramName);
+            break;
+          }
+        }
+      }
+    }
+
+    return dataSources;
+  }
+
+  bool _matchesParam(_DataSource source, String paramName) {
+    final pathAnnotation = const TypeChecker.fromRuntime(
+      Path,
+    ).firstAnnotationOf(source.element);
+    if (pathAnnotation != null) {
+      return pathAnnotation.getField('name')?.toStringValue() == paramName;
+    }
+    return source.name == paramName;
+  }
+}
+
+class _RouteInfo {
+  _RouteInfo(this.element, this.path);
+  final ClassElement element;
+  final String path;
 }
 
 class _DataSource {
