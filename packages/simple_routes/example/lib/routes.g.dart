@@ -89,13 +89,13 @@ class AdditionalDataRoute extends SimpleDataRoute<AdditionalDataData>
 
 class AdditionalDataData extends SimpleRouteData {
   const AdditionalDataData({
-    required this.id,
     this.queryValue,
+    required this.id,
   });
 
-  final String id;
-
   final String? queryValue;
+
+  final String id;
 
   @override
   Map<String, String> get parameters => {'userId': id};
@@ -106,7 +106,7 @@ class AdditionalDataData extends SimpleRouteData {
 
 extension AdditionalDataStateX on GoRouterState {
   AdditionalDataData get additionalDataData => AdditionalDataData(
-        id: pathParameters['userId']!,
         queryValue: uri.queryParameters['queryName'],
+        id: pathParameters['userId']!,
       );
 }
