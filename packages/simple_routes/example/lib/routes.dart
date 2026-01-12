@@ -16,16 +16,10 @@ abstract class Profile {
 }
 
 @Route('edit', parent: Profile)
-abstract class ProfileEdit {
-  @Path('userId')
-  String get id;
-}
+abstract class ProfileEdit {}
 
 @Route('settings', parent: Profile)
 abstract class ProfileSettings {
-  @Path('userId')
-  String get id;
-
   @Query()
   String? get theme;
 }
@@ -33,11 +27,11 @@ abstract class ProfileSettings {
 @Route('child', parent: Dashboard)
 abstract class DashboardChild {}
 
+@Route('details', parent: Profile)
+abstract class ProfileDetails {}
+
 @Route('additional', parent: Profile)
 abstract class AdditionalData {
-  @Path('userId')
-  String get id;
-
   @Query('queryName')
   String? get queryValue;
 }
