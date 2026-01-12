@@ -38,3 +38,7 @@ melos:
       name: Format
       description: Format all packages
       exec: dart format .
+    generate:
+      name: Generate
+      description: Generate code for all packages
+      run: melos exec --depends-on=build_runner -- dart run build_runner build -d
