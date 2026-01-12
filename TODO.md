@@ -6,7 +6,6 @@ This file tracks potential improvements for the `simple_routes` project.
 - [ ] **Support for ShellRoutes**: Investigate and implement base classes for `ShellRoute` and `StatefulShellRoute`.
 
 ## 🏗 Code Generation Enhancements
-- [ ] **Multi-field "Extra" Support**: Support multiple `@Extra` annotations by bundling them into a generated wrapper class.
 ## 🛡 Robustness & Bug Fixes
 *Completed!*
 
