@@ -5,15 +5,14 @@ homepage: https://github.com/andyhorn/simple_routes
 resolution: workspace
 
 environment:
-  sdk: ">=3.5.0 <4.0.0"
+  sdk: ">=3.9.2 <4.0.0"
   flutter: ">=3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
   go_router: ">=12.0.0 <17.0.0"
-  simple_routes_annotations:
-    path: ../simple_routes_annotations
+  simple_routes_annotations: any
 
 dev_dependencies:
   flutter_test:
