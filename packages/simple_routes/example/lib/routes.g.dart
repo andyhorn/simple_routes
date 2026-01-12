@@ -6,12 +6,24 @@ part of 'routes.dart';
 // SimpleRouteGenerator
 // **************************************************************************
 
+abstract class _$Root {
+  const _$Root();
+}
+
 class RootRoute extends SimpleRoute {
   const RootRoute() : super('/');
 }
 
+abstract class _$Dashboard {
+  const _$Dashboard();
+}
+
 class DashboardRoute extends SimpleRoute {
   const DashboardRoute() : super('dashboard');
+}
+
+abstract class _$Profile {
+  const _$Profile();
 }
 
 class ProfileRoute extends SimpleDataRoute<ProfileData> {
@@ -19,19 +31,23 @@ class ProfileRoute extends SimpleDataRoute<ProfileData> {
 }
 
 class ProfileData extends SimpleRouteData {
-  const ProfileData({required this.userId});
+  const ProfileData({required this.id});
 
-  final String userId;
+  final String id;
 
   @override
-  Map<String, String> get parameters => {'userId': userId.toString()};
+  Map<String, String> get parameters => {'userId': id};
 
   @override
   Map<String, String?> get query => {};
 }
 
 extension ProfileStateX on GoRouterState {
-  ProfileData get profileData => ProfileData(userId: pathParameters['userId']);
+  ProfileData get profileData => ProfileData(id: pathParameters['userId']!);
+}
+
+abstract class _$ProfileEdit {
+  const _$ProfileEdit();
 }
 
 class ProfileEditRoute extends SimpleDataRoute<ProfileEditData> {
@@ -39,20 +55,24 @@ class ProfileEditRoute extends SimpleDataRoute<ProfileEditData> {
 }
 
 class ProfileEditData extends SimpleRouteData {
-  const ProfileEditData({required this.userId});
+  const ProfileEditData({required this.id});
 
-  final String userId;
-
-  @override
-  Map<String, String> get parameters => {};
+  final String id;
 
   @override
-  Map<String, String?> get query => {'userId': userId.toString()};
+  Map<String, String> get parameters => {'userId': id};
+
+  @override
+  Map<String, String?> get query => {};
 }
 
 extension ProfileEditStateX on GoRouterState {
   ProfileEditData get profileEditData =>
-      ProfileEditData(userId: uri.queryParameters['userId']);
+      ProfileEditData(id: pathParameters['userId']!);
+}
+
+abstract class _$AdditionalData {
+  const _$AdditionalData();
 }
 
 class AdditionalDataRoute extends SimpleDataRoute<AdditionalDataData> {
@@ -61,27 +81,24 @@ class AdditionalDataRoute extends SimpleDataRoute<AdditionalDataData> {
 
 class AdditionalDataData extends SimpleRouteData {
   const AdditionalDataData({
-    required this.userId,
+    required this.id,
     this.queryValue,
   });
 
-  final String userId;
+  final String id;
 
   final String? queryValue;
 
   @override
-  Map<String, String> get parameters => {};
+  Map<String, String> get parameters => {'userId': id};
 
   @override
-  Map<String, String?> get query => {
-        'userId': userId.toString(),
-        'queryName': queryValue.toString(),
-      };
+  Map<String, String?> get query => {'queryName': queryValue};
 }
 
 extension AdditionalDataStateX on GoRouterState {
   AdditionalDataData get additionalDataData => AdditionalDataData(
-        userId: uri.queryParameters['userId'],
+        id: pathParameters['userId']!,
         queryValue: uri.queryParameters['queryName'],
       );
 }

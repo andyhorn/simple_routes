@@ -3,25 +3,31 @@ import 'package:simple_routes/simple_routes.dart';
 
 part 'routes.g.dart';
 
-@SimpleRouteConfig('/')
+@Route('/')
 class Root extends _$Root {}
 
-@SimpleRouteConfig('dashboard')
+@Route('dashboard')
 class Dashboard extends _$Dashboard {}
 
-@SimpleRouteConfig('profile/:userId')
+@Route('profile/:userId')
 class Profile extends _$Profile {
-  final String userId;
+  const Profile({required this.id});
+  @Path('userId')
+  final String id;
 }
 
-@SimpleRouteConfig('edit')
+@Route('edit')
 class ProfileEdit extends _$ProfileEdit {
-  final String userId;
+  const ProfileEdit({required this.id});
+  @Path('userId')
+  final String id;
 }
 
-@SimpleRouteConfig('additional')
+@Route('additional')
 class AdditionalData extends _$AdditionalData {
-  final String userId;
-  @QueryParam('queryName')
+  const AdditionalData({required this.id, this.queryValue});
+  @Path('userId')
+  final String id;
+  @Query('queryName')
   final String? queryValue;
 }
