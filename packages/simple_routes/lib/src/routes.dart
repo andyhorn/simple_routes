@@ -133,10 +133,7 @@ abstract class SimpleDataRoute<Data extends SimpleRouteData> extends BaseRoute {
   static final _queryRegex = RegExp(r'\?.+$');
 
   /// Navigate to this route using the supplied [data].
-  void go(
-    BuildContext context, {
-    required Data data,
-  }) {
+  void go(BuildContext context, {required Data data}) {
     GoRouter.of(context).go(fullPath(data), extra: data.extra);
   }
 
@@ -163,7 +160,7 @@ abstract class SimpleDataRoute<Data extends SimpleRouteData> extends BaseRoute {
 
   String _injectParams(String path, Data data) {
     return data.parameters.entries.fold(path, (path, entry) {
-      return path.replaceAll(':${entry.key}', entry.value);
+      return path.replaceAll(':${entry.key}', Uri.encodeComponent(entry.value));
     });
   }
 
