@@ -1,3 +1,5 @@
+# spell-checker: ignore subosito
+
 name: Release to pub.dev
 
 on:
@@ -31,4 +33,4 @@ jobs:
         run: melos run test
       - name: Publish
         working-directory: packages/simple_routes
-        run: dart pub publish --force
+        run: melos publish --no-dry-run --yes
