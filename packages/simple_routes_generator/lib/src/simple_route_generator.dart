@@ -57,13 +57,33 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     return _formatter.format('${library.accept(emitter)}');
   }
 
+  String _buildRouteClassName(ClassElement blueprint) {
+    return '${blueprint.name}Route';
+  }
+
+  String _buildRouteDataClassName(ClassElement blueprint) {
+    return '${blueprint.name}RouteData';
+  }
+
+  String _buildParentRouteClassName(InterfaceType parent) {
+    return '${parent.element.name}Route';
+  }
+
+  String _buildSimpleDataRouteType(String dataClassName) {
+    return 'SimpleDataRoute<$dataClassName>';
+  }
+
+  String _buildChildRouteType(String parentRouteClassName) {
+    return 'ChildRoute<$parentRouteClassName>';
+  }
+
   Class _generateDataClass(
     ClassElement blueprint,
     List<DataSource> dataSources,
     List<String> allPathParams,
   ) {
     return Class((c) {
-      final className = '${blueprint.name}RouteData';
+      final className = _buildRouteDataClassName(blueprint);
       c.name = className;
       c.implements.add(refer('SimpleRouteData'));
 
@@ -203,18 +223,19 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     bool isData,
     InterfaceType? parent,
   ) {
-    final name = '${blueprint.name}Route';
-    final dataClassName = '${blueprint.name}RouteData';
+    final name = _buildRouteClassName(blueprint);
+    final dataClassName = _buildRouteDataClassName(blueprint);
     final baseClass =
-        isData ? 'SimpleDataRoute<$dataClassName>' : 'SimpleRoute';
+        isData ? _buildSimpleDataRouteType(dataClassName) : 'SimpleRoute';
 
     return Class((c) {
       c.name = name;
       c.extend = refer(baseClass);
 
       if (parent != null) {
-        final parentName = parent.element.name;
-        c.implements.add(refer('ChildRoute<${parentName}Route>'));
+        final parentRouteClassName = _buildParentRouteClassName(parent);
+        final childRouteType = _buildChildRouteType(parentRouteClassName);
+        c.implements.add(refer(childRouteType));
       }
 
       c.constructors.add(
@@ -227,14 +248,14 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
       );
 
       if (parent != null) {
-        final parentName = parent.element.name;
+        final parentRouteClassName = _buildParentRouteClassName(parent);
         c.methods.add(
           Method((m) {
             m.name = 'parent';
             m.type = MethodType.getter;
             m.annotations.add(refer('override'));
-            m.returns = refer('${parentName}Route');
-            m.body = refer('const ${parentName}Route').call([]).code;
+            m.returns = refer(parentRouteClassName);
+            m.body = refer('const $parentRouteClassName').call([]).code;
           }),
         );
       }
