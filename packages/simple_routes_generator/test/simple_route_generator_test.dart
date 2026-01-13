@@ -306,5 +306,37 @@ abstract class Metrics {
         },
       );
     });
+
+    test('ignores unannotated factory constructor parameters', () async {
+      await testBuilder(
+        simpleRouteBuilder(BuilderOptions.empty),
+        {
+          ...annotationsAsset,
+          'a|lib/routes.dart': '''
+import 'package:simple_routes_annotations/simple_routes_annotations.dart';
+
+part 'routes.g.dart';
+
+@Route('user/:userId')
+abstract class User {
+  const factory User({
+    @Path('userId') required String id,
+    String? unannotatedParam,
+  }) = _User;
+}
+''',
+        },
+        outputs: {
+          'a|lib/routes.simple_routes.g.part': decodedMatches(
+            allOf(
+              contains('class UserRouteData implements SimpleRouteData'),
+              contains('final String id;'),
+              contains("state.pathParameters['userId']!"),
+              isNot(contains('unannotatedParam')),
+            ),
+          ),
+        },
+      );
+    });
   });
 }

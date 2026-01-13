@@ -139,9 +139,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
                 source.type,
               );
             } else if (source.isExtra) {
-              namedArgs[source.name] = refer('state')
-                  .property('extra')
-                  .asA(
+              namedArgs[source.name] = refer('state').property('extra').asA(
                     refer(source.type.getDisplayString(withNullability: true)),
                   );
             }
@@ -219,9 +217,8 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
   ) {
     final name = '${blueprint.name}Route';
     final dataClassName = '${blueprint.name}RouteData';
-    final baseClass = isData
-        ? 'SimpleDataRoute<$dataClassName>'
-        : 'SimpleRoute';
+    final baseClass =
+        isData ? 'SimpleDataRoute<$dataClassName>' : 'SimpleRoute';
 
     return Class((c) {
       c.name = name;
@@ -264,9 +261,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
 
     if (type.isDartCoreInt) {
       if (isNullable) {
-        return source
-            .equalTo(literalNull)
-            .conditional(
+        return source.equalTo(literalNull).conditional(
               literalNull,
               refer('int').property('tryParse').call([source.nullChecked]),
             );
@@ -276,9 +271,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
 
     if (type.isDartCoreDouble) {
       if (isNullable) {
-        return source
-            .equalTo(literalNull)
-            .conditional(
+        return source.equalTo(literalNull).conditional(
               literalNull,
               refer('double').property('tryParse').call([source.nullChecked]),
             );
@@ -288,9 +281,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
 
     if (type.isDartCoreNum) {
       if (isNullable) {
-        return source
-            .equalTo(literalNull)
-            .conditional(
+        return source.equalTo(literalNull).conditional(
               literalNull,
               refer('num').property('tryParse').call([source.nullChecked]),
             );
@@ -300,9 +291,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
 
     if (type.getDisplayString(withNullability: false) == 'DateTime') {
       if (isNullable) {
-        return source
-            .equalTo(literalNull)
-            .conditional(
+        return source.equalTo(literalNull).conditional(
               literalNull,
               refer('DateTime').property('tryParse').call([source.nullChecked]),
             );
@@ -323,9 +312,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
       final enumName = type.element.name;
 
       if (isNullable) {
-        return source
-            .equalTo(literalNull)
-            .conditional(
+        return source.equalTo(literalNull).conditional(
               literalNull,
               refer(enumName).property('values').property('byName').call([
                 source.nullChecked,
@@ -404,13 +391,15 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
   ) {
     final dataSources = <String, _DataSource>{};
 
-    // 1. Collect from factory constructor (if any)
-    final factoryConstructor = blueprint.constructors
-        .where((c) => c.isFactory)
-        .firstOrNull;
+    // 1. Collect from factory constructor (if any) - only annotated parameters
+    final factoryConstructor =
+        blueprint.constructors.where((c) => c.isFactory).firstOrNull;
     if (factoryConstructor != null) {
       for (final param in factoryConstructor.parameters) {
-        dataSources[param.name] = _DataSource.fromParameter(param);
+        // Only collect parameters that have annotations
+        if (_isAnnotated(param)) {
+          dataSources[param.name] = _DataSource.fromParameter(param);
+        }
       }
     }
 
@@ -440,9 +429,8 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     for (final info in hierarchy.skip(1)) {
       final parentBlueprint = info.element;
       // Check factory
-      final parentFactory = parentBlueprint.constructors
-          .where((c) => c.isFactory)
-          .firstOrNull;
+      final parentFactory =
+          parentBlueprint.constructors.where((c) => c.isFactory).firstOrNull;
       if (parentFactory != null) {
         for (final param in parentFactory.parameters) {
           if (_hasAnnotation(param, _pathChecker)) {
@@ -481,9 +469,8 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     List<_DataSource> dataSources,
   ) {
     final pathDataSources = dataSources.where((ds) => ds.isPath).toList();
-    final annotatedParamNames = pathDataSources
-        .map((ds) => ds.paramName ?? ds.name)
-        .toSet();
+    final annotatedParamNames =
+        pathDataSources.map((ds) => ds.paramName ?? ds.name).toSet();
     final templateParamNames = allPathParams.toSet();
 
     // 1. Check for missing @Path annotations
@@ -596,8 +583,7 @@ class _DataSource {
       isQuery: queryAnnot != null,
       isExtra: extraAnnot != null,
       isRequired: param.isRequiredNamed || !param.isOptional,
-      paramName:
-          pathAnnot?.getField('name')?.toStringValue() ??
+      paramName: pathAnnot?.getField('name')?.toStringValue() ??
           queryAnnot?.getField('name')?.toStringValue(),
       element: param,
     );
@@ -636,8 +622,7 @@ class _DataSource {
       isQuery: queryAnnot != null,
       isExtra: extraAnnot != null,
       isRequired: type.nullabilitySuffix == NullabilitySuffix.none,
-      paramName:
-          pathAnnot?.getField('name')?.toStringValue() ??
+      paramName: pathAnnot?.getField('name')?.toStringValue() ??
           queryAnnot?.getField('name')?.toStringValue(),
       element: element,
     );
