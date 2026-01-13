@@ -89,7 +89,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
   Class _generateDataClass(
     ClassElement blueprint,
     List<DataSource> dataSources,
-    List<String> allPathParams,
+    Set<String> allPathParams,
   ) {
     return Class((c) {
       final className = _buildRouteDataClassName(blueprint);
@@ -567,8 +567,8 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     return result;
   }
 
-  List<String> _collectPathParams(List<RouteInfo> hierarchy) {
-    return hierarchy.expand((h) => _parsePathParams(h.path)).toSet().toList();
+  Set<String> _collectPathParams(List<RouteInfo> hierarchy) {
+    return hierarchy.expand((h) => _parsePathParams(h.path)).toSet();
   }
 
   List<String> _parsePathParams(String path) {
@@ -671,13 +671,13 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
 
   void _validatePathParams(
     ClassElement blueprint,
-    List<String> allPathParams,
+    Set<String> allPathParams,
     List<DataSource> dataSources,
   ) {
-    final pathDataSources = dataSources.where((ds) => ds.isPath).toList();
+    final templateParamNames = allPathParams.toSet();
+    final pathDataSources = dataSources.where((ds) => ds.isPath);
     final annotatedParamNames =
         pathDataSources.map((ds) => ds.paramName ?? ds.name).toSet();
-    final templateParamNames = allPathParams.toSet();
 
     // 1. Check for missing @Path annotations
     for (final templateParam in templateParamNames) {
@@ -705,11 +705,11 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     ClassElement blueprint,
     List<DataSource> dataSources,
   ) {
-    final extraDataSources = dataSources.where((ds) => ds.isExtra).toList();
+    final extraDataSourcesCount = dataSources.where((ds) => ds.isExtra).length;
 
-    if (extraDataSources.length > 1) {
+    if (extraDataSourcesCount > 1) {
       throw InvalidGenerationSourceError(
-        'Only one @Extra annotation is allowed per route. Found ${extraDataSources.length} @Extra annotations.',
+        'Only one @Extra annotation is allowed per route. Found $extraDataSourcesCount @Extra annotations.',
         element: blueprint,
       );
     }
