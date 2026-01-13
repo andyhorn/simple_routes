@@ -511,22 +511,6 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
       if (varAnnotation != null) return varAnnotation;
     }
 
-    // Fallback: match by name
-    final checkerString = checker.toString();
-    final parts = checkerString.split(RegExp(r'[#.]'));
-    final annotationName = parts.last.replaceAll(')', '').trim();
-
-    for (final metadata in element.metadata) {
-      final value = metadata.computeConstantValue();
-      final type = value?.type;
-      final typeName =
-          type?.element?.name ?? type?.getDisplayString(withNullability: false);
-
-      if (typeName == annotationName) {
-        return value;
-      }
-    }
-
     return null;
   }
 
@@ -552,15 +536,6 @@ class _DataSource {
     this.paramName,
     required this.element,
   });
-
-  final String name;
-  final DartType type;
-  final bool isPath;
-  final bool isQuery;
-  final bool isExtra;
-  final bool isRequired;
-  final String? paramName;
-  final Element element;
 
   factory _DataSource.fromParameter(ParameterElement param) {
     final pathAnnot = SimpleRouteGenerator._getAnnotation(
@@ -627,4 +602,13 @@ class _DataSource {
       element: element,
     );
   }
+
+  final String name;
+  final DartType type;
+  final bool isPath;
+  final bool isQuery;
+  final bool isExtra;
+  final bool isRequired;
+  final String? paramName;
+  final Element element;
 }
