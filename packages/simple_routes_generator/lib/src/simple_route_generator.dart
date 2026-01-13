@@ -82,6 +82,10 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     return 'ChildRoute<$parentRouteClassName>';
   }
 
+  /// Generates the route data class that implements [SimpleRouteData].
+  ///
+  /// Creates a class with fields for each data source, a constructor, a
+  /// `fromState` factory, and getters for [parameters], [query], and [extra].
   Class _generateDataClass(
     ClassElement blueprint,
     List<DataSource> dataSources,
@@ -228,6 +232,9 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     });
   }
 
+  /// Generates the route class that extends [SimpleRoute] or [SimpleDataRoute].
+  ///
+  /// If [parent] is provided, the class also implements [ChildRoute].
   Class _generateRouteClass(
     ClassElement blueprint,
     String path,
@@ -273,6 +280,10 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     });
   }
 
+  /// Generates an expression to parse a string value to the given [type].
+  ///
+  /// Returns a call to the appropriate helper method (e.g., `_parseInt`) for
+  /// non-string types, or the source expression directly for strings.
   Expression _parseType(Expression source, DartType type) {
     final isNullable = type.nullabilitySuffix != NullabilitySuffix.none;
 
@@ -491,6 +502,10 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     });
   }
 
+  /// Generates an expression to serialize a value of [type] to a string.
+  ///
+  /// Handles enums (uses `.name`), DateTime (uses `.toIso8601String()`), and
+  /// other types (uses `.toString()`).
   Expression _serializeType(Expression source, DartType type) {
     final isNullable = type.nullabilitySuffix != NullabilitySuffix.none;
 
@@ -513,6 +528,10 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
         : source.property('toString').call([]);
   }
 
+  /// Builds the route hierarchy by traversing parent routes.
+  ///
+  /// Returns a list of [RouteInfo] objects from the current route up to the
+  /// root, following the `parent` annotation chain.
   List<RouteInfo> _getHierarchy(
     ClassElement element,
     ConstantReader annotation,
@@ -559,6 +578,10 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     return regex.allMatches(path).map((m) => m.group(1)!).toList();
   }
 
+  /// Collects all data sources from the blueprint and its parent hierarchy.
+  ///
+  /// Collects all annotated elements from the current blueprint, and path
+  /// parameters from parent routes in the hierarchy.
   List<DataSource> _collectDataSources(
     ClassElement blueprint,
     List<RouteInfo> hierarchy,
