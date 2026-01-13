@@ -1,4 +1,3 @@
-import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
@@ -7,23 +6,12 @@ import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:simple_routes_annotations/simple_routes_annotations.dart';
 import 'package:source_gen/source_gen.dart';
-import 'path_parser.dart';
+
+import 'models/models.dart';
 
 class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
   final DartFormatter _formatter = DartFormatter();
-
-  static const _routeChecker = TypeChecker.fromUrl(
-    'package:simple_routes_annotations/simple_routes_annotations.dart#Route',
-  );
-  static const _pathChecker = TypeChecker.fromUrl(
-    'package:simple_routes_annotations/simple_routes_annotations.dart#Path',
-  );
-  static const _queryChecker = TypeChecker.fromUrl(
-    'package:simple_routes_annotations/simple_routes_annotations.dart#Query',
-  );
-  static const _extraChecker = TypeChecker.fromUrl(
-    'package:simple_routes_annotations/simple_routes_annotations.dart#Extra',
-  );
+  final Annotations _annotations = const Annotations();
 
   @override
   String generateForAnnotatedElement(
@@ -71,7 +59,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
 
   Class _generateDataClass(
     ClassElement blueprint,
-    List<_DataSource> dataSources,
+    List<DataSource> dataSources,
     List<String> allPathParams,
   ) {
     return Class((c) {
@@ -350,17 +338,17 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
         : source.property('toString').call([]);
   }
 
-  List<_RouteInfo> _getHierarchy(
+  List<RouteInfo> _getHierarchy(
     ClassElement element,
     ConstantReader annotation,
   ) {
-    final result = <_RouteInfo>[];
+    final result = <RouteInfo>[];
     var currentElement = element;
     var currentAnnotation = annotation;
 
     while (true) {
       final path = currentAnnotation.read('path').stringValue;
-      result.add(_RouteInfo(currentElement, path));
+      result.add(RouteInfo(currentElement, path));
 
       final parentReader = currentAnnotation.read('parent');
       if (parentReader.isNull) break;
@@ -369,7 +357,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
       if (parentType is! InterfaceType) break;
 
       currentElement = parentType.element as ClassElement;
-      final nextAnnotation = _getAnnotation(currentElement, _routeChecker);
+      final nextAnnotation = _annotations.getRouteAnnotation(currentElement);
 
       if (nextAnnotation == null) break;
       currentAnnotation = ConstantReader(nextAnnotation);
@@ -378,18 +366,22 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     return result;
   }
 
-  List<String> _collectPathParams(List<_RouteInfo> hierarchy) {
-    return hierarchy
-        .expand((h) => PathParser.parseParams(h.path))
-        .toSet()
-        .toList();
+  List<String> _collectPathParams(List<RouteInfo> hierarchy) {
+    return hierarchy.expand((h) => _parsePathParams(h.path)).toSet().toList();
   }
 
-  List<_DataSource> _collectDataSources(
+  List<String> _parsePathParams(String path) {
+    // This is a bug in the Dart SDK, it should not be marked as deprecated
+    // ignore: deprecated_member_use
+    final regex = RegExp(r':([a-zA-Z0-9_]+)');
+    return regex.allMatches(path).map((m) => m.group(1)!).toList();
+  }
+
+  List<DataSource> _collectDataSources(
     ClassElement blueprint,
-    List<_RouteInfo> hierarchy,
+    List<RouteInfo> hierarchy,
   ) {
-    final dataSources = <String, _DataSource>{};
+    final dataSources = <String, DataSource>{};
 
     // 1. Collect from factory constructor (if any) - only annotated parameters
     final factoryConstructor =
@@ -397,29 +389,29 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     if (factoryConstructor != null) {
       for (final param in factoryConstructor.parameters) {
         // Only collect parameters that have annotations
-        if (_isAnnotated(param)) {
-          dataSources[param.name] = _DataSource.fromParameter(param);
+        if (_annotations.isAnnotated(param)) {
+          dataSources[param.name] = DataSource.fromParameter(param);
         }
       }
     }
 
     // 2. Collect from annotated fields and getters
     for (final field in blueprint.fields) {
-      if (_isAnnotated(field)) {
-        final ds = _DataSource.fromElement(field);
+      if (_annotations.isAnnotated(field)) {
+        final ds = DataSource.fromElement(field);
         dataSources[ds.name] = ds;
       }
     }
 
     for (final accessor in blueprint.accessors) {
-      if (accessor.isGetter && _isAnnotated(accessor)) {
-        final ds = _DataSource.fromElement(accessor);
+      if (accessor.isGetter && _annotations.isAnnotated(accessor)) {
+        final ds = DataSource.fromElement(accessor);
         dataSources[ds.name] = ds;
       } else if (accessor.isGetter) {
         // Also check the underlying variable for the accessor
         final variable = accessor.variable;
-        if (_isAnnotated(variable)) {
-          final ds = _DataSource.fromElement(accessor);
+        if (_annotations.isAnnotated(variable)) {
+          final ds = DataSource.fromElement(accessor);
           dataSources[ds.name] = ds;
         }
       }
@@ -433,8 +425,8 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
           parentBlueprint.constructors.where((c) => c.isFactory).firstOrNull;
       if (parentFactory != null) {
         for (final param in parentFactory.parameters) {
-          if (_hasAnnotation(param, _pathChecker)) {
-            final ds = _DataSource.fromParameter(param);
+          if (_annotations.getPathAnnotation(param) != null) {
+            final ds = DataSource.fromParameter(param);
             if (!dataSources.containsKey(ds.name)) {
               dataSources[ds.name] = ds;
             }
@@ -443,16 +435,17 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
       }
       // Check fields/getters
       for (final field in parentBlueprint.fields) {
-        if (_hasAnnotation(field, _pathChecker)) {
-          final ds = _DataSource.fromElement(field);
+        if (_annotations.getPathAnnotation(field) != null) {
+          final ds = DataSource.fromElement(field);
           if (!dataSources.containsKey(ds.name)) {
             dataSources[ds.name] = ds;
           }
         }
       }
       for (final accessor in parentBlueprint.accessors) {
-        if (accessor.isGetter && _hasAnnotation(accessor, _pathChecker)) {
-          final ds = _DataSource.fromElement(accessor);
+        if (accessor.isGetter &&
+            _annotations.getPathAnnotation(accessor) != null) {
+          final ds = DataSource.fromElement(accessor);
           if (!dataSources.containsKey(ds.name)) {
             dataSources[ds.name] = ds;
           }
@@ -466,7 +459,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
   void _validatePathParams(
     ClassElement blueprint,
     List<String> allPathParams,
-    List<_DataSource> dataSources,
+    List<DataSource> dataSources,
   ) {
     final pathDataSources = dataSources.where((ds) => ds.isPath).toList();
     final annotatedParamNames =
@@ -494,121 +487,4 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
       }
     }
   }
-
-  static bool _isAnnotated(Element element) {
-    return _hasAnnotation(element, _pathChecker) ||
-        _hasAnnotation(element, _queryChecker) ||
-        _hasAnnotation(element, _extraChecker);
-  }
-
-  static DartObject? _getAnnotation(Element element, TypeChecker checker) {
-    final annotation = checker.firstAnnotationOf(element);
-    if (annotation != null) return annotation;
-
-    if (element is PropertyAccessorElement) {
-      final variable = element.variable;
-      final varAnnotation = checker.firstAnnotationOf(variable);
-      if (varAnnotation != null) return varAnnotation;
-    }
-
-    return null;
-  }
-
-  static bool _hasAnnotation(Element element, TypeChecker checker) {
-    return _getAnnotation(element, checker) != null;
-  }
-}
-
-class _RouteInfo {
-  _RouteInfo(this.element, this.path);
-  final ClassElement element;
-  final String path;
-}
-
-class _DataSource {
-  const _DataSource({
-    required this.name,
-    required this.type,
-    required this.isPath,
-    required this.isQuery,
-    required this.isExtra,
-    required this.isRequired,
-    this.paramName,
-    required this.element,
-  });
-
-  factory _DataSource.fromParameter(ParameterElement param) {
-    final pathAnnot = SimpleRouteGenerator._getAnnotation(
-      param,
-      SimpleRouteGenerator._pathChecker,
-    );
-    final queryAnnot = SimpleRouteGenerator._getAnnotation(
-      param,
-      SimpleRouteGenerator._queryChecker,
-    );
-    final extraAnnot = SimpleRouteGenerator._getAnnotation(
-      param,
-      SimpleRouteGenerator._extraChecker,
-    );
-
-    return _DataSource(
-      name: param.name,
-      type: param.type,
-      isPath: pathAnnot != null,
-      isQuery: queryAnnot != null,
-      isExtra: extraAnnot != null,
-      isRequired: param.isRequiredNamed || !param.isOptional,
-      paramName: pathAnnot?.getField('name')?.toStringValue() ??
-          queryAnnot?.getField('name')?.toStringValue(),
-      element: param,
-    );
-  }
-
-  factory _DataSource.fromElement(Element element) {
-    final pathAnnot = SimpleRouteGenerator._getAnnotation(
-      element,
-      SimpleRouteGenerator._pathChecker,
-    );
-    final queryAnnot = SimpleRouteGenerator._getAnnotation(
-      element,
-      SimpleRouteGenerator._queryChecker,
-    );
-    final extraAnnot = SimpleRouteGenerator._getAnnotation(
-      element,
-      SimpleRouteGenerator._extraChecker,
-    );
-
-    DartType type;
-    if (element is VariableElement) {
-      type = element.type;
-    } else if (element is PropertyAccessorElement) {
-      type = element.returnType;
-    } else {
-      throw InvalidGenerationSourceError(
-        'Unexpected element type: ${element.runtimeType}',
-        element: element,
-      );
-    }
-
-    return _DataSource(
-      name: element.name!,
-      type: type,
-      isPath: pathAnnot != null,
-      isQuery: queryAnnot != null,
-      isExtra: extraAnnot != null,
-      isRequired: type.nullabilitySuffix == NullabilitySuffix.none,
-      paramName: pathAnnot?.getField('name')?.toStringValue() ??
-          queryAnnot?.getField('name')?.toStringValue(),
-      element: element,
-    );
-  }
-
-  final String name;
-  final DartType type;
-  final bool isPath;
-  final bool isQuery;
-  final bool isExtra;
-  final bool isRequired;
-  final String? paramName;
-  final Element element;
 }
