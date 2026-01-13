@@ -23,7 +23,6 @@ final router = GoRouter(
     GoRoute(
       path: const ProfileRoute().path,
       redirect: (context, state) {
-        // Use the GoRouterState extension methods to validate the route data.
         if (state.pathParameters['userId'] == null) {
           // When redirecting, use the `fullPath` method.
           return const RootRoute().fullPath();
@@ -32,12 +31,9 @@ final router = GoRouter(
         return null;
       },
       builder: (context, state) {
-        // Use a factory to extract your route data.
-        // This is especially useful if you have multiple routes that use the
-        // same data class or if your route has many parameters.
-        final profileRouteData = ProfileRouteData.fromState(state);
+        final profileData = ProfileRouteData.fromState(state);
 
-        return ProfilePage(userId: profileRouteData.userId);
+        return ProfilePage(userId: profileData.id);
       },
       routes: [
         GoRoute(
@@ -47,7 +43,7 @@ final router = GoRouter(
         GoRoute(
           path: const AdditionalDataRoute().path,
           builder: (context, state) => AdditionalRouteDataPage(
-            queryValue: AdditionalRouteData.fromState(state).queryValue,
+            queryValue: AdditionalDataRouteData.fromState(state).queryValue,
           ),
         ),
       ],
@@ -96,7 +92,7 @@ class NavButtons extends StatelessWidget {
         ElevatedButton(
           onPressed: () => const ProfileRoute().go(
             context,
-            data: const ProfileRouteData(userId: '123'),
+            data: const ProfileRouteData(id: '123'),
           ),
           child: const Text('Go to profile'),
         ),
@@ -104,8 +100,8 @@ class NavButtons extends StatelessWidget {
         ElevatedButton(
           onPressed: () => const ProfileEditRoute().go(
             context,
-            data: const ProfileRouteData(
-              userId: '123',
+            data: const ProfileEditRouteData(
+              id: '123',
             ),
           ),
           child: const Text('Go to profile edit'),
@@ -114,8 +110,8 @@ class NavButtons extends StatelessWidget {
         ElevatedButton(
           onPressed: () => const AdditionalDataRoute().go(
             context,
-            data: const AdditionalRouteData(
-              userId: '123',
+            data: const AdditionalDataRouteData(
+              id: '123',
               queryValue: 'hello world!',
             ),
           ),
@@ -180,14 +176,14 @@ class ProfileEditPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final profileRouteData = ProfileRouteData.fromState(
+    final profileData = ProfileEditRouteData.fromState(
       GoRouterState.of(context),
     );
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text('Profile edit page for ${profileRouteData.userId}'),
+        Text('Profile edit page for ${profileData.id}'),
         const NavButtons(),
       ],
     );

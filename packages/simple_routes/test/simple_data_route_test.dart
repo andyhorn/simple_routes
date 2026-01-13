@@ -21,19 +21,21 @@ void main() {
           MaterialApp(
             home: MockGoRouterProvider(
               goRouter: router,
-              child: Builder(builder: (context) {
-                return ElevatedButton(
-                  onPressed: () => const TestDataRoute().go(
-                    context,
-                    data: const TestRouteData(
-                      testValue: 'test-value',
-                      testData: TestData(),
-                      testQuery: 'test-query',
+              child: Builder(
+                builder: (context) {
+                  return ElevatedButton(
+                    onPressed: () => const TestDataRoute().go(
+                      context,
+                      data: const TestRouteData(
+                        testValue: 'test-value',
+                        testData: TestData(),
+                        testQuery: 'test-query',
+                      ),
                     ),
-                  ),
-                  child: const Text('click me'),
-                );
-              }),
+                    child: const Text('click me'),
+                  );
+                },
+              ),
             ),
           ),
         );
@@ -41,10 +43,8 @@ void main() {
         await tester.tap(find.text('click me'));
 
         verify(
-          () => router.go(
-            '/test-value?query=test-query',
-            extra: isA<TestData>(),
-          ),
+          () =>
+              router.go('/test-value?query=test-query', extra: isA<TestData>()),
         ).called(1);
       });
     });
@@ -55,19 +55,21 @@ void main() {
           MaterialApp(
             home: MockGoRouterProvider(
               goRouter: router,
-              child: Builder(builder: (context) {
-                return ElevatedButton(
-                  onPressed: () => const TestDataRoute().push(
-                    context,
-                    data: const TestRouteData(
-                      testValue: 'test-value',
-                      testData: TestData(),
-                      testQuery: 'test-query',
+              child: Builder(
+                builder: (context) {
+                  return ElevatedButton(
+                    onPressed: () => const TestDataRoute().push(
+                      context,
+                      data: const TestRouteData(
+                        testValue: 'test-value',
+                        testData: TestData(),
+                        testQuery: 'test-query',
+                      ),
                     ),
-                  ),
-                  child: const Text('click me'),
-                );
-              }),
+                    child: const Text('click me'),
+                  );
+                },
+              ),
             ),
           ),
         );
@@ -94,6 +96,18 @@ void main() {
           ),
         );
         expect(generated, '/test-value?query=test%20query');
+      });
+
+      test('URI encodes path parameters', () {
+        const route = TestDataRoute();
+        final generated = route.fullPath(
+          const TestRouteData(
+            testValue: 'test value',
+            testData: TestData(),
+            testQuery: 'test query',
+          ),
+        );
+        expect(generated, '/test%20value?query=test%20query');
       });
     });
   });

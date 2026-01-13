@@ -4,6 +4,9 @@ repository: https://github.com/andyhorn/simple_routes.git
 
 workspace:
   - packages/simple_routes
+  - packages/simple_routes_annotations
+  - packages/simple_routes_generator
+  - packages/simple_routes/example
 
 environment:
   sdk: ">=3.5.0 <4.0.0"
@@ -14,6 +17,9 @@ dependencies:
 melos:
   packages:
     - packages/simple_routes
+    - packages/simple_routes_annotations
+    - packages/simple_routes_generator
+    - packages/simple_routes/example
 
   scripts:
     test:
@@ -32,3 +38,7 @@ melos:
       name: Format
       description: Format all packages
       exec: dart format .
+    generate:
+      name: Generate
+      description: Generate code for all packages
+      run: melos exec --depends-on=build_runner -- dart run build_runner build -d
