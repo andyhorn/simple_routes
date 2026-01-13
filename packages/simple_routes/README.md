@@ -82,7 +82,7 @@ abstract class Profile {
   // @Path('userId')
   // String get id;
   // ```
-  @Path() 
+  @Path()
   String get userId;
 }
 ```
