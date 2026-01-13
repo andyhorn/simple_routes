@@ -233,6 +233,38 @@ abstract class User {
           );
         },
       );
+
+      test('throws error when multiple @Extra annotations are present', () async {
+        expect(
+          () => testBuilder(simpleRouteBuilder(BuilderOptions.empty), {
+            ...annotationsAsset,
+            'a|lib/routes.dart': '''
+import 'package:simple_routes_annotations/simple_routes_annotations.dart';
+
+part 'routes.g.dart';
+
+class MyExtraData {}
+class AnotherExtraData {}
+
+@Route('details')
+abstract class Details {
+  @Extra()
+  MyExtraData get data1;
+  
+  @Extra()
+  AnotherExtraData get data2;
+}
+''',
+          }),
+          throwsA(
+            isA<InvalidGenerationSourceError>().having(
+              (e) => e.message,
+              'message',
+              contains('Only one @Extra annotation is allowed per route'),
+            ),
+          ),
+        );
+      });
     });
 
     test('generates route with bool and enum parameters', () async {

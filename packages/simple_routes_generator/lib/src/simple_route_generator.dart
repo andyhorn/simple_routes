@@ -36,6 +36,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     final parentType = parentReader.isNull ? null : parentReader.typeValue;
 
     _validatePathParams(blueprint, allPathParams, dataSources);
+    _validateExtraAnnotations(blueprint, dataSources);
 
     final isData = dataSources.isNotEmpty;
 
@@ -655,6 +656,20 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
           element: source.element,
         );
       }
+    }
+  }
+
+  void _validateExtraAnnotations(
+    ClassElement blueprint,
+    List<DataSource> dataSources,
+  ) {
+    final extraDataSources = dataSources.where((ds) => ds.isExtra).toList();
+
+    if (extraDataSources.length > 1) {
+      throw InvalidGenerationSourceError(
+        'Only one @Extra annotation is allowed per route. Found ${extraDataSources.length} @Extra annotations.',
+        element: blueprint,
+      );
     }
   }
 }
