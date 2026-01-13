@@ -14,7 +14,7 @@ dependencies:
   flutter:
     sdk: flutter
   go_router: ">=12.0.0 <17.0.0"
-  simple_routes_annotations: any
+  simple_routes_annotations: ^1.0.0
 
 dev_dependencies:
   flutter_test:
