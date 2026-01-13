@@ -115,6 +115,12 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
         }),
       );
 
+      // Add parse helper methods
+      final parseHelpers = _generateParseHelpers(dataSources);
+      for (final helper in parseHelpers) {
+        c.methods.add(helper);
+      }
+
       // Add fromState factory
       c.constructors.add(
         Constructor((ctor) {
@@ -264,77 +270,220 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
 
   Expression _parseType(Expression source, DartType type) {
     final isNullable = type.nullabilitySuffix != NullabilitySuffix.none;
-    final expr = isNullable ? source : source.nullChecked;
 
-    if (type.isDartCoreString) return expr;
+    if (type.isDartCoreString) return source;
 
     if (type.isDartCoreInt) {
-      if (isNullable) {
-        return source.equalTo(literalNull).conditional(
-              literalNull,
-              refer('int').property('tryParse').call([source.nullChecked]),
-            );
-      }
-      return refer('int').property('parse').call([expr]);
+      return refer('_parseInt').call([source, literalBool(isNullable)]);
     }
 
     if (type.isDartCoreDouble) {
-      if (isNullable) {
-        return source.equalTo(literalNull).conditional(
-              literalNull,
-              refer('double').property('tryParse').call([source.nullChecked]),
-            );
-      }
-      return refer('double').property('parse').call([expr]);
+      return refer('_parseDouble').call([source, literalBool(isNullable)]);
     }
 
     if (type.isDartCoreNum) {
-      if (isNullable) {
-        return source.equalTo(literalNull).conditional(
-              literalNull,
-              refer('num').property('tryParse').call([source.nullChecked]),
-            );
-      }
-      return refer('num').property('parse').call([expr]);
+      return refer('_parseNum').call([source, literalBool(isNullable)]);
     }
 
     if (type.getDisplayString(withNullability: false) == 'DateTime') {
-      if (isNullable) {
-        return source.equalTo(literalNull).conditional(
-              literalNull,
-              refer('DateTime').property('tryParse').call([source.nullChecked]),
-            );
-      }
-      return refer('DateTime').property('parse').call([expr]);
+      return refer('_parseDateTime').call([source, literalBool(isNullable)]);
     }
 
     if (type.isDartCoreBool) {
-      if (isNullable) {
-        return source
-            .equalTo(literalNull)
-            .conditional(literalNull, source.equalTo(literalString('true')));
-      }
-      return expr.equalTo(literalString('true'));
+      return refer('_parseBool').call([source, literalBool(isNullable)]);
     }
 
     if (type is InterfaceType && type.element is EnumElement) {
       final enumName = type.element.name;
-
-      if (isNullable) {
-        return source.equalTo(literalNull).conditional(
-              literalNull,
-              refer(enumName).property('values').property('byName').call([
-                source.nullChecked,
-              ]),
-            );
-      }
-
-      return refer(enumName).property('values').property('byName').call([expr]);
+      return refer('_parseEnum').call([
+        source,
+        literalBool(isNullable),
+        refer(enumName).property('values'),
+      ]);
     }
 
-    return isNullable
-        ? source.nullSafeProperty('toString').call([])
-        : source.nullChecked.property('toString').call([]);
+    // Fallback for other types
+    if (isNullable) {
+      return source.nullSafeProperty('toString').call([]);
+    }
+    return source.nullChecked.property('toString').call([]);
+  }
+
+  /// Generates static helper methods for parsing types from strings.
+  List<Method> _generateParseHelpers(List<DataSource> dataSources) {
+    final helpers = <Method>[];
+    final typesNeeded = <String>{};
+
+    // Collect all types that need parsing helpers
+    for (final source in dataSources) {
+      final type = source.type;
+      if (type.isDartCoreInt && !typesNeeded.contains('int')) {
+        typesNeeded.add('int');
+        helpers.add(_createIntParseHelper());
+      } else if (type.isDartCoreDouble && !typesNeeded.contains('double')) {
+        typesNeeded.add('double');
+        helpers.add(_createDoubleParseHelper());
+      } else if (type.isDartCoreNum && !typesNeeded.contains('num')) {
+        typesNeeded.add('num');
+        helpers.add(_createNumParseHelper());
+      } else if (type.getDisplayString(withNullability: false) == 'DateTime' &&
+          !typesNeeded.contains('DateTime')) {
+        typesNeeded.add('DateTime');
+        helpers.add(_createDateTimeParseHelper());
+      } else if (type.isDartCoreBool && !typesNeeded.contains('bool')) {
+        typesNeeded.add('bool');
+        helpers.add(_createBoolParseHelper());
+      } else if (type is InterfaceType && type.element is EnumElement) {
+        // Only add enum helper once
+        if (!typesNeeded.contains('enum')) {
+          typesNeeded.add('enum');
+          helpers.add(_createEnumParseHelper());
+        }
+      }
+    }
+
+    return helpers;
+  }
+
+  Method _createIntParseHelper() {
+    return Method((m) {
+      m.name = '_parseInt';
+      m.static = true;
+      m.returns = refer('int?');
+      m.requiredParameters.addAll([
+        Parameter((p) {
+          p.name = 'source';
+          p.type = refer('String?');
+        }),
+        Parameter((p) {
+          p.name = 'isNullable';
+          p.type = refer('bool');
+        }),
+      ]);
+      m.body = Block.of([
+        const Code('if (source == null) return null;'),
+        const Code('if (isNullable) return int.tryParse(source);'),
+        const Code('return int.parse(source);'),
+      ]);
+    });
+  }
+
+  Method _createDoubleParseHelper() {
+    return Method((m) {
+      m.name = '_parseDouble';
+      m.static = true;
+      m.returns = refer('double?');
+      m.requiredParameters.addAll([
+        Parameter((p) {
+          p.name = 'source';
+          p.type = refer('String?');
+        }),
+        Parameter((p) {
+          p.name = 'isNullable';
+          p.type = refer('bool');
+        }),
+      ]);
+      m.body = Block.of([
+        const Code('if (source == null) return null;'),
+        const Code('if (isNullable) return double.tryParse(source);'),
+        const Code('return double.parse(source);'),
+      ]);
+    });
+  }
+
+  Method _createNumParseHelper() {
+    return Method((m) {
+      m.name = '_parseNum';
+      m.static = true;
+      m.returns = refer('num?');
+      m.requiredParameters.addAll([
+        Parameter((p) {
+          p.name = 'source';
+          p.type = refer('String?');
+        }),
+        Parameter((p) {
+          p.name = 'isNullable';
+          p.type = refer('bool');
+        }),
+      ]);
+      m.body = Block.of([
+        const Code('if (source == null) return null;'),
+        const Code('if (isNullable) return num.tryParse(source);'),
+        const Code('return num.parse(source);'),
+      ]);
+    });
+  }
+
+  Method _createDateTimeParseHelper() {
+    return Method((m) {
+      m.name = '_parseDateTime';
+      m.static = true;
+      m.returns = refer('DateTime?');
+      m.requiredParameters.addAll([
+        Parameter((p) {
+          p.name = 'source';
+          p.type = refer('String?');
+        }),
+        Parameter((p) {
+          p.name = 'isNullable';
+          p.type = refer('bool');
+        }),
+      ]);
+      m.body = Block.of([
+        const Code('if (source == null) return null;'),
+        const Code('if (isNullable) return DateTime.tryParse(source);'),
+        const Code('return DateTime.parse(source);'),
+      ]);
+    });
+  }
+
+  Method _createBoolParseHelper() {
+    return Method((m) {
+      m.name = '_parseBool';
+      m.static = true;
+      m.returns = refer('bool?');
+      m.requiredParameters.addAll([
+        Parameter((p) {
+          p.name = 'source';
+          p.type = refer('String?');
+        }),
+        Parameter((p) {
+          p.name = 'isNullable';
+          p.type = refer('bool');
+        }),
+      ]);
+      m.body = Block.of([
+        const Code('if (source == null) return null;'),
+        const Code('if (isNullable) return source == \'true\';'),
+        const Code('return source == \'true\';'),
+      ]);
+    });
+  }
+
+  Method _createEnumParseHelper() {
+    return Method((m) {
+      m.name = '_parseEnum';
+      m.static = true;
+      m.returns = refer('Object?');
+      m.requiredParameters.addAll([
+        Parameter((p) {
+          p.name = 'source';
+          p.type = refer('String?');
+        }),
+        Parameter((p) {
+          p.name = 'isNullable';
+          p.type = refer('bool');
+        }),
+        Parameter((p) {
+          p.name = 'enumValues';
+          p.type = refer('List');
+        }),
+      ]);
+      m.body = Block.of([
+        const Code('if (source == null) return null;'),
+        const Code('return enumValues.byName(source);'),
+      ]);
+    });
   }
 
   Expression _serializeType(Expression source, DartType type) {

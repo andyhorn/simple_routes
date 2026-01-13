@@ -260,12 +260,13 @@ abstract class Dashboard {
         outputs: {
           'a|lib/routes.simple_routes.g.part': decodedMatches(
             allOf(
-              contains("== 'true'"),
-              contains(
-                "MyStatus.values.byName(state.uri.queryParameters['status']!)",
-              ),
+              contains("_parseBool("),
+              contains("_parseEnum("),
+              contains("MyStatus.values"),
               contains("'isAdmin': isAdmin.toString()"),
               contains("'status': status.name"),
+              contains("static bool? _parseBool("),
+              contains("static Object? _parseEnum("),
             ),
           ),
         },
@@ -295,12 +296,12 @@ abstract class Metrics {
         outputs: {
           'a|lib/routes.simple_routes.g.part': decodedMatches(
             allOf(
-              contains("double.parse(state.uri.queryParameters['value']!)"),
-              contains(
-                "DateTime.parse(state.uri.queryParameters['timestamp']!)",
-              ),
+              contains("_parseDouble("),
+              contains("_parseDateTime("),
               contains("'value': value.toString()"),
               contains("'timestamp': timestamp.toIso8601String()"),
+              contains("static double? _parseDouble("),
+              contains("static DateTime? _parseDateTime("),
             ),
           ),
         },
@@ -331,7 +332,7 @@ abstract class User {
             allOf(
               contains('class UserRouteData implements SimpleRouteData'),
               contains('final String id;'),
-              contains("state.pathParameters['userId']!"),
+              contains("state.pathParameters['userId']"),
               isNot(contains('unannotatedParam')),
             ),
           ),
