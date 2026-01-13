@@ -565,77 +565,85 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
   ) {
     final dataSources = <String, DataSource>{};
 
-    // 1. Collect from factory constructor (if any) - only annotated parameters
-    final factoryConstructor =
-        blueprint.constructors.where((c) => c.isFactory).firstOrNull;
-    if (factoryConstructor != null) {
-      for (final param in factoryConstructor.parameters) {
-        // Only collect parameters that have annotations
-        if (_annotations.isAnnotated(param)) {
-          dataSources[param.name] = DataSource.fromParameter(param);
+    // 1. Collect from current blueprint - all annotated elements
+    final allDataSources = _collectDataSourcesFromElement(
+      blueprint,
+      (element) => _annotations.isAnnotated(element),
+    );
+
+    dataSources.addAll(allDataSources);
+
+    // 2. Collect path parameters from hierarchy that are missing in the current leaf
+    for (final info in hierarchy.skip(1)) {
+      final parentBlueprint = info.element;
+      final parentDataSources = _collectDataSourcesFromElement(
+        parentBlueprint,
+        (element) => _annotations.getPathAnnotation(element) != null,
+      );
+
+      for (final entry in parentDataSources.entries) {
+        if (!dataSources.containsKey(entry.key)) {
+          dataSources[entry.key] = entry.value;
         }
       }
     }
 
-    // 2. Collect from annotated fields and getters
+    return dataSources.values.toList();
+  }
+
+  /// Collects data sources from a class element (factory constructor, fields, accessors).
+  ///
+  /// [blueprint] - The class element to collect from
+  /// [shouldCollect] - Predicate function to determine if an element should be collected
+  /// Returns a map of data source names to DataSource objects
+  Map<String, DataSource> _collectDataSourcesFromElement(
+    ClassElement blueprint,
+    bool Function(Element element) shouldCollect,
+  ) {
+    final dataSources = <String, DataSource>{};
+
+    // Collect from factory constructor (if any)
+    final factoryConstructors = blueprint.constructors.where(
+      (c) => c.isFactory,
+    );
+
+    if (factoryConstructors.firstOrNull != null) {
+      final factoryConstructor = factoryConstructors.firstOrNull!;
+
+      for (final param in factoryConstructor.parameters) {
+        if (shouldCollect(param)) {
+          final ds = DataSource.fromParameter(param);
+          dataSources[ds.name] = ds;
+        }
+      }
+    }
+
+    // Collect from fields
     for (final field in blueprint.fields) {
-      if (_annotations.isAnnotated(field)) {
+      if (shouldCollect(field)) {
         final ds = DataSource.fromElement(field);
         dataSources[ds.name] = ds;
       }
     }
 
-    for (final accessor in blueprint.accessors) {
-      if (accessor.isGetter && _annotations.isAnnotated(accessor)) {
+    final getters = blueprint.accessors.where((a) => a.isGetter);
+
+    // Collect from accessors
+    for (final accessor in getters) {
+      if (shouldCollect(accessor)) {
         final ds = DataSource.fromElement(accessor);
         dataSources[ds.name] = ds;
-      } else if (accessor.isGetter) {
+      } else {
         // Also check the underlying variable for the accessor
         final variable = accessor.variable;
-        if (_annotations.isAnnotated(variable)) {
+        if (shouldCollect(variable)) {
           final ds = DataSource.fromElement(accessor);
           dataSources[ds.name] = ds;
         }
       }
     }
 
-    // 3. Collect path parameters from hierarchy that are missing in the current leaf
-    for (final info in hierarchy.skip(1)) {
-      final parentBlueprint = info.element;
-      // Check factory
-      final parentFactory =
-          parentBlueprint.constructors.where((c) => c.isFactory).firstOrNull;
-      if (parentFactory != null) {
-        for (final param in parentFactory.parameters) {
-          if (_annotations.getPathAnnotation(param) != null) {
-            final ds = DataSource.fromParameter(param);
-            if (!dataSources.containsKey(ds.name)) {
-              dataSources[ds.name] = ds;
-            }
-          }
-        }
-      }
-      // Check fields/getters
-      for (final field in parentBlueprint.fields) {
-        if (_annotations.getPathAnnotation(field) != null) {
-          final ds = DataSource.fromElement(field);
-          if (!dataSources.containsKey(ds.name)) {
-            dataSources[ds.name] = ds;
-          }
-        }
-      }
-      for (final accessor in parentBlueprint.accessors) {
-        if (accessor.isGetter &&
-            _annotations.getPathAnnotation(accessor) != null) {
-          final ds = DataSource.fromElement(accessor);
-          if (!dataSources.containsKey(ds.name)) {
-            dataSources[ds.name] = ds;
-          }
-        }
-      }
-    }
-
-    return dataSources.values.toList();
+    return dataSources;
   }
 
   void _validatePathParams(
