@@ -33,7 +33,11 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
 
     final path = annotation.read('path').stringValue;
     final parentReader = annotation.read('parent');
-    final parentType = parentReader.isNull ? null : parentReader.typeValue;
+    final parentType = parentReader.isNull
+        ? null
+        : (parentReader.typeValue is InterfaceType
+            ? parentReader.typeValue as InterfaceType
+            : null);
 
     _validatePathParams(blueprint, allPathParams, dataSources);
     _validateExtraAnnotations(blueprint, dataSources);
@@ -49,7 +53,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
           blueprint,
           path,
           isData,
-          parentType as InterfaceType?,
+          parentType,
         ),
       );
     });
@@ -527,7 +531,14 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
       final parentType = parentReader.typeValue;
       if (parentType is! InterfaceType) break;
 
-      currentElement = parentType.element as ClassElement;
+      final element = parentType.element;
+      if (element is! ClassElement) {
+        throw InvalidGenerationSourceError(
+          'Parent route must be a class, but found ${element.runtimeType}.',
+          element: element,
+        );
+      }
+      currentElement = element;
       final nextAnnotation = _annotations.getRouteAnnotation(currentElement);
 
       if (nextAnnotation == null) break;
