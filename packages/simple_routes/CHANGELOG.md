@@ -1,12 +1,15 @@
 # CHANGELOG
 
-## 2.1.0
-- **Initial Release of Code Generation Tooling!** 🎉
-- Define routes using abstract "blueprint" classes and the `@Route` annotation.
-- Automatically generate type-safe `Route` and `RouteData` classes.
+## 2.1.0-beta.1
+
+- **Beta Release: Code Generation Support**
+- Added support for code generation as the recommended way to define routes.
+- Define routes using abstract "blueprint" classes and the `@Route` annotation from `simple_routes_annotations`.
+- Automatically generate type-safe `Route` and `RouteData` classes using `simple_routes_generator`.
 - Support for path parameters (`@Path`), query parameters (`@Query`), and extra data (`@Extra`).
 - Automatic path parameter inheritance for child routes.
 - Simplified data extraction with generated `fromState` factory constructors.
+- Manual route definition (extending `SimpleRoute` or `SimpleDataRoute`) remains supported for those who prefer it.
 
 ## 2.0.4 - 9/29/2025
 - Add support for go_router <17.0.0

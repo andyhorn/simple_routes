@@ -1,10 +1,10 @@
 # CHANGELOG
 
-## 1.0.0
+## 1.0.0-beta.1
 
-- Initial release
-- Code generator for simple_routes package
+- Initial beta release
+- Code generator for the `simple_routes` package
 - Generate type-safe `Route` and `RouteData` classes from annotated blueprint classes
-- Support for path parameters, query parameters, and extra data
-- Automatic path parameter inheritance for child routes
-- Generate `fromState` factory constructors for route data extraction
+- Support for path parameters (`@Path`), query parameters (`@Query`), and extra data (`@Extra`)
+- Automatic path parameter inheritance for child routes defined with `parent` property
+- Generate `fromState` factory constructors for easy route data extraction from `GoRouterState`
