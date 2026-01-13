@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 2.1.0-beta.1
+## 2.1.0+beta.1
 
 - **Initial Beta Release of Code Generation Tooling!**
 - Added code generation support across the workspace packages.

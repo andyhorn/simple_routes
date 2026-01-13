@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 1.0.0-beta.1
+## 1.0.0+beta.1
 
 - Initial beta release
 - Add `@Route` annotation for marking route blueprint classes with path and optional parent route

@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 2.1.0-beta.1
+## 2.1.0+beta.1
 
 - **Beta Release: Code Generation Support**
 - Added support for code generation as the recommended way to define routes.
