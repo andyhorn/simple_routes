@@ -263,37 +263,77 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     if (type.isDartCoreString) return expr;
 
     if (type.isDartCoreInt) {
+      if (isNullable) {
+        return source
+            .equalTo(literalNull)
+            .conditional(
+              literalNull,
+              refer('int').property('tryParse').call([source.nullChecked]),
+            );
+      }
       return refer('int').property('parse').call([expr]);
     }
 
     if (type.isDartCoreDouble) {
+      if (isNullable) {
+        return source
+            .equalTo(literalNull)
+            .conditional(
+              literalNull,
+              refer('double').property('tryParse').call([source.nullChecked]),
+            );
+      }
       return refer('double').property('parse').call([expr]);
     }
 
     if (type.isDartCoreNum) {
+      if (isNullable) {
+        return source
+            .equalTo(literalNull)
+            .conditional(
+              literalNull,
+              refer('num').property('tryParse').call([source.nullChecked]),
+            );
+      }
       return refer('num').property('parse').call([expr]);
     }
 
     if (type.getDisplayString(withNullability: false) == 'DateTime') {
+      if (isNullable) {
+        return source
+            .equalTo(literalNull)
+            .conditional(
+              literalNull,
+              refer('DateTime').property('tryParse').call([source.nullChecked]),
+            );
+      }
       return refer('DateTime').property('parse').call([expr]);
     }
 
     if (type.isDartCoreBool) {
+      if (isNullable) {
+        return source
+            .equalTo(literalNull)
+            .conditional(literalNull, source.equalTo(literalString('true')));
+      }
       return expr.equalTo(literalString('true'));
     }
 
     if (type is InterfaceType && type.element is EnumElement) {
       final enumName = type.element.name;
-      final byNameCall = refer(
-        enumName,
-      ).property('values').property('byName').call([expr]);
 
       if (isNullable) {
         return source
-            .notEqualTo(literalNull)
-            .conditional(byNameCall, literalNull);
+            .equalTo(literalNull)
+            .conditional(
+              literalNull,
+              refer(enumName).property('values').property('byName').call([
+                source.nullChecked,
+              ]),
+            );
       }
-      return byNameCall;
+
+      return refer(enumName).property('values').property('byName').call([expr]);
     }
 
     return isNullable
