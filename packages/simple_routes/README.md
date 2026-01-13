@@ -78,10 +78,9 @@ For routes with path parameters, define them as abstract getters and annotate th
 abstract class Profile {
   // If the name of the field matches the path segment, you can omit the name.
   // Otherwise, you must provide the name.
-  // ```
+  // Example:
   // @Path('userId')
   // String get id;
-  // ```
   @Path()
   String get userId;
 }
