@@ -1,6 +1,6 @@
 # Code Generation Guide
 
-`simple_routes` uses code generation to bridge the gap between your route definitions and type-safe navigation. This guide covers how to use the code generation feature "as a whole."
+`simple_routes` uses code generation to bridge the gap between your route definitions and type-safe navigation. This guide covers how to use the code generation feature as a whole.
 
 ## Overview
 
