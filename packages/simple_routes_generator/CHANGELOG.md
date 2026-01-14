@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.0.0+beta.2
+
+- Fixed null-check assertions, extra parameter validation, type casting, and nullable handling
+- Refactored code structure and improved maintainability
+- Improved test coverage
+
 ## 1.0.0+beta.1
 
 - Initial beta release
