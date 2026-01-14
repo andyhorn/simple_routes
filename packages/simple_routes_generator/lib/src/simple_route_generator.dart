@@ -1,4 +1,3 @@
-import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
@@ -7,23 +6,12 @@ import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:simple_routes_annotations/simple_routes_annotations.dart';
 import 'package:source_gen/source_gen.dart';
-import 'path_parser.dart';
+
+import 'models/models.dart';
 
 class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
   final DartFormatter _formatter = DartFormatter();
-
-  static const _routeChecker = TypeChecker.fromUrl(
-    'package:simple_routes_annotations/simple_routes_annotations.dart#Route',
-  );
-  static const _pathChecker = TypeChecker.fromUrl(
-    'package:simple_routes_annotations/simple_routes_annotations.dart#Path',
-  );
-  static const _queryChecker = TypeChecker.fromUrl(
-    'package:simple_routes_annotations/simple_routes_annotations.dart#Query',
-  );
-  static const _extraChecker = TypeChecker.fromUrl(
-    'package:simple_routes_annotations/simple_routes_annotations.dart#Extra',
-  );
+  final Annotations _annotations = const Annotations();
 
   @override
   String generateForAnnotatedElement(
@@ -45,9 +33,14 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
 
     final path = annotation.read('path').stringValue;
     final parentReader = annotation.read('parent');
-    final parentType = parentReader.isNull ? null : parentReader.typeValue;
+    final parentType = parentReader.isNull
+        ? null
+        : (parentReader.typeValue is InterfaceType
+            ? parentReader.typeValue as InterfaceType
+            : null);
 
     _validatePathParams(blueprint, allPathParams, dataSources);
+    _validateExtraAnnotations(blueprint, dataSources);
 
     final isData = dataSources.isNotEmpty;
 
@@ -60,7 +53,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
           blueprint,
           path,
           isData,
-          parentType as InterfaceType?,
+          parentType,
         ),
       );
     });
@@ -69,13 +62,37 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     return _formatter.format('${library.accept(emitter)}');
   }
 
+  String _buildRouteClassName(ClassElement blueprint) {
+    return '${blueprint.name}Route';
+  }
+
+  String _buildRouteDataClassName(ClassElement blueprint) {
+    return '${blueprint.name}RouteData';
+  }
+
+  String _buildParentRouteClassName(InterfaceType parent) {
+    return '${parent.element.name}Route';
+  }
+
+  String _buildSimpleDataRouteType(String dataClassName) {
+    return 'SimpleDataRoute<$dataClassName>';
+  }
+
+  String _buildChildRouteType(String parentRouteClassName) {
+    return 'ChildRoute<$parentRouteClassName>';
+  }
+
+  /// Generates the route data class that implements [SimpleRouteData].
+  ///
+  /// Creates a class with fields for each data source, a constructor, a
+  /// `fromState` factory, and getters for [parameters], [query], and [extra].
   Class _generateDataClass(
     ClassElement blueprint,
-    List<_DataSource> dataSources,
-    List<String> allPathParams,
+    List<DataSource> dataSources,
+    Set<String> allPathParams,
   ) {
     return Class((c) {
-      final className = '${blueprint.name}RouteData';
+      final className = _buildRouteDataClassName(blueprint);
       c.name = className;
       c.implements.add(refer('SimpleRouteData'));
 
@@ -106,6 +123,12 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
           }
         }),
       );
+
+      // Add parse helper methods
+      final parseHelpers = _generateParseHelpers(dataSources);
+      for (final helper in parseHelpers) {
+        c.methods.add(helper);
+      }
 
       // Add fromState factory
       c.constructors.add(
@@ -209,24 +232,28 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     });
   }
 
+  /// Generates the route class that extends [SimpleRoute] or [SimpleDataRoute].
+  ///
+  /// If [parent] is provided, the class also implements [ChildRoute].
   Class _generateRouteClass(
     ClassElement blueprint,
     String path,
     bool isData,
     InterfaceType? parent,
   ) {
-    final name = '${blueprint.name}Route';
-    final dataClassName = '${blueprint.name}RouteData';
+    final name = _buildRouteClassName(blueprint);
+    final dataClassName = _buildRouteDataClassName(blueprint);
     final baseClass =
-        isData ? 'SimpleDataRoute<$dataClassName>' : 'SimpleRoute';
+        isData ? _buildSimpleDataRouteType(dataClassName) : 'SimpleRoute';
 
     return Class((c) {
       c.name = name;
       c.extend = refer(baseClass);
 
       if (parent != null) {
-        final parentName = parent.element.name;
-        c.implements.add(refer('ChildRoute<${parentName}Route>'));
+        final parentRouteClassName = _buildParentRouteClassName(parent);
+        final childRouteType = _buildChildRouteType(parentRouteClassName);
+        c.implements.add(refer(childRouteType));
       }
 
       c.constructors.add(
@@ -239,95 +266,269 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
       );
 
       if (parent != null) {
-        final parentName = parent.element.name;
+        final parentRouteClassName = _buildParentRouteClassName(parent);
         c.methods.add(
           Method((m) {
             m.name = 'parent';
             m.type = MethodType.getter;
             m.annotations.add(refer('override'));
-            m.returns = refer('${parentName}Route');
-            m.body = refer('const ${parentName}Route').call([]).code;
+            m.returns = refer(parentRouteClassName);
+            m.body = refer('const $parentRouteClassName').call([]).code;
           }),
         );
       }
     });
   }
 
+  /// Generates an expression to parse a string value to the given [type].
+  ///
+  /// Returns a call to the appropriate helper method (e.g., `_parseInt`) for
+  /// non-string types, or the source expression directly for strings.
   Expression _parseType(Expression source, DartType type) {
     final isNullable = type.nullabilitySuffix != NullabilitySuffix.none;
-    final expr = isNullable ? source : source.nullChecked;
 
-    if (type.isDartCoreString) return expr;
+    if (type.isDartCoreString) return source;
 
     if (type.isDartCoreInt) {
-      if (isNullable) {
-        return source.equalTo(literalNull).conditional(
-              literalNull,
-              refer('int').property('tryParse').call([source.nullChecked]),
-            );
-      }
-      return refer('int').property('parse').call([expr]);
+      return refer('_parseInt').call([source, literalBool(isNullable)]);
     }
 
     if (type.isDartCoreDouble) {
-      if (isNullable) {
-        return source.equalTo(literalNull).conditional(
-              literalNull,
-              refer('double').property('tryParse').call([source.nullChecked]),
-            );
-      }
-      return refer('double').property('parse').call([expr]);
+      return refer('_parseDouble').call([source, literalBool(isNullable)]);
     }
 
     if (type.isDartCoreNum) {
-      if (isNullable) {
-        return source.equalTo(literalNull).conditional(
-              literalNull,
-              refer('num').property('tryParse').call([source.nullChecked]),
-            );
-      }
-      return refer('num').property('parse').call([expr]);
+      return refer('_parseNum').call([source, literalBool(isNullable)]);
     }
 
     if (type.getDisplayString(withNullability: false) == 'DateTime') {
-      if (isNullable) {
-        return source.equalTo(literalNull).conditional(
-              literalNull,
-              refer('DateTime').property('tryParse').call([source.nullChecked]),
-            );
-      }
-      return refer('DateTime').property('parse').call([expr]);
+      return refer('_parseDateTime').call([source, literalBool(isNullable)]);
     }
 
     if (type.isDartCoreBool) {
-      if (isNullable) {
-        return source
-            .equalTo(literalNull)
-            .conditional(literalNull, source.equalTo(literalString('true')));
-      }
-      return expr.equalTo(literalString('true'));
+      return refer('_parseBool').call([source, literalBool(isNullable)]);
     }
 
     if (type is InterfaceType && type.element is EnumElement) {
       final enumName = type.element.name;
-
-      if (isNullable) {
-        return source.equalTo(literalNull).conditional(
-              literalNull,
-              refer(enumName).property('values').property('byName').call([
-                source.nullChecked,
-              ]),
-            );
-      }
-
-      return refer(enumName).property('values').property('byName').call([expr]);
+      return refer('_parseEnum').call([
+        source,
+        literalBool(isNullable),
+        refer(enumName).property('values'),
+      ]);
     }
 
-    return isNullable
-        ? source.nullSafeProperty('toString').call([])
-        : source.nullChecked.property('toString').call([]);
+    // Fallback for other types
+    if (isNullable) {
+      return source.nullSafeProperty('toString').call([]);
+    }
+    return source.nullChecked.property('toString').call([]);
   }
 
+  /// Generates static helper methods for parsing types from strings.
+  List<Method> _generateParseHelpers(List<DataSource> dataSources) {
+    final helpers = <Method>[];
+    final typesNeeded = <String>{};
+
+    // Collect all types that need parsing helpers
+    for (final source in dataSources) {
+      final type = source.type;
+      if (type.isDartCoreInt && !typesNeeded.contains('int')) {
+        typesNeeded.add('int');
+        helpers.add(_createIntParseHelper());
+      } else if (type.isDartCoreDouble && !typesNeeded.contains('double')) {
+        typesNeeded.add('double');
+        helpers.add(_createDoubleParseHelper());
+      } else if (type.isDartCoreNum && !typesNeeded.contains('num')) {
+        typesNeeded.add('num');
+        helpers.add(_createNumParseHelper());
+      } else if (type.getDisplayString(withNullability: false) == 'DateTime' &&
+          !typesNeeded.contains('DateTime')) {
+        typesNeeded.add('DateTime');
+        helpers.add(_createDateTimeParseHelper());
+      } else if (type.isDartCoreBool && !typesNeeded.contains('bool')) {
+        typesNeeded.add('bool');
+        helpers.add(_createBoolParseHelper());
+      } else if (type is InterfaceType && type.element is EnumElement) {
+        // Only add enum helper once
+        if (!typesNeeded.contains('enum')) {
+          typesNeeded.add('enum');
+          helpers.add(_createEnumParseHelper());
+        }
+      }
+    }
+
+    return helpers;
+  }
+
+  Method _createIntParseHelper() {
+    return Method((m) {
+      m.name = '_parseInt';
+      m.static = true;
+      m.returns = refer('int?');
+      m.requiredParameters.addAll([
+        Parameter((p) {
+          p.name = 'source';
+          p.type = refer('String?');
+        }),
+        Parameter((p) {
+          p.name = 'isNullable';
+          p.type = refer('bool');
+        }),
+      ]);
+      m.body = Block.of([
+        const Code('if (source == null) {'),
+        const Code('  if (isNullable) return null;'),
+        const Code(
+            "  throw ArgumentError('Required parameter cannot be null');"),
+        const Code('}'),
+        const Code('if (isNullable) return int.tryParse(source);'),
+        const Code('return int.parse(source);'),
+      ]);
+    });
+  }
+
+  Method _createDoubleParseHelper() {
+    return Method((m) {
+      m.name = '_parseDouble';
+      m.static = true;
+      m.returns = refer('double?');
+      m.requiredParameters.addAll([
+        Parameter((p) {
+          p.name = 'source';
+          p.type = refer('String?');
+        }),
+        Parameter((p) {
+          p.name = 'isNullable';
+          p.type = refer('bool');
+        }),
+      ]);
+      m.body = Block.of([
+        const Code('if (source == null) {'),
+        const Code('  if (isNullable) return null;'),
+        const Code(
+            "  throw ArgumentError('Required parameter cannot be null');"),
+        const Code('}'),
+        const Code('if (isNullable) return double.tryParse(source);'),
+        const Code('return double.parse(source);'),
+      ]);
+    });
+  }
+
+  Method _createNumParseHelper() {
+    return Method((m) {
+      m.name = '_parseNum';
+      m.static = true;
+      m.returns = refer('num?');
+      m.requiredParameters.addAll([
+        Parameter((p) {
+          p.name = 'source';
+          p.type = refer('String?');
+        }),
+        Parameter((p) {
+          p.name = 'isNullable';
+          p.type = refer('bool');
+        }),
+      ]);
+      m.body = Block.of([
+        const Code('if (source == null) {'),
+        const Code('  if (isNullable) return null;'),
+        const Code(
+            "  throw ArgumentError('Required parameter cannot be null');"),
+        const Code('}'),
+        const Code('if (isNullable) return num.tryParse(source);'),
+        const Code('return num.parse(source);'),
+      ]);
+    });
+  }
+
+  Method _createDateTimeParseHelper() {
+    return Method((m) {
+      m.name = '_parseDateTime';
+      m.static = true;
+      m.returns = refer('DateTime?');
+      m.requiredParameters.addAll([
+        Parameter((p) {
+          p.name = 'source';
+          p.type = refer('String?');
+        }),
+        Parameter((p) {
+          p.name = 'isNullable';
+          p.type = refer('bool');
+        }),
+      ]);
+      m.body = Block.of([
+        const Code('if (source == null) {'),
+        const Code('  if (isNullable) return null;'),
+        const Code(
+            "  throw ArgumentError('Required parameter cannot be null');"),
+        const Code('}'),
+        const Code('if (isNullable) return DateTime.tryParse(source);'),
+        const Code('return DateTime.parse(source);'),
+      ]);
+    });
+  }
+
+  Method _createBoolParseHelper() {
+    return Method((m) {
+      m.name = '_parseBool';
+      m.static = true;
+      m.returns = refer('bool?');
+      m.requiredParameters.addAll([
+        Parameter((p) {
+          p.name = 'source';
+          p.type = refer('String?');
+        }),
+        Parameter((p) {
+          p.name = 'isNullable';
+          p.type = refer('bool');
+        }),
+      ]);
+      m.body = Block.of([
+        const Code('if (source == null) {'),
+        const Code('  if (isNullable) return null;'),
+        const Code(
+            "  throw ArgumentError('Required parameter cannot be null');"),
+        const Code('}'),
+        const Code("return source == 'true';"),
+      ]);
+    });
+  }
+
+  Method _createEnumParseHelper() {
+    return Method((m) {
+      m.name = '_parseEnum';
+      m.static = true;
+      m.returns = refer('Object?');
+      m.requiredParameters.addAll([
+        Parameter((p) {
+          p.name = 'source';
+          p.type = refer('String?');
+        }),
+        Parameter((p) {
+          p.name = 'isNullable';
+          p.type = refer('bool');
+        }),
+        Parameter((p) {
+          p.name = 'enumValues';
+          p.type = refer('List');
+        }),
+      ]);
+      m.body = Block.of([
+        const Code('if (source == null) {'),
+        const Code('  if (isNullable) return null;'),
+        const Code(
+            "  throw ArgumentError('Required parameter cannot be null');"),
+        const Code('}'),
+        const Code('return enumValues.byName(source);'),
+      ]);
+    });
+  }
+
+  /// Generates an expression to serialize a value of [type] to a string.
+  ///
+  /// Handles enums (uses `.name`), DateTime (uses `.toIso8601String()`), and
+  /// other types (uses `.toString()`).
   Expression _serializeType(Expression source, DartType type) {
     final isNullable = type.nullabilitySuffix != NullabilitySuffix.none;
 
@@ -350,17 +551,21 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
         : source.property('toString').call([]);
   }
 
-  List<_RouteInfo> _getHierarchy(
+  /// Builds the route hierarchy by traversing parent routes.
+  ///
+  /// Returns a list of [RouteInfo] objects from the current route up to the
+  /// root, following the `parent` annotation chain.
+  List<RouteInfo> _getHierarchy(
     ClassElement element,
     ConstantReader annotation,
   ) {
-    final result = <_RouteInfo>[];
+    final result = <RouteInfo>[];
     var currentElement = element;
     var currentAnnotation = annotation;
 
     while (true) {
       final path = currentAnnotation.read('path').stringValue;
-      result.add(_RouteInfo(currentElement, path));
+      result.add(RouteInfo(currentElement, path));
 
       final parentReader = currentAnnotation.read('parent');
       if (parentReader.isNull) break;
@@ -368,8 +573,15 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
       final parentType = parentReader.typeValue;
       if (parentType is! InterfaceType) break;
 
-      currentElement = parentType.element as ClassElement;
-      final nextAnnotation = _getAnnotation(currentElement, _routeChecker);
+      final element = parentType.element;
+      if (element is! ClassElement) {
+        throw InvalidGenerationSourceError(
+          'Parent route must be a class, but found ${element.runtimeType}.',
+          element: element,
+        );
+      }
+      currentElement = element;
+      final nextAnnotation = _annotations.getRouteAnnotation(currentElement);
 
       if (nextAnnotation == null) break;
       currentAnnotation = ConstantReader(nextAnnotation);
@@ -378,84 +590,46 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     return result;
   }
 
-  List<String> _collectPathParams(List<_RouteInfo> hierarchy) {
-    return hierarchy
-        .expand((h) => PathParser.parseParams(h.path))
-        .toSet()
-        .toList();
+  Set<String> _collectPathParams(List<RouteInfo> hierarchy) {
+    return hierarchy.expand((h) => _parsePathParams(h.path)).toSet();
   }
 
-  List<_DataSource> _collectDataSources(
+  List<String> _parsePathParams(String path) {
+    // This is a bug in the Dart SDK, it should not be marked as deprecated
+    // ignore: deprecated_member_use
+    final regex = RegExp(r':([a-zA-Z0-9_]+)');
+    return regex.allMatches(path).map((m) => m.group(1)!).toList();
+  }
+
+  /// Collects all data sources from the blueprint and its parent hierarchy.
+  ///
+  /// Collects all annotated elements from the current blueprint, and path
+  /// parameters from parent routes in the hierarchy.
+  List<DataSource> _collectDataSources(
     ClassElement blueprint,
-    List<_RouteInfo> hierarchy,
+    List<RouteInfo> hierarchy,
   ) {
-    final dataSources = <String, _DataSource>{};
+    final dataSources = <String, DataSource>{};
 
-    // 1. Collect from factory constructor (if any) - only annotated parameters
-    final factoryConstructor =
-        blueprint.constructors.where((c) => c.isFactory).firstOrNull;
-    if (factoryConstructor != null) {
-      for (final param in factoryConstructor.parameters) {
-        // Only collect parameters that have annotations
-        if (_isAnnotated(param)) {
-          dataSources[param.name] = _DataSource.fromParameter(param);
-        }
-      }
-    }
+    // 1. Collect from current blueprint - all annotated elements
+    final allDataSources = _collectDataSourcesFromElement(
+      blueprint,
+      (element) => _annotations.isAnnotated(element),
+    );
 
-    // 2. Collect from annotated fields and getters
-    for (final field in blueprint.fields) {
-      if (_isAnnotated(field)) {
-        final ds = _DataSource.fromElement(field);
-        dataSources[ds.name] = ds;
-      }
-    }
+    dataSources.addAll(allDataSources);
 
-    for (final accessor in blueprint.accessors) {
-      if (accessor.isGetter && _isAnnotated(accessor)) {
-        final ds = _DataSource.fromElement(accessor);
-        dataSources[ds.name] = ds;
-      } else if (accessor.isGetter) {
-        // Also check the underlying variable for the accessor
-        final variable = accessor.variable;
-        if (_isAnnotated(variable)) {
-          final ds = _DataSource.fromElement(accessor);
-          dataSources[ds.name] = ds;
-        }
-      }
-    }
-
-    // 3. Collect path parameters from hierarchy that are missing in the current leaf
+    // 2. Collect path parameters from hierarchy that are missing in the current leaf
     for (final info in hierarchy.skip(1)) {
       final parentBlueprint = info.element;
-      // Check factory
-      final parentFactory =
-          parentBlueprint.constructors.where((c) => c.isFactory).firstOrNull;
-      if (parentFactory != null) {
-        for (final param in parentFactory.parameters) {
-          if (_hasAnnotation(param, _pathChecker)) {
-            final ds = _DataSource.fromParameter(param);
-            if (!dataSources.containsKey(ds.name)) {
-              dataSources[ds.name] = ds;
-            }
-          }
-        }
-      }
-      // Check fields/getters
-      for (final field in parentBlueprint.fields) {
-        if (_hasAnnotation(field, _pathChecker)) {
-          final ds = _DataSource.fromElement(field);
-          if (!dataSources.containsKey(ds.name)) {
-            dataSources[ds.name] = ds;
-          }
-        }
-      }
-      for (final accessor in parentBlueprint.accessors) {
-        if (accessor.isGetter && _hasAnnotation(accessor, _pathChecker)) {
-          final ds = _DataSource.fromElement(accessor);
-          if (!dataSources.containsKey(ds.name)) {
-            dataSources[ds.name] = ds;
-          }
+      final parentDataSources = _collectDataSourcesFromElement(
+        parentBlueprint,
+        (element) => _annotations.getPathAnnotation(element) != null,
+      );
+
+      for (final entry in parentDataSources.entries) {
+        if (!dataSources.containsKey(entry.key)) {
+          dataSources[entry.key] = entry.value;
         }
       }
     }
@@ -463,18 +637,72 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     return dataSources.values.toList();
   }
 
+  /// Collects data sources from a class element (factory constructor, fields, accessors).
+  ///
+  /// [blueprint] - The class element to collect from
+  /// [shouldCollect] - Predicate function to determine if an element should be collected
+  /// Returns a map of data source names to DataSource objects
+  Map<String, DataSource> _collectDataSourcesFromElement(
+    ClassElement blueprint,
+    bool Function(Element element) shouldCollect,
+  ) {
+    final dataSources = <String, DataSource>{};
+
+    // Collect from factory constructor (if any)
+    final factoryConstructors = blueprint.constructors.where(
+      (c) => c.isFactory,
+    );
+
+    final factoryConstructor = factoryConstructors.firstOrNull;
+
+    if (factoryConstructor != null) {
+      for (final param in factoryConstructor.parameters) {
+        if (shouldCollect(param)) {
+          final ds = DataSource.fromParameter(param);
+          dataSources[ds.name] = ds;
+        }
+      }
+    }
+
+    // Collect from fields
+    for (final field in blueprint.fields) {
+      if (shouldCollect(field)) {
+        final ds = DataSource.fromElement(field);
+        dataSources[ds.name] = ds;
+      }
+    }
+
+    final getters = blueprint.accessors.where((a) => a.isGetter);
+
+    // Collect from accessors
+    for (final accessor in getters) {
+      if (shouldCollect(accessor)) {
+        final ds = DataSource.fromElement(accessor);
+        dataSources[ds.name] = ds;
+      } else {
+        // Also check the underlying variable for the accessor
+        final variable = accessor.variable;
+        if (shouldCollect(variable)) {
+          final ds = DataSource.fromElement(accessor);
+          dataSources[ds.name] = ds;
+        }
+      }
+    }
+
+    return dataSources;
+  }
+
   void _validatePathParams(
     ClassElement blueprint,
-    List<String> allPathParams,
-    List<_DataSource> dataSources,
+    Set<String> pathParams,
+    List<DataSource> dataSources,
   ) {
-    final pathDataSources = dataSources.where((ds) => ds.isPath).toList();
+    final pathDataSources = dataSources.where((ds) => ds.isPath);
     final annotatedParamNames =
         pathDataSources.map((ds) => ds.paramName ?? ds.name).toSet();
-    final templateParamNames = allPathParams.toSet();
 
     // 1. Check for missing @Path annotations
-    for (final templateParam in templateParamNames) {
+    for (final templateParam in pathParams) {
       if (!annotatedParamNames.contains(templateParam)) {
         throw InvalidGenerationSourceError(
           'Missing @Path annotation for path parameter ":$templateParam".',
@@ -486,7 +714,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     // 2. Check for @Path annotations that don't match the template
     for (final source in pathDataSources) {
       final effectiveName = source.paramName ?? source.name;
-      if (!templateParamNames.contains(effectiveName)) {
+      if (!pathParams.contains(effectiveName)) {
         throw InvalidGenerationSourceError(
           '@Path annotation "$effectiveName" does not match any parameter in the path template.',
           element: source.element,
@@ -495,120 +723,17 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     }
   }
 
-  static bool _isAnnotated(Element element) {
-    return _hasAnnotation(element, _pathChecker) ||
-        _hasAnnotation(element, _queryChecker) ||
-        _hasAnnotation(element, _extraChecker);
-  }
+  void _validateExtraAnnotations(
+    ClassElement blueprint,
+    List<DataSource> dataSources,
+  ) {
+    final extraDataSourcesCount = dataSources.where((ds) => ds.isExtra).length;
 
-  static DartObject? _getAnnotation(Element element, TypeChecker checker) {
-    final annotation = checker.firstAnnotationOf(element);
-    if (annotation != null) return annotation;
-
-    if (element is PropertyAccessorElement) {
-      final variable = element.variable;
-      final varAnnotation = checker.firstAnnotationOf(variable);
-      if (varAnnotation != null) return varAnnotation;
-    }
-
-    return null;
-  }
-
-  static bool _hasAnnotation(Element element, TypeChecker checker) {
-    return _getAnnotation(element, checker) != null;
-  }
-}
-
-class _RouteInfo {
-  _RouteInfo(this.element, this.path);
-  final ClassElement element;
-  final String path;
-}
-
-class _DataSource {
-  const _DataSource({
-    required this.name,
-    required this.type,
-    required this.isPath,
-    required this.isQuery,
-    required this.isExtra,
-    required this.isRequired,
-    this.paramName,
-    required this.element,
-  });
-
-  factory _DataSource.fromParameter(ParameterElement param) {
-    final pathAnnot = SimpleRouteGenerator._getAnnotation(
-      param,
-      SimpleRouteGenerator._pathChecker,
-    );
-    final queryAnnot = SimpleRouteGenerator._getAnnotation(
-      param,
-      SimpleRouteGenerator._queryChecker,
-    );
-    final extraAnnot = SimpleRouteGenerator._getAnnotation(
-      param,
-      SimpleRouteGenerator._extraChecker,
-    );
-
-    return _DataSource(
-      name: param.name,
-      type: param.type,
-      isPath: pathAnnot != null,
-      isQuery: queryAnnot != null,
-      isExtra: extraAnnot != null,
-      isRequired: param.isRequiredNamed || !param.isOptional,
-      paramName: pathAnnot?.getField('name')?.toStringValue() ??
-          queryAnnot?.getField('name')?.toStringValue(),
-      element: param,
-    );
-  }
-
-  factory _DataSource.fromElement(Element element) {
-    final pathAnnot = SimpleRouteGenerator._getAnnotation(
-      element,
-      SimpleRouteGenerator._pathChecker,
-    );
-    final queryAnnot = SimpleRouteGenerator._getAnnotation(
-      element,
-      SimpleRouteGenerator._queryChecker,
-    );
-    final extraAnnot = SimpleRouteGenerator._getAnnotation(
-      element,
-      SimpleRouteGenerator._extraChecker,
-    );
-
-    DartType type;
-    if (element is VariableElement) {
-      type = element.type;
-    } else if (element is PropertyAccessorElement) {
-      type = element.returnType;
-    } else {
+    if (extraDataSourcesCount > 1) {
       throw InvalidGenerationSourceError(
-        'Unexpected element type: ${element.runtimeType}',
-        element: element,
+        'Only one @Extra annotation is allowed per route. Found $extraDataSourcesCount @Extra annotations.',
+        element: blueprint,
       );
     }
-
-    return _DataSource(
-      name: element.name!,
-      type: type,
-      isPath: pathAnnot != null,
-      isQuery: queryAnnot != null,
-      isExtra: extraAnnot != null,
-      isRequired: type.nullabilitySuffix == NullabilitySuffix.none,
-      paramName: pathAnnot?.getField('name')?.toStringValue() ??
-          queryAnnot?.getField('name')?.toStringValue(),
-      element: element,
-    );
   }
-
-  final String name;
-  final DartType type;
-  final bool isPath;
-  final bool isQuery;
-  final bool isExtra;
-  final bool isRequired;
-  final String? paramName;
-  final Element element;
 }
