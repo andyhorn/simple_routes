@@ -1,9 +1,8 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:simple_routes_generator/src/models/models.dart';
 import 'package:source_gen/source_gen.dart';
-
-import 'models.dart';
 
 class DataSource {
   const DataSource({
@@ -13,8 +12,7 @@ class DataSource {
     required this.isQuery,
     required this.isExtra,
     required this.isRequired,
-    this.paramName,
-    required this.element,
+    required this.element, this.paramName,
   });
 
   factory DataSource.fromParameter(ParameterElement param) {

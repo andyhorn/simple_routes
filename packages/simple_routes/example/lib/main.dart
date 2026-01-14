@@ -153,7 +153,7 @@ class DashboardPage extends StatelessWidget {
 }
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key, required this.userId});
+  const ProfilePage({required this.userId, super.key });
 
   final String userId;
 

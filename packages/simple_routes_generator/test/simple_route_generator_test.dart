@@ -295,17 +295,17 @@ abstract class Dashboard {
         outputs: {
           'a|lib/routes.simple_routes.g.part': decodedMatches(
             allOf([
-              contains("_parseBool("),
-              contains("_parseEnum("),
-              contains("MyStatus.values"),
+              contains('_parseBool('),
+              contains('_parseEnum('),
+              contains('MyStatus.values'),
               contains(
-                  "_parseBool(state.uri.queryParameters['isAdmin'], false)!"),
+                  "_parseBool(state.uri.queryParameters['isAdmin'], false)!",),
               contains(
-                  "_parseEnum(state.uri.queryParameters['status'], false, MyStatus.values)!"),
+                  "_parseEnum(state.uri.queryParameters['status'], false, MyStatus.values)!",),
               contains("'isAdmin': isAdmin.toString()"),
               contains("'status': status.name"),
-              contains("static bool? _parseBool("),
-              contains("static Object? _parseEnum("),
+              contains('static bool? _parseBool('),
+              contains('static Object? _parseEnum('),
             ]),
           ),
         },
@@ -335,16 +335,16 @@ abstract class Metrics {
         outputs: {
           'a|lib/routes.simple_routes.g.part': decodedMatches(
             allOf([
-              contains("_parseDouble("),
-              contains("_parseDateTime("),
+              contains('_parseDouble('),
+              contains('_parseDateTime('),
               contains(
-                  "_parseDouble(state.uri.queryParameters['value'], false)!"),
+                  "_parseDouble(state.uri.queryParameters['value'], false)!",),
               contains(
-                  "_parseDateTime(state.uri.queryParameters['timestamp'], false)!"),
+                  "_parseDateTime(state.uri.queryParameters['timestamp'], false)!",),
               contains("'value': value.toString()"),
               contains("'timestamp': timestamp.toIso8601String()"),
-              contains("static double? _parseDouble("),
-              contains("static DateTime? _parseDateTime("),
+              contains('static double? _parseDouble('),
+              contains('static DateTime? _parseDateTime('),
             ]),
           ),
         },
@@ -409,8 +409,8 @@ abstract class Search {
               contains('class SearchRouteData implements SimpleRouteData'),
               contains('final String? query;'),
               contains('final int? pageNumber;'),
-              contains("_parseInt("),
-              contains("true"), // isNullable
+              contains('_parseInt('),
+              contains('true'), // isNullable
             ),
           ),
         },
@@ -558,12 +558,12 @@ abstract class Api {
         outputs: {
           'a|lib/routes.simple_routes.g.part': decodedMatches(
             allOf(
-              contains("_parseInt("),
-              contains("_parseNum("),
+              contains('_parseInt('),
+              contains('_parseNum('),
               contains("_parseInt(state.uri.queryParameters['page'], false)!"),
               contains("_parseNum(state.uri.queryParameters['count'], false)!"),
-              contains("static int? _parseInt("),
-              contains("static num? _parseNum("),
+              contains('static int? _parseInt('),
+              contains('static num? _parseNum('),
             ),
           ),
         },
@@ -597,9 +597,9 @@ abstract class Dashboard {
             allOf(
               contains('final Status? status;'),
               contains('final DateTime? updated;'),
-              contains("_parseEnum("),
-              contains("_parseDateTime("),
-              contains("true"), // isNullable
+              contains('_parseEnum('),
+              contains('_parseDateTime('),
+              contains('true'), // isNullable
             ),
           ),
         },
@@ -794,8 +794,8 @@ abstract class Settings {
             'a|lib/routes.simple_routes.g.part': decodedMatches(
               allOf(
                 contains('final bool? enabled;'),
-                contains("_parseBool("),
-                contains("true"), // isNullable
+                contains('_parseBool('),
+                contains('true'), // isNullable
               ),
             ),
           },
@@ -903,10 +903,10 @@ abstract class Test {
               contains("state.pathParameters['id']!"),
               contains("_parseInt(state.uri.queryParameters['count'], true)"),
               contains(
-                  "_parseEnum(state.uri.queryParameters['status'], false, Status.values)!"),
-              contains("state.extra as ExtraData"),
-              contains("_parseInt("),
-              contains("_parseEnum("),
+                  "_parseEnum(state.uri.queryParameters['status'], false, Status.values)!",),
+              contains('state.extra as ExtraData'),
+              contains('_parseInt('),
+              contains('_parseEnum('),
             ),
           ),
         },

@@ -167,7 +167,7 @@ abstract class SimpleDataRoute<Data extends SimpleRouteData> extends BaseRoute {
   Map<String, String> _getQuery(Data data) {
     return data.query.entries.fold({}, (query, entry) {
       if (entry.value != null && entry.value!.isNotEmpty) {
-        query[entry.key] = (entry.value!);
+        query[entry.key] = entry.value!;
       }
 
       return query;

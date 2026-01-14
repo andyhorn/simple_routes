@@ -61,7 +61,7 @@ void main() {
                   onPressed: () => const TestBaseRoute().go(context),
                   child: const Text('click me'),
                 );
-              }),
+              },),
             ),
           ),
         );
@@ -83,7 +83,7 @@ void main() {
                   onPressed: () => const TestBaseRoute().push(context),
                   child: const Text('click me'),
                 );
-              }),
+              },),
             ),
           ),
         );

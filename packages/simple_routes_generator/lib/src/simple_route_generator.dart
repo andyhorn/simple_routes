@@ -5,9 +5,8 @@ import 'package:build/build.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:simple_routes_annotations/simple_routes_annotations.dart';
+import 'package:simple_routes_generator/src/models/models.dart';
 import 'package:source_gen/source_gen.dart';
-
-import 'models/models.dart';
 
 class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
   final DartFormatter _formatter = DartFormatter();
@@ -383,7 +382,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
         const Code('if (source == null) {'),
         const Code('  if (isNullable) return null;'),
         const Code(
-            "  throw ArgumentError('Required parameter cannot be null');"),
+            "  throw ArgumentError('Required parameter cannot be null');",),
         const Code('}'),
         const Code('if (isNullable) return int.tryParse(source);'),
         const Code('return int.parse(source);'),
@@ -410,7 +409,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
         const Code('if (source == null) {'),
         const Code('  if (isNullable) return null;'),
         const Code(
-            "  throw ArgumentError('Required parameter cannot be null');"),
+            "  throw ArgumentError('Required parameter cannot be null');",),
         const Code('}'),
         const Code('if (isNullable) return double.tryParse(source);'),
         const Code('return double.parse(source);'),
@@ -437,7 +436,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
         const Code('if (source == null) {'),
         const Code('  if (isNullable) return null;'),
         const Code(
-            "  throw ArgumentError('Required parameter cannot be null');"),
+            "  throw ArgumentError('Required parameter cannot be null');",),
         const Code('}'),
         const Code('if (isNullable) return num.tryParse(source);'),
         const Code('return num.parse(source);'),
@@ -464,7 +463,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
         const Code('if (source == null) {'),
         const Code('  if (isNullable) return null;'),
         const Code(
-            "  throw ArgumentError('Required parameter cannot be null');"),
+            "  throw ArgumentError('Required parameter cannot be null');",),
         const Code('}'),
         const Code('if (isNullable) return DateTime.tryParse(source);'),
         const Code('return DateTime.parse(source);'),
@@ -491,7 +490,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
         const Code('if (source == null) {'),
         const Code('  if (isNullable) return null;'),
         const Code(
-            "  throw ArgumentError('Required parameter cannot be null');"),
+            "  throw ArgumentError('Required parameter cannot be null');",),
         const Code('}'),
         const Code("return source == 'true';"),
       ]);
@@ -521,7 +520,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
         const Code('if (source == null) {'),
         const Code('  if (isNullable) return null;'),
         const Code(
-            "  throw ArgumentError('Required parameter cannot be null');"),
+            "  throw ArgumentError('Required parameter cannot be null');",),
         const Code('}'),
         const Code('return enumValues.byName(source);'),
       ]);
@@ -599,8 +598,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
 
   List<String> _parsePathParams(String path) {
     // This is a bug in the Dart SDK, it should not be marked as deprecated
-    // ignore: deprecated_member_use
-    final regex = RegExp(r':([a-zA-Z0-9_]+)');
+    final regex = RegExp(':([a-zA-Z0-9_]+)');
     return regex.allMatches(path).map((m) => m.group(1)!).toList();
   }
 
@@ -617,7 +615,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     // 1. Collect from current blueprint - all annotated elements
     final allDataSources = _collectDataSourcesFromElement(
       blueprint,
-      (element) => _annotations.isAnnotated(element),
+      _annotations.isAnnotated,
     );
 
     dataSources.addAll(allDataSources);

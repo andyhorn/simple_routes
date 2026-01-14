@@ -1,3 +1,5 @@
+import 'package:go_router/go_router.dart' show GoRouterState;
+
 /// A class that contains data to be injected into a route.
 /// This can be path parameters, query parameters, or "extra" data, or any
 /// combination of the three.
