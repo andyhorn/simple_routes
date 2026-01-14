@@ -630,9 +630,9 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
       (c) => c.isFactory,
     );
 
-    if (factoryConstructors.firstOrNull != null) {
-      final factoryConstructor = factoryConstructors.firstOrNull!;
+    final factoryConstructor = factoryConstructors.firstOrNull;
 
+    if (factoryConstructor != null) {
       for (final param in factoryConstructor.parameters) {
         if (shouldCollect(param)) {
           final ds = DataSource.fromParameter(param);
