@@ -377,7 +377,11 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
         }),
       ]);
       m.body = Block.of([
-        const Code('if (source == null) return null;'),
+        const Code('if (source == null) {'),
+        const Code('  if (isNullable) return null;'),
+        const Code(
+            "  throw ArgumentError('Required parameter cannot be null');"),
+        const Code('}'),
         const Code('if (isNullable) return int.tryParse(source);'),
         const Code('return int.parse(source);'),
       ]);
@@ -400,7 +404,11 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
         }),
       ]);
       m.body = Block.of([
-        const Code('if (source == null) return null;'),
+        const Code('if (source == null) {'),
+        const Code('  if (isNullable) return null;'),
+        const Code(
+            "  throw ArgumentError('Required parameter cannot be null');"),
+        const Code('}'),
         const Code('if (isNullable) return double.tryParse(source);'),
         const Code('return double.parse(source);'),
       ]);
@@ -423,7 +431,11 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
         }),
       ]);
       m.body = Block.of([
-        const Code('if (source == null) return null;'),
+        const Code('if (source == null) {'),
+        const Code('  if (isNullable) return null;'),
+        const Code(
+            "  throw ArgumentError('Required parameter cannot be null');"),
+        const Code('}'),
         const Code('if (isNullable) return num.tryParse(source);'),
         const Code('return num.parse(source);'),
       ]);
@@ -446,7 +458,11 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
         }),
       ]);
       m.body = Block.of([
-        const Code('if (source == null) return null;'),
+        const Code('if (source == null) {'),
+        const Code('  if (isNullable) return null;'),
+        const Code(
+            "  throw ArgumentError('Required parameter cannot be null');"),
+        const Code('}'),
         const Code('if (isNullable) return DateTime.tryParse(source);'),
         const Code('return DateTime.parse(source);'),
       ]);
@@ -469,9 +485,12 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
         }),
       ]);
       m.body = Block.of([
-        const Code('if (source == null) return null;'),
-        const Code('if (isNullable) return source == \'true\';'),
-        const Code('return source == \'true\';'),
+        const Code('if (source == null) {'),
+        const Code('  if (isNullable) return null;'),
+        const Code(
+            "  throw ArgumentError('Required parameter cannot be null');"),
+        const Code('}'),
+        const Code("return source == 'true';"),
       ]);
     });
   }
@@ -496,7 +515,11 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
         }),
       ]);
       m.body = Block.of([
-        const Code('if (source == null) return null;'),
+        const Code('if (source == null) {'),
+        const Code('  if (isNullable) return null;'),
+        const Code(
+            "  throw ArgumentError('Required parameter cannot be null');"),
+        const Code('}'),
         const Code('return enumValues.byName(source);'),
       ]);
     });
