@@ -287,38 +287,41 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
   Expression _parseType(Expression source, DartType type) {
     final isNullable = type.nullabilitySuffix != NullabilitySuffix.none;
 
-    if (type.isDartCoreString) return source;
+    // Strings come directly from nullable sources like path/query parameters.
+    // Apply a null-check for non-nullable String targets.
+    if (type.isDartCoreString) {
+      return isNullable ? source : source.nullChecked;
+    }
+
+    Expression? parsed;
 
     if (type.isDartCoreInt) {
-      return refer('_parseInt').call([source, literalBool(isNullable)]);
-    }
-
-    if (type.isDartCoreDouble) {
-      return refer('_parseDouble').call([source, literalBool(isNullable)]);
-    }
-
-    if (type.isDartCoreNum) {
-      return refer('_parseNum').call([source, literalBool(isNullable)]);
-    }
-
-    if (type.getDisplayString(withNullability: false) == 'DateTime') {
-      return refer('_parseDateTime').call([source, literalBool(isNullable)]);
-    }
-
-    if (type.isDartCoreBool) {
-      return refer('_parseBool').call([source, literalBool(isNullable)]);
-    }
-
-    if (type is InterfaceType && type.element is EnumElement) {
+      parsed = refer('_parseInt').call([source, literalBool(isNullable)]);
+    } else if (type.isDartCoreDouble) {
+      parsed = refer('_parseDouble').call([source, literalBool(isNullable)]);
+    } else if (type.isDartCoreNum) {
+      parsed = refer('_parseNum').call([source, literalBool(isNullable)]);
+    } else if (type.getDisplayString(withNullability: false) == 'DateTime') {
+      parsed = refer('_parseDateTime').call([source, literalBool(isNullable)]);
+    } else if (type.isDartCoreBool) {
+      parsed = refer('_parseBool').call([source, literalBool(isNullable)]);
+    } else if (type is InterfaceType && type.element is EnumElement) {
       final enumName = type.element.name;
-      return refer('_parseEnum').call([
+      parsed = refer('_parseEnum').call([
         source,
         literalBool(isNullable),
         refer(enumName).property('values'),
       ]);
     }
 
-    // Fallback for other types
+    if (parsed != null) {
+      // Parse helpers return nullable values; assert non-null when the
+      // target type is non-nullable.
+      return isNullable ? parsed : parsed.nullChecked;
+    }
+
+    // Fallback for other types: rely on toString(), preserving existing
+    // nullability behavior.
     if (isNullable) {
       return source.nullSafeProperty('toString').call([]);
     }

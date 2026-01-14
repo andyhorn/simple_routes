@@ -77,6 +77,7 @@ abstract class User {
               ),
               contains('class UserRouteData implements SimpleRouteData'),
               contains('final String userId;'),
+              contains("state.pathParameters['userId']!"),
             ),
           ),
         },
@@ -141,6 +142,7 @@ abstract class Search {
             allOf(
               contains('class SearchRouteData implements SimpleRouteData'),
               contains('final String query;'),
+              contains("state.uri.queryParameters['q']!"),
               contains("'q': query"),
             ),
           ),
@@ -234,7 +236,8 @@ abstract class User {
         },
       );
 
-      test('throws error when multiple @Extra annotations are present', () async {
+      test('throws error when multiple @Extra annotations are present',
+          () async {
         expect(
           () => testBuilder(simpleRouteBuilder(BuilderOptions.empty), {
             ...annotationsAsset,
@@ -291,15 +294,19 @@ abstract class Dashboard {
         },
         outputs: {
           'a|lib/routes.simple_routes.g.part': decodedMatches(
-            allOf(
+            allOf([
               contains("_parseBool("),
               contains("_parseEnum("),
               contains("MyStatus.values"),
+              contains(
+                  "_parseBool(state.uri.queryParameters['isAdmin'], false)!"),
+              contains(
+                  "_parseEnum(state.uri.queryParameters['status'], false, MyStatus.values)!"),
               contains("'isAdmin': isAdmin.toString()"),
               contains("'status': status.name"),
               contains("static bool? _parseBool("),
               contains("static Object? _parseEnum("),
-            ),
+            ]),
           ),
         },
       );
@@ -327,14 +334,18 @@ abstract class Metrics {
         },
         outputs: {
           'a|lib/routes.simple_routes.g.part': decodedMatches(
-            allOf(
+            allOf([
               contains("_parseDouble("),
               contains("_parseDateTime("),
+              contains(
+                  "_parseDouble(state.uri.queryParameters['value'], false)!"),
+              contains(
+                  "_parseDateTime(state.uri.queryParameters['timestamp'], false)!"),
               contains("'value': value.toString()"),
               contains("'timestamp': timestamp.toIso8601String()"),
               contains("static double? _parseDouble("),
               contains("static DateTime? _parseDateTime("),
-            ),
+            ]),
           ),
         },
       );
@@ -549,6 +560,8 @@ abstract class Api {
             allOf(
               contains("_parseInt("),
               contains("_parseNum("),
+              contains("_parseInt(state.uri.queryParameters['page'], false)!"),
+              contains("_parseNum(state.uri.queryParameters['count'], false)!"),
               contains("static int? _parseInt("),
               contains("static num? _parseNum("),
             ),
@@ -621,7 +634,8 @@ abstract class User {
       );
     });
 
-    test('generates route with factory constructor multiple parameters', () async {
+    test('generates route with factory constructor multiple parameters',
+        () async {
       await testBuilder(
         simpleRouteBuilder(BuilderOptions.empty),
         {
@@ -685,6 +699,8 @@ abstract class Comments {}
               contains('class CommentsRouteData implements SimpleRouteData'),
               contains('final String userId;'),
               contains('final String postId;'),
+              contains("state.pathParameters['userId']!"),
+              contains("state.pathParameters['postId']!"),
             ),
           ),
         },
@@ -816,7 +832,8 @@ abstract class User {
       });
     });
 
-    test('generates route with required and optional parameters correctly', () async {
+    test('generates route with required and optional parameters correctly',
+        () async {
       await testBuilder(
         simpleRouteBuilder(BuilderOptions.empty),
         {
@@ -848,7 +865,8 @@ abstract class User {
       );
     });
 
-    test('generates correct fromState factory with all parameter types', () async {
+    test('generates correct fromState factory with all parameter types',
+        () async {
       await testBuilder(
         simpleRouteBuilder(BuilderOptions.empty),
         {
@@ -882,10 +900,11 @@ abstract class Test {
           'a|lib/routes.simple_routes.g.part': decodedMatches(
             allOf(
               contains('factory TestRouteData.fromState'),
-              contains("state.pathParameters['id']"),
-              contains("state.uri.queryParameters['count']"),
-              contains("state.uri.queryParameters['status']"),
-              contains("state.extra"),
+              contains("state.pathParameters['id']!"),
+              contains("_parseInt(state.uri.queryParameters['count'], true)"),
+              contains(
+                  "_parseEnum(state.uri.queryParameters['status'], false, Status.values)!"),
+              contains("state.extra as ExtraData"),
               contains("_parseInt("),
               contains("_parseEnum("),
             ),
