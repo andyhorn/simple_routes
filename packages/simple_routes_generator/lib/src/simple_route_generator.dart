@@ -671,16 +671,15 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
 
   void _validatePathParams(
     ClassElement blueprint,
-    Set<String> allPathParams,
+    Set<String> pathParams,
     List<DataSource> dataSources,
   ) {
-    final templateParamNames = allPathParams.toSet();
     final pathDataSources = dataSources.where((ds) => ds.isPath);
     final annotatedParamNames =
         pathDataSources.map((ds) => ds.paramName ?? ds.name).toSet();
 
     // 1. Check for missing @Path annotations
-    for (final templateParam in templateParamNames) {
+    for (final templateParam in pathParams) {
       if (!annotatedParamNames.contains(templateParam)) {
         throw InvalidGenerationSourceError(
           'Missing @Path annotation for path parameter ":$templateParam".',
@@ -692,7 +691,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     // 2. Check for @Path annotations that don't match the template
     for (final source in pathDataSources) {
       final effectiveName = source.paramName ?? source.name;
-      if (!templateParamNames.contains(effectiveName)) {
+      if (!pathParams.contains(effectiveName)) {
         throw InvalidGenerationSourceError(
           '@Path annotation "$effectiveName" does not match any parameter in the path template.',
           element: source.element,
