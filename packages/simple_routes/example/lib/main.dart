@@ -1,3 +1,6 @@
+// ignore for example
+// ignore_for_file: public_member_api_docs
+
 // Once you have defined your routes (see routes.dart), you can use them
 // in your GoRouter configuration.
 
@@ -153,7 +156,7 @@ class DashboardPage extends StatelessWidget {
 }
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({required this.userId, super.key });
+  const ProfilePage({required this.userId, super.key});
 
   final String userId;
 

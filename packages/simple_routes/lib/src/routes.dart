@@ -4,6 +4,7 @@ import 'package:simple_routes/simple_routes.dart';
 
 /// An abstract class to serve as the parent for all routes.
 abstract class BaseRoute {
+  /// Create a [BaseRoute] with the given path.
   const BaseRoute(this._path);
   final String _path;
 
@@ -92,8 +93,10 @@ abstract class BaseRoute {
 /// }
 /// ```
 abstract class SimpleRoute extends BaseRoute {
+  /// Create a new [SimpleRoute] with the given path.
   const SimpleRoute(super._path);
 
+  /// The root route.
   static const root = '/';
 
   /// Navigate to this route.
@@ -128,6 +131,7 @@ abstract class SimpleRoute extends BaseRoute {
 /// }
 /// ```
 abstract class SimpleDataRoute<Data extends SimpleRouteData> extends BaseRoute {
+  /// Create a [SimpleDataRoute] with the given path.
   const SimpleDataRoute(super._path);
 
   static final _queryRegex = RegExp(r'\?.+$');
@@ -145,7 +149,8 @@ abstract class SimpleDataRoute<Data extends SimpleRouteData> extends BaseRoute {
     return GoRouter.of(context).push(fullPath(data), extra: data.extra);
   }
 
-  /// Generate the full, populated path for this route using the supplied [data].
+  /// Generate the full, populated path for this route
+  /// using the supplied [data].
   ///
   /// This method will inject the [data] parameters into the path template and
   /// append any query parameters.

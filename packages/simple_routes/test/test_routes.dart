@@ -1,3 +1,6 @@
+// ignore for tests
+// ignore_for_file: avoid_field_initializers_in_const_classes
+
 import 'package:simple_routes/simple_routes.dart';
 
 class TestEmptyRoute extends SimpleRoute {

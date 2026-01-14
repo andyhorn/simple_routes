@@ -8,6 +8,11 @@ import 'package:meta/meta.dart';
 /// ```
 @immutable
 class Route {
+  /// Creates a Route annotation with the given [path] and
+  /// (optionally) the [parent].
+  ///
+  /// If you supply a [parent], this route will inherit the
+  /// path and data.
   const Route(this.path, {this.parent});
 
   /// The path for this route.
@@ -25,6 +30,7 @@ class Route {
 /// ```
 @immutable
 class Query {
+  /// Create a Query annotation with the (optional) [name].
   const Query([this.name]);
 
   /// The name of the query parameter. If null, the field name is used.
@@ -43,9 +49,11 @@ class Query {
 /// ```
 @immutable
 class Path {
+  /// Creates a Path annotation with the (optional) given [name].
   const Path([this.name]);
 
-  /// The name of the path parameter in the template. If null, the field name is used.
+  /// The name of the path parameter in the template.
+  /// If null, the field name is used.
   final String? name;
 }
 
@@ -57,5 +65,6 @@ class Path {
 /// ```
 @immutable
 class Extra {
+  /// Creates an Extra annotation.
   const Extra();
 }
