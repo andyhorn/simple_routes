@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2.1.0
+
+- **Stable release: Code generation support**
+- Code generation support across the workspace packages (`simple_routes` 2.1.0, `simple_routes_annotations` 1.0.0, `simple_routes_generator` 1.0.0).
+
 ## 2.1.0+beta.1
 
 - **Initial Beta Release of Code Generation Tooling!**

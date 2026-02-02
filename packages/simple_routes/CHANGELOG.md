@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2.1.0
+
+- **Stable release: Code generation support**
+- Code generation is the recommended way to define routes.
+
 ## 2.1.0+beta.1
 
 - **Beta Release: Code Generation Support**

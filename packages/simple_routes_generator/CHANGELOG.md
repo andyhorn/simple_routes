@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.0
+
+- Stable release
+
 ## 1.0.0+beta.2
 
 - Fixed null-check assertions, extra parameter validation, type casting, and nullable handling

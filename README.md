@@ -32,3 +32,4 @@ melos bootstrap
 - `melos run analyze`: Run analysis for all packages.
 - `melos run test`: Run tests for all packages.
 - `melos run format`: Format all packages.
+- `melos run generate`: Run code generation (build_runner) for packages that use it.
