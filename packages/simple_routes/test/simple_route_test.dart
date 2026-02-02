@@ -56,12 +56,14 @@ void main() {
           MaterialApp(
             home: MockGoRouterProvider(
               goRouter: router,
-              child: Builder(builder: (context) {
-                return ElevatedButton(
-                  onPressed: () => const TestBaseRoute().go(context),
-                  child: const Text('click me'),
-                );
-              },),
+              child: Builder(
+                builder: (context) {
+                  return ElevatedButton(
+                    onPressed: () => const TestBaseRoute().go(context),
+                    child: const Text('click me'),
+                  );
+                },
+              ),
             ),
           ),
         );
@@ -78,12 +80,14 @@ void main() {
           MaterialApp(
             home: MockGoRouterProvider(
               goRouter: router,
-              child: Builder(builder: (context) {
-                return ElevatedButton(
-                  onPressed: () => const TestBaseRoute().push(context),
-                  child: const Text('click me'),
-                );
-              },),
+              child: Builder(
+                builder: (context) {
+                  return ElevatedButton(
+                    onPressed: () => const TestBaseRoute().push(context),
+                    child: const Text('click me'),
+                  );
+                },
+              ),
             ),
           ),
         );
@@ -367,7 +371,7 @@ void main() {
               GoRoute(
                 path: '/other-page',
                 builder: (context, state) {
-                  isActive = const TestBaseRoute().isCurrentRoute(state);
+                  isActive = const TestBaseRoute().isActive(state);
                   return const Scaffold(
                     body: Text('Test Route'),
                   );

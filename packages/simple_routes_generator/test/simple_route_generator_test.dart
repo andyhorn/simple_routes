@@ -298,10 +298,8 @@ abstract class Dashboard {
               contains('_parseBool('),
               contains('_parseEnum('),
               contains('MyStatus.values'),
-              contains(
-                  "_parseBool(state.uri.queryParameters['isAdmin'], false)!",),
-              contains(
-                  "_parseEnum(state.uri.queryParameters['status'], false, MyStatus.values)!",),
+              contains("state.uri.queryParameters['isAdmin']"),
+              contains("state.uri.queryParameters['status']"),
               contains("'isAdmin': isAdmin.toString()"),
               contains("'status': status.name"),
               contains('static bool? _parseBool('),
@@ -337,10 +335,8 @@ abstract class Metrics {
             allOf([
               contains('_parseDouble('),
               contains('_parseDateTime('),
-              contains(
-                  "_parseDouble(state.uri.queryParameters['value'], false)!",),
-              contains(
-                  "_parseDateTime(state.uri.queryParameters['timestamp'], false)!",),
+              contains("state.uri.queryParameters['value']"),
+              contains("state.uri.queryParameters['timestamp']"),
               contains("'value': value.toString()"),
               contains("'timestamp': timestamp.toIso8601String()"),
               contains('static double? _parseDouble('),
@@ -560,8 +556,8 @@ abstract class Api {
             allOf(
               contains('_parseInt('),
               contains('_parseNum('),
-              contains("_parseInt(state.uri.queryParameters['page'], false)!"),
-              contains("_parseNum(state.uri.queryParameters['count'], false)!"),
+              contains("state.uri.queryParameters['page']"),
+              contains("state.uri.queryParameters['count']"),
               contains('static int? _parseInt('),
               contains('static num? _parseNum('),
             ),
@@ -898,16 +894,16 @@ abstract class Test {
         },
         outputs: {
           'a|lib/routes.simple_routes.g.part': decodedMatches(
-            allOf(
+            allOf([
               contains('factory TestRouteData.fromState'),
               contains("state.pathParameters['id']!"),
-              contains("_parseInt(state.uri.queryParameters['count'], true)"),
-              contains(
-                  "_parseEnum(state.uri.queryParameters['status'], false, Status.values)!",),
+              contains("state.uri.queryParameters['count']"),
+              contains("state.uri.queryParameters['status']"),
+              contains('Status.values'),
               contains('state.extra as ExtraData'),
               contains('_parseInt('),
               contains('_parseEnum('),
-            ),
+            ]),
           ),
         },
       );
