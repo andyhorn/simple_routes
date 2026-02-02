@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.1.1
+
+- Patch version bump for latest release.
+
 ## 2.1.0
 
 - **Stable release: Code generation support**
