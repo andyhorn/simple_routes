@@ -17,7 +17,7 @@ dependencies:
   simple_routes: any
 
 dev_dependencies:
-  build_runner: ^2.4.8
+  build_runner: ^2.10.5
 
   flutter_test:
     sdk: flutter
