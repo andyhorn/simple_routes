@@ -1,18 +1,6 @@
-include: package:flutter_lints/flutter.yaml
+include: package:very_good_analysis/analysis_options.yaml
 
 analyzer:
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
-
-linter:
-  rules:
-    # - public_member_api_docs # Disabled for now to avoid failing on existing code
-    - prefer_const_constructors
-    - prefer_const_literals_to_create_immutables
-    - prefer_const_declarations
-    - sort_constructors_first
-    - sort_unnamed_constructors_first
-    - always_declare_return_types
-    - omit_local_variable_types
-    - unnecessary_brace_in_string_interps

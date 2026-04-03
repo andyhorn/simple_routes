@@ -27,6 +27,9 @@ class ProfileRouteData implements SimpleRouteData {
 
   @override
   Map<String, String?> get query => {};
+
+  @override
+  Object? get extra => null;
 }
 
 class ProfileRoute extends SimpleDataRoute<ProfileRouteData> {
@@ -46,6 +49,9 @@ class ProfileEditRouteData implements SimpleRouteData {
 
   @override
   Map<String, String?> get query => {};
+
+  @override
+  Object? get extra => null;
 }
 
 class ProfileEditRoute extends SimpleDataRoute<ProfileEditRouteData>
@@ -77,6 +83,9 @@ class ProfileSettingsRouteData implements SimpleRouteData {
 
   @override
   Map<String, String?> get query => {'theme': theme};
+
+  @override
+  Object? get extra => null;
 }
 
 class ProfileSettingsRoute extends SimpleDataRoute<ProfileSettingsRouteData>
@@ -108,6 +117,9 @@ class ProfileDetailsRouteData implements SimpleRouteData {
 
   @override
   Map<String, String?> get query => {};
+
+  @override
+  Object? get extra => null;
 }
 
 class ProfileDetailsRoute extends SimpleDataRoute<ProfileDetailsRouteData>
@@ -139,6 +151,9 @@ class AdditionalDataRouteData implements SimpleRouteData {
 
   @override
   Map<String, String?> get query => {'queryName': queryValue};
+
+  @override
+  Object? get extra => null;
 }
 
 class AdditionalDataRoute extends SimpleDataRoute<AdditionalDataRouteData>

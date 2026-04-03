@@ -1,9 +1,17 @@
 # CHANGELOG
 
+## 1.0.1
+
+- Patch version bump for latest release.
+
 ## 1.0.0
 
-- Initial release
-- Add `@Route` annotation for marking route blueprint classes
-- Add `@Path` annotation for path parameters
-- Add `@Query` annotation for query parameters
-- Add `@Extra` annotation for extra data
+- Stable release
+
+## 1.0.0+beta.1
+
+- Initial beta release
+- Add `@Route` annotation for marking route blueprint classes with path and optional parent route
+- Add `@Path` annotation for mapping path parameters from route templates
+- Add `@Query` annotation for defining query parameters with optional custom names
+- Add `@Extra` annotation for passing complex objects via GoRouter's extra property

@@ -1,3 +1,6 @@
+// ignore for examples
+// ignore_for_file: public_member_api_docs
+
 import 'package:go_router/go_router.dart';
 import 'package:simple_routes/simple_routes.dart';
 
