@@ -1,0 +1,28 @@
+# spell-checker: ignore mocktail
+
+name: simple_routes
+description: Simple, declarative route and navigation management for go_router.
+version: 2.1.1
+homepage: https://github.com/andyhorn/simple_routes
+resolution: workspace
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  go_router: ">=12.0.0 <18.0.0"
+  simple_routes_annotations: ^1.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.1
+  very_good_analysis: ^10.0.0
+
+topics:
+  - go-router
+  - navigation
+  - routing

@@ -1,3 +1,5 @@
+# spell-checker: ignore subosito
+
 name: Release to pub.dev
 
 on:
@@ -16,16 +18,19 @@ jobs:
       - uses: actions/checkout@v2
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: 3.29.3
+          flutter-version: 3.35.4
           channel: "stable"
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
       - name: Restore packages
-        run: flutter pub get
+        run: |
+          dart pub global activate melos
+          melos bootstrap
       - name: Analyze
-        run: flutter analyze
+        run: melos run analyze
       - name: Test
-        run: flutter test
+        run: melos run test
       - name: Publish
-        run: dart pub publish --force
+        working-directory: packages/simple_routes
+        run: melos publish --no-dry-run --yes
