@@ -1,6 +1,6 @@
 name: simple_routes_annotations
 description: Annotations for the simple_routes package.
-version: 1.0.1
+version: 2.1.2
 homepage: https://github.com/andyhorn/simple_routes
 resolution: workspace
 
