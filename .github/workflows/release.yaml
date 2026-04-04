@@ -16,10 +16,7 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
-      - uses: kuhnroyal/flutter-fvm-action@v2
-      - uses: dart-lang/setup-dart@v1
-        with:
-          sdk: stable
+      - uses: kuhnroyal/flutter-fvm-config-action/setup@v3
       - name: Restore packages
         run: |
           dart pub global activate melos
