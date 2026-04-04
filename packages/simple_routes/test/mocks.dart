@@ -6,14 +6,18 @@ class MockGoRouterState extends Mock implements GoRouterState {}
 
 class MockGoRouter extends Mock implements GoRouter {
   MockGoRouter() {
-    when(() => go(
-          any(),
-          extra: any(named: 'extra'),
-        ),).thenReturn(null);
-    when(() => push(
-          any(),
-          extra: any(named: 'extra'),
-        ),).thenAnswer(
+    when(
+      () => go(
+        any(),
+        extra: any(named: 'extra'),
+      ),
+    ).thenReturn(null);
+    when(
+      () => push(
+        any(),
+        extra: any(named: 'extra'),
+      ),
+    ).thenAnswer(
       (_) => Future.value(),
     );
   }
@@ -21,7 +25,9 @@ class MockGoRouter extends Mock implements GoRouter {
 
 class MockGoRouterProvider extends StatelessWidget {
   const MockGoRouterProvider({
-    required this.goRouter, required this.child, super.key,
+    required this.goRouter,
+    required this.child,
+    super.key,
   });
 
   final GoRouter goRouter;

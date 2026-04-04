@@ -4,7 +4,9 @@ import 'package:analyzer/dart/element/type.dart';
 import 'package:simple_routes_generator/src/models/models.dart';
 import 'package:source_gen/source_gen.dart';
 
+/// Represents a data source for route generation.
 class DataSource {
+  /// Creates a new [DataSource].
   const DataSource({
     required this.name,
     required this.type,
@@ -16,6 +18,7 @@ class DataSource {
     this.paramName,
   });
 
+  /// Creates a [DataSource] from a formal parameter element.
   factory DataSource.fromParameter(FormalParameterElement param) {
     const annotations = Annotations();
 
@@ -36,6 +39,7 @@ class DataSource {
     );
   }
 
+  /// Creates a [DataSource] from a general element.
   factory DataSource.fromElement(Element element) {
     const annotations = Annotations();
     final pathAnnotation = annotations.getPathAnnotation(element);
@@ -64,12 +68,27 @@ class DataSource {
     );
   }
 
+  /// The name of the data source.
   final String name;
+
+  /// The Dart type of the data source.
   final DartType type;
+
+  /// Whether this is a path parameter.
   final bool isPath;
+
+  /// Whether this is a query parameter.
   final bool isQuery;
+
+  /// Whether this is an extra parameter.
   final bool isExtra;
+
+  /// Whether this parameter is required.
   final bool isRequired;
+
+  /// The custom name for this parameter, if provided.
   final String? paramName;
+
+  /// The element representing this data source.
   final Element element;
 }

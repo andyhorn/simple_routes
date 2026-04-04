@@ -8,6 +8,7 @@ import 'package:simple_routes_annotations/simple_routes_annotations.dart';
 import 'package:simple_routes_generator/src/models/models.dart';
 import 'package:source_gen/source_gen.dart';
 
+/// Generator for simple routes.
 class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
   final Annotations _annotations = const Annotations();
   final DartFormatter _formatter = DartFormatter(
@@ -83,10 +84,10 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     return 'ChildRoute<$parentRouteClassName>';
   }
 
-  /// Generates the route data class that implements [SimpleRouteData].
+  /// Generates the route data class that implements `SimpleRouteData`.
   ///
   /// Creates a class with fields for each data source, a constructor, a
-  /// `fromState` factory, and getters for [parameters], [query], and [extra].
+  /// `fromState` factory, and getters for `parameters`, `query`, and `extra`.
   Class _generateDataClass(
     ClassElement blueprint,
     List<DataSource> dataSources,
@@ -100,11 +101,12 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
       // Add fields
       for (final source in dataSources) {
         c.fields.add(
-          Field((f) {
-            f.name = source.name;
-            f.modifier = FieldModifier.final$;
-            f.type = refer(source.type.getDisplayString(withNullability: true));
-          }),
+          Field(
+            (f) => f
+              ..name = source.name
+              ..modifier = FieldModifier.final$
+              ..type = refer(source.type.getDisplayString()),
+          ),
         );
       }
 
@@ -114,33 +116,33 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
           ctor.constant = true;
           for (final source in dataSources) {
             ctor.optionalParameters.add(
-              Parameter((p) {
-                p.name = source.name;
-                p.toThis = true;
-                p.required = source.isRequired;
-                p.named = true;
-              }),
+              Parameter(
+                (p) => p
+                  ..name = source.name
+                  ..toThis = true
+                  ..required = source.isRequired
+                  ..named = true,
+              ),
             );
           }
         }),
       );
 
       // Add parse helper methods
-      final parseHelpers = _generateParseHelpers(dataSources);
-      for (final helper in parseHelpers) {
-        c.methods.add(helper);
-      }
+      _generateParseHelpers(dataSources).forEach(c.methods.add);
 
       // Add fromState factory
       c.constructors.add(
         Constructor((ctor) {
-          ctor.name = 'fromState';
-          ctor.factory = true;
+          ctor
+            ..name = 'fromState'
+            ..factory = true;
           ctor.requiredParameters.add(
-            Parameter((p) {
-              p.name = 'state';
-              p.type = refer('GoRouterState');
-            }),
+            Parameter(
+              (p) => p
+                ..name = 'state'
+                ..type = refer('GoRouterState'),
+            ),
           );
 
           final namedArgs = <String, Expression>{};
@@ -164,7 +166,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
               );
             } else if (source.isExtra) {
               namedArgs[source.name] = refer('state').property('extra').asA(
-                    refer(source.type.getDisplayString(withNullability: true)),
+                    refer(source.type.getDisplayString()),
                   );
             }
           }
@@ -176,8 +178,9 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
       // Override [parameters]
       c.methods.add(
         Method((m) {
-          m.name = 'parameters';
-          m.type = MethodType.getter;
+          m
+            ..name = 'parameters'
+            ..type = MethodType.getter;
           m.annotations.add(refer('override'));
           m.returns = refer('Map<String, String>');
 
@@ -198,8 +201,9 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
       // Override [query]
       c.methods.add(
         Method((m) {
-          m.name = 'query';
-          m.type = MethodType.getter;
+          m
+            ..name = 'query'
+            ..type = MethodType.getter;
           m.annotations.add(refer('override'));
           m.returns = refer('Map<String, String?>');
 
@@ -222,30 +226,34 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
       if (extraSource != null) {
         c.methods.add(
           Method((m) {
-            m.name = 'extra';
-            m.type = MethodType.getter;
+            m
+              ..name = 'extra'
+              ..type = MethodType.getter;
             m.annotations.add(refer('override'));
-            m.returns = refer('Object?');
-            m.body = refer(extraSource.name).code;
+            m
+              ..returns = refer('Object?')
+              ..body = refer(extraSource.name).code;
           }),
         );
       } else {
         c.methods.add(
           Method((m) {
-            m.name = 'extra';
-            m.type = MethodType.getter;
+            m
+              ..name = 'extra'
+              ..type = MethodType.getter;
             m.annotations.add(refer('override'));
-            m.returns = refer('Object?');
-            m.body = literalNull.code;
+            m
+              ..returns = refer('Object?')
+              ..body = literalNull.code;
           }),
         );
       }
     });
   }
 
-  /// Generates the route class that extends [SimpleRoute] or [SimpleDataRoute].
+  /// Generates the route class that extends `SimpleRoute` or `SimpleDataRoute`.
   ///
-  /// If [parent] is provided, the class also implements [ChildRoute].
+  /// If [parent] is provided, the class also implements `ChildRoute`.
   Class _generateRouteClass(
     ClassElement blueprint,
     String path,
@@ -258,8 +266,9 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
         isData ? _buildSimpleDataRouteType(dataClassName) : 'SimpleRoute';
 
     return Class((c) {
-      c.name = name;
-      c.extend = refer(baseClass);
+      c
+        ..name = name
+        ..extend = refer(baseClass);
 
       if (parent != null) {
         final parentRouteClassName = _buildParentRouteClassName(parent);
@@ -280,11 +289,13 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
         final parentRouteClassName = _buildParentRouteClassName(parent);
         c.methods.add(
           Method((m) {
-            m.name = 'parent';
-            m.type = MethodType.getter;
+            m
+              ..name = 'parent'
+              ..type = MethodType.getter;
             m.annotations.add(refer('override'));
-            m.returns = refer(parentRouteClassName);
-            m.body = refer('const $parentRouteClassName').call([]).code;
+            m
+              ..returns = refer(parentRouteClassName)
+              ..body = refer('const $parentRouteClassName').call([]).code;
           }),
         );
       }
@@ -312,7 +323,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
       parsed = refer('_parseDouble').call([source, literalBool(isNullable)]);
     } else if (type.isDartCoreNum) {
       parsed = refer('_parseNum').call([source, literalBool(isNullable)]);
-    } else if (type.getDisplayString(withNullability: false) == 'DateTime') {
+    } else if (type.getDisplayString() == 'DateTime') {
       parsed = refer('_parseDateTime').call([source, literalBool(isNullable)]);
     } else if (type.isDartCoreBool) {
       parsed = refer('_parseBool').call([source, literalBool(isNullable)]);
@@ -358,7 +369,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
       } else if (type.isDartCoreNum && !typesNeeded.contains('num')) {
         typesNeeded.add('num');
         helpers.add(_createNumParseHelper());
-      } else if (type.getDisplayString(withNullability: false) == 'DateTime' &&
+      } else if (type.getDisplayString() == 'DateTime' &&
           !typesNeeded.contains('DateTime')) {
         typesNeeded.add('DateTime');
         helpers.add(_createDateTimeParseHelper());
@@ -379,17 +390,20 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
 
   Method _createIntParseHelper() {
     return Method((m) {
-      m.name = '_parseInt';
-      m.static = true;
-      m.returns = refer('int?');
+      m
+        ..name = '_parseInt'
+        ..static = true
+        ..returns = refer('int?');
       m.requiredParameters.addAll([
         Parameter((p) {
-          p.name = 'source';
-          p.type = refer('String?');
+          p
+            ..name = 'source'
+            ..type = refer('String?');
         }),
         Parameter((p) {
-          p.name = 'isNullable';
-          p.type = refer('bool');
+          p
+            ..name = 'isNullable'
+            ..type = refer('bool');
         }),
       ]);
       m.body = Block.of([
@@ -407,17 +421,20 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
 
   Method _createDoubleParseHelper() {
     return Method((m) {
-      m.name = '_parseDouble';
-      m.static = true;
-      m.returns = refer('double?');
+      m
+        ..name = '_parseDouble'
+        ..static = true
+        ..returns = refer('double?');
       m.requiredParameters.addAll([
         Parameter((p) {
-          p.name = 'source';
-          p.type = refer('String?');
+          p
+            ..name = 'source'
+            ..type = refer('String?');
         }),
         Parameter((p) {
-          p.name = 'isNullable';
-          p.type = refer('bool');
+          p
+            ..name = 'isNullable'
+            ..type = refer('bool');
         }),
       ]);
       m.body = Block.of([
@@ -435,17 +452,20 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
 
   Method _createNumParseHelper() {
     return Method((m) {
-      m.name = '_parseNum';
-      m.static = true;
-      m.returns = refer('num?');
+      m
+        ..name = '_parseNum'
+        ..static = true
+        ..returns = refer('num?');
       m.requiredParameters.addAll([
         Parameter((p) {
-          p.name = 'source';
-          p.type = refer('String?');
+          p
+            ..name = 'source'
+            ..type = refer('String?');
         }),
         Parameter((p) {
-          p.name = 'isNullable';
-          p.type = refer('bool');
+          p
+            ..name = 'isNullable'
+            ..type = refer('bool');
         }),
       ]);
       m.body = Block.of([
@@ -463,17 +483,20 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
 
   Method _createDateTimeParseHelper() {
     return Method((m) {
-      m.name = '_parseDateTime';
-      m.static = true;
-      m.returns = refer('DateTime?');
+      m
+        ..name = '_parseDateTime'
+        ..static = true
+        ..returns = refer('DateTime?');
       m.requiredParameters.addAll([
         Parameter((p) {
-          p.name = 'source';
-          p.type = refer('String?');
+          p
+            ..name = 'source'
+            ..type = refer('String?');
         }),
         Parameter((p) {
-          p.name = 'isNullable';
-          p.type = refer('bool');
+          p
+            ..name = 'isNullable'
+            ..type = refer('bool');
         }),
       ]);
       m.body = Block.of([
@@ -491,17 +514,20 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
 
   Method _createBoolParseHelper() {
     return Method((m) {
-      m.name = '_parseBool';
-      m.static = true;
-      m.returns = refer('bool?');
+      m
+        ..name = '_parseBool'
+        ..static = true
+        ..returns = refer('bool?');
       m.requiredParameters.addAll([
         Parameter((p) {
-          p.name = 'source';
-          p.type = refer('String?');
+          p
+            ..name = 'source'
+            ..type = refer('String?');
         }),
         Parameter((p) {
-          p.name = 'isNullable';
-          p.type = refer('bool');
+          p
+            ..name = 'isNullable'
+            ..type = refer('bool');
         }),
       ]);
       m.body = Block.of([
@@ -518,21 +544,25 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
 
   Method _createEnumParseHelper() {
     return Method((m) {
-      m.name = '_parseEnum';
-      m.static = true;
-      m.returns = refer('Object?');
+      m
+        ..name = '_parseEnum'
+        ..static = true
+        ..returns = refer('Object?');
       m.requiredParameters.addAll([
         Parameter((p) {
-          p.name = 'source';
-          p.type = refer('String?');
+          p
+            ..name = 'source'
+            ..type = refer('String?');
         }),
         Parameter((p) {
-          p.name = 'isNullable';
-          p.type = refer('bool');
+          p
+            ..name = 'isNullable'
+            ..type = refer('bool');
         }),
         Parameter((p) {
-          p.name = 'enumValues';
-          p.type = refer('List');
+          p
+            ..name = 'enumValues'
+            ..type = refer('List');
         }),
       ]);
       m.body = Block.of([
@@ -562,7 +592,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
           : source.property('name');
     }
 
-    if (type.getDisplayString(withNullability: false) == 'DateTime') {
+    if (type.getDisplayString() == 'DateTime') {
       return isNullable
           ? source.nullSafeProperty('toIso8601String').call([])
           : source.property('toIso8601String').call([]);
@@ -640,7 +670,8 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
 
     dataSources.addAll(allDataSources);
 
-    // 2. Collect path parameters from hierarchy that are missing in the current leaf
+    // 2. Collect path parameters from hierarchy that are missing in the
+    // current leaf
     for (final info in hierarchy.skip(1)) {
       final parentBlueprint = info.element;
       final parentDataSources = _collectDataSourcesFromElement(
@@ -658,10 +689,12 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     return dataSources.values.toList();
   }
 
-  /// Collects data sources from a class element (factory constructor, fields, accessors).
+  /// Collects data sources from a class element (factory constructor, fields,
+  /// accessors).
   ///
   /// [blueprint] - The class element to collect from
-  /// [shouldCollect] - Predicate function to determine if an element should be collected
+  /// [shouldCollect] - Predicate function to determine if an element should be
+  /// collected
   /// Returns a map of data source names to DataSource objects
   Map<String, DataSource> _collectDataSourcesFromElement(
     ClassElement blueprint,
@@ -735,7 +768,8 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
       final effectiveName = source.paramName ?? source.name;
       if (!pathParams.contains(effectiveName)) {
         throw InvalidGenerationSourceError(
-          '@Path annotation "$effectiveName" does not match any parameter in the path template.',
+          '@Path annotation "$effectiveName" does not match any parameter in '
+          'the path template.',
           element: source.element,
         );
       }
@@ -750,7 +784,8 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
 
     if (extraDataSourcesCount > 1) {
       throw InvalidGenerationSourceError(
-        'Only one @Extra annotation is allowed per route. Found $extraDataSourcesCount @Extra annotations.',
+        'Only one @Extra annotation is allowed per route. Found '
+        '$extraDataSourcesCount @Extra annotations.',
         element: blueprint,
       );
     }

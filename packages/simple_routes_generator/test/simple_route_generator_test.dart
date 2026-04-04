@@ -107,7 +107,8 @@ abstract class UserSettings {}
           'a|lib/routes.simple_routes.g.part': decodedMatches(
             allOf(
               contains(
-                'class UserSettingsRoute extends SimpleDataRoute<UserSettingsRouteData>',
+                'class UserSettingsRoute extends '
+                'SimpleDataRoute<UserSettingsRouteData>',
               ),
               contains(
                 'class UserSettingsRouteData implements SimpleRouteData',
