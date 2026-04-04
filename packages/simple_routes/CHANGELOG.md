@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## [2.2.0](https://github.com/andyhorn/simple_routes/compare/simple_routes-v2.1.1...simple_routes-v2.2.0) (2026-04-04)
+
+
+### Features
+
+* codegen ([#41](https://github.com/andyhorn/simple_routes/issues/41)) ([f3cc696](https://github.com/andyhorn/simple_routes/commit/f3cc6966792e8a9744ae66089cd120b913607dc4))
+* convert to melos workspace ([#40](https://github.com/andyhorn/simple_routes/issues/40)) ([93f70eb](https://github.com/andyhorn/simple_routes/commit/93f70ebfcc444a9b4cdd3997be17aed32166540d))
+
+
+### Bug Fixes
+
+* annotation package references ([40a0bc3](https://github.com/andyhorn/simple_routes/commit/40a0bc3dd3033815978aef302b0dafd4b71ddd29))
+
 ## 2.1.1
 
 - Patch version bump for latest release.
