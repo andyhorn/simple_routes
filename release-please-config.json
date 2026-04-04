@@ -1,0 +1,30 @@
+{
+  "packages": {
+    "packages/simple_routes": {
+      "changelog-path": "CHANGELOG.md",
+      "release-type": "dart",
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": true,
+      "prerelease-type": "beta"
+    },
+    "packages/simple_routes_annotations": {
+      "changelog-path": "CHANGELOG.md",
+      "release-type": "dart",
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": true,
+      "prerelease-type": "beta"
+    },
+    "packages/simple_routes_generator": {
+      "changelog-path": "CHANGELOG.md",
+      "release-type": "dart",
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": true,
+      "prerelease-type": "beta"
+    }
+  },
+  "separate-pull-requests": true,
+  "changelog-path": "CHANGELOG.md",
+  "skip-github-release": false,
+  "pull-request-title-pattern": "chore(release): ${branch} ${version}",
+  "commit-search-limit": 500
+}
