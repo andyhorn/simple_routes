@@ -22,7 +22,7 @@
       "prerelease-type": "beta"
     }
   },
-  "separate-pull-requests": true,
+  "separate-pull-requests": false,
   "changelog-path": "CHANGELOG.md",
   "skip-github-release": false,
   "pull-request-title-pattern": "chore(release): ${branch} ${version}",
