@@ -12,10 +12,11 @@ class DataSource {
     required this.isQuery,
     required this.isExtra,
     required this.isRequired,
-    required this.element, this.paramName,
+    required this.element,
+    this.paramName,
   });
 
-  factory DataSource.fromParameter(ParameterElement param) {
+  factory DataSource.fromParameter(FormalParameterElement param) {
     const annotations = Annotations();
 
     final pathAnnotation = annotations.getPathAnnotation(param);
@@ -23,7 +24,7 @@ class DataSource {
     final extraAnnotation = annotations.getExtraAnnotation(param);
 
     return DataSource(
-      name: param.name,
+      name: param.name!,
       type: param.type,
       isPath: pathAnnotation != null,
       isQuery: queryAnnotation != null,

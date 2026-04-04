@@ -9,8 +9,10 @@ import 'package:simple_routes_generator/src/models/models.dart';
 import 'package:source_gen/source_gen.dart';
 
 class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
-  final DartFormatter _formatter = DartFormatter();
   final Annotations _annotations = const Annotations();
+  final DartFormatter _formatter = DartFormatter(
+    languageVersion: DartFormatter.latestLanguageVersion,
+  );
 
   @override
   String generateForAnnotatedElement(
@@ -316,11 +318,13 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
       parsed = refer('_parseBool').call([source, literalBool(isNullable)]);
     } else if (type is InterfaceType && type.element is EnumElement) {
       final enumName = type.element.name;
-      parsed = refer('_parseEnum').call([
-        source,
-        literalBool(isNullable),
-        refer(enumName).property('values'),
-      ]);
+      if (enumName != null) {
+        parsed = refer('_parseEnum').call([
+          source,
+          literalBool(isNullable),
+          refer(enumName).property('values'),
+        ]);
+      }
     }
 
     if (parsed != null) {
@@ -673,7 +677,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     final factoryConstructor = factoryConstructors.firstOrNull;
 
     if (factoryConstructor != null) {
-      for (final param in factoryConstructor.parameters) {
+      for (final param in factoryConstructor.formalParameters) {
         if (shouldCollect(param)) {
           final ds = DataSource.fromParameter(param);
           dataSources[ds.name] = ds;
@@ -689,18 +693,16 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
       }
     }
 
-    final getters = blueprint.accessors.where((a) => a.isGetter);
-
-    // Collect from accessors
-    for (final accessor in getters) {
-      if (shouldCollect(accessor)) {
-        final ds = DataSource.fromElement(accessor);
+    // Collect from getters
+    for (final getter in blueprint.getters) {
+      if (shouldCollect(getter)) {
+        final ds = DataSource.fromElement(getter);
         dataSources[ds.name] = ds;
       } else {
-        // Also check the underlying variable for the accessor
-        final variable = accessor.variable;
+        // Also check the underlying variable for the getter
+        final variable = getter.variable;
         if (shouldCollect(variable)) {
-          final ds = DataSource.fromElement(accessor);
+          final ds = DataSource.fromElement(getter);
           dataSources[ds.name] = ds;
         }
       }
