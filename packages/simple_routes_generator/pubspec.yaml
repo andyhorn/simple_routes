@@ -1,6 +1,6 @@
 name: simple_routes_generator
 description: Code generator for the simple_routes package.
-version: 2.1.4
+version: 2.1.2
 homepage: https://github.com/andyhorn/simple_routes
 resolution: workspace
 
