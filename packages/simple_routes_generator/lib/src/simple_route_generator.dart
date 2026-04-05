@@ -323,7 +323,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
       parsed = refer('_parseDouble').call([source, literalBool(isNullable)]);
     } else if (type.isDartCoreNum) {
       parsed = refer('_parseNum').call([source, literalBool(isNullable)]);
-    } else if (type.getDisplayString() == 'DateTime') {
+    } else if (type is InterfaceType && type.element.name == 'DateTime') {
       parsed = refer('_parseDateTime').call([source, literalBool(isNullable)]);
     } else if (type.isDartCoreBool) {
       parsed = refer('_parseBool').call([source, literalBool(isNullable)]);
@@ -369,7 +369,8 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
       } else if (type.isDartCoreNum && !typesNeeded.contains('num')) {
         typesNeeded.add('num');
         helpers.add(_createNumParseHelper());
-      } else if (type.getDisplayString() == 'DateTime' &&
+      } else if (type is InterfaceType &&
+          type.element.name == 'DateTime' &&
           !typesNeeded.contains('DateTime')) {
         typesNeeded.add('DateTime');
         helpers.add(_createDateTimeParseHelper());
@@ -592,7 +593,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
           : source.property('name');
     }
 
-    if (type.getDisplayString() == 'DateTime') {
+    if (type is InterfaceType && type.element.name == 'DateTime') {
       return isNullable
           ? source.nullSafeProperty('toIso8601String').call([])
           : source.property('toIso8601String').call([]);
