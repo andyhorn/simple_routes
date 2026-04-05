@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [2.1.3](https://github.com/andyhorn/simple_routes/compare/simple_routes-v2.1.2...simple_routes-v2.1.3) (2026-04-05)
+
+
+### Bug Fixes
+
+* inter-dependency constraints ([0f75356](https://github.com/andyhorn/simple_routes/commit/0f75356f5aedadea942ec439b48f25a645eb7ae9))
+
 ## [2.1.2](https://github.com/andyhorn/simple_routes/compare/simple_routes-v2.1.2...simple_routes-v2.1.2) (2026-04-04)
 
 

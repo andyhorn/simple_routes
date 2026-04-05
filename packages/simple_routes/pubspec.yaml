@@ -2,7 +2,7 @@
 
 name: simple_routes
 description: Simple, declarative route and navigation management for go_router.
-version: 2.1.2
+version: 2.1.3
 homepage: https://github.com/andyhorn/simple_routes
 resolution: workspace
 
