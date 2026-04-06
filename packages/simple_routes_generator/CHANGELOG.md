@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [2.1.4](https://github.com/andyhorn/simple_routes/compare/simple_routes_generator-v2.1.3...simple_routes_generator-v2.1.4) (2026-04-06)
+
+
+### Bug Fixes
+
+* fix failing test ([173ca49](https://github.com/andyhorn/simple_routes/commit/173ca49461c22f135fad49debf694b623bf118f4))
+
 ## [2.1.2](https://github.com/andyhorn/simple_routes/compare/simple_routes_generator-v2.1.4...simple_routes_generator-v2.1.2) (2026-04-05)
 
 
