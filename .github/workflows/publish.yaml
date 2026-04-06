@@ -1,0 +1,32 @@
+name: Publish to pub.dev
+
+on:
+  push:
+    tags:
+      - 'simple_routes-v[0-9]*'
+      - 'simple_routes_annotations-v[0-9]*'
+      - 'simple_routes_generator-v[0-9]*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: pub.dev
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: kuhnroyal/flutter-fvm-config-action/setup@v3
+      - name: Restore packages
+        run: |
+          dart pub global activate melos
+          melos bootstrap
+      - name: Determine package from tag
+        id: package
+        run: |
+          PACKAGE_NAME="${GITHUB_REF_NAME%-v*}"
+          echo "path=packages/${PACKAGE_NAME}" >> $GITHUB_OUTPUT
+      - name: Test
+        run: melos run test
+      - name: Publish
+        working-directory: ${{ steps.package.outputs.path }}
+        run: dart pub publish --force

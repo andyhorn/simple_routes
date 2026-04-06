@@ -13,60 +13,9 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
-    outputs:
-      releases_created: ${{ steps.release.outputs.releases_created }}
-      simple_routes_release_created: ${{ steps.release.outputs.simple_routes_release_created }}
-      simple_routes_annotations_release_created: ${{ steps.release.outputs.simple_routes_annotations_release_created }}
-      simple_routes_generator_release_created: ${{ steps.release.outputs.simple_routes_generator_release_created }}
     steps:
       - uses: googleapis/release-please-action@v4
-        id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-
-  publish:
-    needs: release-please
-    if: needs.release-please.outputs.releases_created == 'true'
-    runs-on: ubuntu-latest
-    environment: pub.dev
-    permissions:
-      id-token: write
-    strategy:
-      matrix:
-        package:
-          - packages/simple_routes
-          - packages/simple_routes_annotations
-          - packages/simple_routes_generator
-      fail-fast: false
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: kuhnroyal/flutter-fvm-config-action/setup@v3
-      - name: Restore packages
-        run: |
-          dart pub global activate melos
-          melos bootstrap
-      - name: Check if package has changes
-        id: check_changes
-        run: |
-          PACKAGE_TAG="${{ matrix.package }}"
-          VERSION=$(grep '^version:' ${{ matrix.package }}/pubspec.yaml | cut -d' ' -f2)
-          RELEASE_TAG="${PACKAGE_TAG##*/}-v${VERSION}"
-          if git rev-parse "$RELEASE_TAG" >/dev/null 2>&1; then
-            echo "has_changes=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_changes=false" >> $GITHUB_OUTPUT
-          fi
-      - name: Analyze
-        if: steps.check_changes.outputs.has_changes == 'true'
-        run: melos run analyze
-      - name: Test
-        if: steps.check_changes.outputs.has_changes == 'true'
-        run: melos run test
-      - name: Publish to pub.dev
-        if: steps.check_changes.outputs.has_changes == 'true'
-        working-directory: ${{ matrix.package }}
-        run: dart pub publish --force
