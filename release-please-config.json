@@ -25,6 +25,5 @@
   "separate-pull-requests": false,
   "changelog-path": "CHANGELOG.md",
   "skip-github-release": false,
-  "pull-request-title-pattern": "chore(release): ${branch} ${version}",
   "commit-search-limit": 500
 }
