@@ -6,6 +6,12 @@ on:
       - 'simple_routes-v[0-9]*'
       - 'simple_routes_annotations-v[0-9]*'
       - 'simple_routes_generator-v[0-9]*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to publish (e.g. simple_routes_generator-v2.1.4)'
+        required: true
+        type: string
 
 jobs:
   publish:
@@ -23,7 +29,12 @@ jobs:
       - name: Determine package from tag
         id: package
         run: |
-          PACKAGE_NAME="${GITHUB_REF_NAME%-v*}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+          PACKAGE_NAME="${TAG%-v*}"
           echo "path=packages/${PACKAGE_NAME}" >> $GITHUB_OUTPUT
       - name: Test
         run: melos run test
