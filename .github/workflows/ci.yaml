@@ -1,0 +1,54 @@
+# spell-checker: ignore kuhnroyal
+
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: kuhnroyal/flutter-fvm-config-action/setup@v3
+      - name: Install melos
+        run: dart pub global activate melos
+      - name: Check formatting
+        run: melos run format:check
+
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: kuhnroyal/flutter-fvm-config-action/setup@v3
+      - name: Install melos
+        run: dart pub global activate melos
+      - name: Restore packages
+        run: melos bootstrap
+      - name: Analyze
+        run: melos run analyze
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: kuhnroyal/flutter-fvm-config-action/setup@v3
+      - name: Install melos
+        run: dart pub global activate melos
+      - name: Restore packages
+        run: melos bootstrap
+      - name: Test
+        run: melos run test

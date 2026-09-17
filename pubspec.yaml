@@ -44,6 +44,10 @@ melos:
       name: Format
       description: Format all packages
       exec: dart format .
+    format:check:
+      name: Check formatting
+      description: Verify all packages are formatted
+      run: dart format --output=none --set-exit-if-changed .
     generate:
       name: Generate
       description: Generate code for all packages
