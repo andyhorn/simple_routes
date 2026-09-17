@@ -51,6 +51,101 @@ abstract class Root {}
       );
     });
 
+    test('generates route data from declaring primary parameters', () async {
+      await testBuilder(
+        simpleRouteBuilder(BuilderOptions.empty),
+        {
+          ...annotationsAsset,
+          'a|lib/routes.dart': '''
+import 'package:simple_routes_annotations/simple_routes_annotations.dart';
+
+part 'routes.g.dart';
+
+@Route('user/:userId')
+abstract class User({
+  @Path('userId') required final String id,
+  @Query('q') required final String? query,
+});
+''',
+        },
+        outputs: {
+          'a|lib/routes.simple_routes.g.part': decodedMatches(
+            allOf([
+              contains('class UserRouteData implements SimpleRouteData'),
+              contains('required this.id'),
+              contains('required this.query'),
+              isNot(contains('  this.query,')),
+              contains("state.pathParameters['userId']!"),
+              contains("state.uri.queryParameters['q']"),
+              contains("'userId': id"),
+              contains("'q': query"),
+            ]),
+          ),
+        },
+      );
+    });
+
+    test('requires non-nullable optional primary parameters '
+        'without forwarded defaults', () async {
+      await testBuilder(
+        simpleRouteBuilder(BuilderOptions.empty),
+        {
+          ...annotationsAsset,
+          'a|lib/routes.dart': '''
+import 'package:simple_routes_annotations/simple_routes_annotations.dart';
+
+part 'routes.g.dart';
+
+@Route('search')
+abstract class Search({
+  @Query('page') final int page = 1,
+});
+''',
+        },
+        outputs: {
+          'a|lib/routes.simple_routes.g.part': decodedMatches(
+            allOf(
+              contains('class SearchRouteData implements SimpleRouteData'),
+              contains('required this.page'),
+              isNot(contains('  this.page,')),
+              contains("state.uri.queryParameters['page']"),
+              contains("'page': page"),
+            ),
+          ),
+        },
+      );
+    });
+
+    test('generates route data from a named primary constructor', () async {
+      await testBuilder(
+        simpleRouteBuilder(BuilderOptions.empty),
+        {
+          ...annotationsAsset,
+          'a|lib/routes.dart': '''
+import 'package:simple_routes_annotations/simple_routes_annotations.dart';
+
+part 'routes.g.dart';
+
+@Route('search')
+abstract class Search.filtered({
+  @Query('q') String? query,
+});
+''',
+        },
+        outputs: {
+          'a|lib/routes.simple_routes.g.part': decodedMatches(
+            allOf(
+              contains('class SearchRouteData implements SimpleRouteData'),
+              contains('final String? query;'),
+              contains('this.query'),
+              contains("state.uri.queryParameters['q']"),
+              contains("'q': query"),
+            ),
+          ),
+        },
+      );
+    });
+
     test('generates route with path parameters', () async {
       await testBuilder(
         simpleRouteBuilder(BuilderOptions.empty),
@@ -545,13 +640,14 @@ abstract class User {
       );
     });
 
-    test('generates route with factory constructor multiple parameters',
-        () async {
-      await testBuilder(
-        simpleRouteBuilder(BuilderOptions.empty),
-        {
-          ...annotationsAsset,
-          'a|lib/routes.dart': '''
+    test(
+      'generates route with factory constructor multiple parameters',
+      () async {
+        await testBuilder(
+          simpleRouteBuilder(BuilderOptions.empty),
+          {
+            ...annotationsAsset,
+            'a|lib/routes.dart': '''
 import 'package:simple_routes_annotations/simple_routes_annotations.dart';
 
 part 'routes.g.dart';
@@ -565,18 +661,19 @@ abstract class Post {
   }) = _Post;
 }
 ''',
-        },
-        outputs: {
-          'a|lib/routes.simple_routes.g.part': decodedMatches(
-            allOf(
-              contains('final String user;'),
-              contains('final String post;'),
-              contains('final String? sort;'),
+          },
+          outputs: {
+            'a|lib/routes.simple_routes.g.part': decodedMatches(
+              allOf(
+                contains('final String user;'),
+                contains('final String post;'),
+                contains('final String? sort;'),
+              ),
             ),
-          ),
-        },
-      );
-    });
+          },
+        );
+      },
+    );
 
     test('generates deep hierarchy route (3 levels)', () async {
       await testBuilder(
@@ -743,13 +840,14 @@ abstract class User {
       });
     });
 
-    test('generates route with required and optional parameters correctly',
-        () async {
-      await testBuilder(
-        simpleRouteBuilder(BuilderOptions.empty),
-        {
-          ...annotationsAsset,
-          'a|lib/routes.dart': '''
+    test(
+      'generates route with required and optional parameters correctly',
+      () async {
+        await testBuilder(
+          simpleRouteBuilder(BuilderOptions.empty),
+          {
+            ...annotationsAsset,
+            'a|lib/routes.dart': '''
 import 'package:simple_routes_annotations/simple_routes_annotations.dart';
 
 part 'routes.g.dart';
@@ -763,26 +861,28 @@ abstract class User {
   String? get optionalQuery;
 }
 ''',
-        },
-        outputs: {
-          'a|lib/routes.simple_routes.g.part': decodedMatches(
-            allOf(
-              contains('required this.userId'),
-              contains('this.optionalQuery'),
-              isNot(contains('required this.optionalQuery')),
+          },
+          outputs: {
+            'a|lib/routes.simple_routes.g.part': decodedMatches(
+              allOf(
+                contains('required this.userId'),
+                contains('this.optionalQuery'),
+                isNot(contains('required this.optionalQuery')),
+              ),
             ),
-          ),
-        },
-      );
-    });
+          },
+        );
+      },
+    );
 
-    test('generates correct fromState factory with all parameter types',
-        () async {
-      await testBuilder(
-        simpleRouteBuilder(BuilderOptions.empty),
-        {
-          ...annotationsAsset,
-          'a|lib/routes.dart': '''
+    test(
+      'generates correct fromState factory with all parameter types',
+      () async {
+        await testBuilder(
+          simpleRouteBuilder(BuilderOptions.empty),
+          {
+            ...annotationsAsset,
+            'a|lib/routes.dart': '''
 import 'package:simple_routes_annotations/simple_routes_annotations.dart';
 
 part 'routes.g.dart';
@@ -806,22 +906,23 @@ abstract class Test {
   ExtraData get extra;
 }
 ''',
-        },
-        outputs: {
-          'a|lib/routes.simple_routes.g.part': decodedMatches(
-            allOf([
-              contains('factory TestRouteData.fromState'),
-              contains("state.pathParameters['id']!"),
-              contains("state.uri.queryParameters['count']"),
-              contains("state.uri.queryParameters['status']"),
-              contains('Status.values'),
-              contains('state.extra as ExtraData'),
-              contains('_parseInt('),
-              contains('_parseEnum('),
-            ]),
-          ),
-        },
-      );
-    });
+          },
+          outputs: {
+            'a|lib/routes.simple_routes.g.part': decodedMatches(
+              allOf([
+                contains('factory TestRouteData.fromState'),
+                contains("state.pathParameters['id']!"),
+                contains("state.uri.queryParameters['count']"),
+                contains("state.uri.queryParameters['status']"),
+                contains('Status.values'),
+                contains('state.extra as ExtraData'),
+                contains('_parseInt('),
+                contains('_parseEnum('),
+              ]),
+            ),
+          },
+        );
+      },
+    );
   });
 }
