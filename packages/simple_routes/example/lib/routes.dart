@@ -13,10 +13,9 @@ abstract class Root {}
 abstract class Dashboard {}
 
 @Route('profile/:userId')
-abstract class Profile {
-  @Path('userId')
-  String get id;
-}
+abstract class Profile({
+  @Path('userId') required final String id,
+});
 
 @Route('edit', parent: Profile)
 abstract class ProfileEdit {}

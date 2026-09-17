@@ -14,6 +14,7 @@ Simple, declarative route and navigation management for [go_router](https://pub.
 
 ## Table of Contents
 
+- [Requirements](#requirements)
 - [Getting Started](#getting-started)
 - [Usage](#usage)
   - [Code Generation (Recommended)](#code-generation-features)
@@ -23,10 +24,15 @@ Simple, declarative route and navigation management for [go_router](https://pub.
     - [Query Parameters](#query-parameters)
     - [Extra Data](#extra-data)
     - [Generating Code](#generating-code)
-  - [Manual Route Definition](#manual-route-definition)
+  - [Manual route definition](#manual-route-definition)
 - [Navigation](#navigation)
-- [Advanced Usage](#advanced-usage)
+- [Advanced usage](#advanced-usage)
   - [Route Matching](#route-matching)
+
+## Requirements
+
+- Dart 3.13 or later
+- Flutter 3.47 or later
 
 ## Getting Started
 
@@ -71,20 +77,17 @@ abstract class Dashboard {}
 
 #### Routes with Parameters
 
-For routes with path parameters, define them as abstract getters and annotate them with `@Path()`.
+For routes with path parameters, annotate primary-constructor parameters with `@Path()`.
 
 ```dart
 @Route('profile/:userId')
-abstract class Profile {
-  // If the name of the field matches the path segment, you can omit the name.
-  // Otherwise, you must provide the name.
-  // Example:
-  // @Path('userId')
-  // String get id;
-  @Path()
-  String get userId;
-}
+abstract class Profile({
+  @Path('userId') required final String id,
+});
 ```
+
+Traditional annotated getters and fields remain supported. The `id` parameter uses
+`userId` to match the path segment.
 
 #### Child Routes and Inheritance
 
@@ -129,7 +132,7 @@ dart run build_runner build
 
 The generator creates a `[ClassName]Route` class for navigation and a `[ClassName]RouteData` class for holding parameters.
 
-### Manual Route Definition
+### Manual route definition
 
 If you prefer not to use code generation, you can define your routes manually by extending `SimpleRoute` or `SimpleDataRoute`.
 
@@ -162,7 +165,7 @@ const ProfileRoute().go(
 );
 ```
 
-## Advanced Usage
+## Advanced usage
 
 ### Extracting Data
 
