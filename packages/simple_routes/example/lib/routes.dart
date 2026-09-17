@@ -21,10 +21,9 @@ abstract class Profile({
 abstract class ProfileEdit {}
 
 @Route('settings', parent: Profile)
-abstract class ProfileSettings {
-  @Query()
-  String? get theme;
-}
+abstract class ProfileSettings({
+  @Query() final String? theme,
+});
 
 @Route('child', parent: Dashboard)
 abstract class DashboardChild {}
@@ -33,7 +32,6 @@ abstract class DashboardChild {}
 abstract class ProfileDetails {}
 
 @Route('additional', parent: Profile)
-abstract class AdditionalData {
-  @Query('queryName')
-  String? get queryValue;
-}
+abstract class AdditionalData({
+  @Query('queryName') final String? queryValue,
+});
