@@ -63,10 +63,7 @@ class ProfileEditRoute extends SimpleDataRoute<ProfileEditRouteData>
 }
 
 class ProfileSettingsRouteData implements SimpleRouteData {
-  const ProfileSettingsRouteData({
-    this.theme,
-    required this.id,
-  });
+  const ProfileSettingsRouteData({this.theme, required this.id});
 
   factory ProfileSettingsRouteData.fromState(GoRouterState state) =>
       ProfileSettingsRouteData(
@@ -131,10 +128,7 @@ class ProfileDetailsRoute extends SimpleDataRoute<ProfileDetailsRouteData>
 }
 
 class AdditionalDataRouteData implements SimpleRouteData {
-  const AdditionalDataRouteData({
-    this.queryValue,
-    required this.id,
-  });
+  const AdditionalDataRouteData({this.queryValue, required this.id});
 
   factory AdditionalDataRouteData.fromState(GoRouterState state) =>
       AdditionalDataRouteData(

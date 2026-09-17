@@ -1,4 +1,4 @@
-# Code Generation Guide
+# Code generation guide
 
 `simple_routes` uses code generation to bridge the gap between your route definitions and type-safe navigation. This guide covers how to use the code generation feature as a whole.
 
@@ -15,20 +15,21 @@ Blueprints are abstract classes annotated with `@Route`. They serve as the sourc
 
 ```dart
 @Route('profile/:userId')
-abstract class Profile {
-  @Path('userId')
-  String get id;
-}
+abstract class Profile({
+  @Path('userId') required final String id,
+});
 ```
 
 ### Path Parameters (`@Path`)
 
 Any dynamic segment in your route path (e.g., `:userId`) must be represented in your blueprint.
 
-- Use `@Path()` on a getter or field.
-- If the name of the getter/field differs from the path segment, provide the name: `@Path('userId') String get id;`.
-- If they match, you can omit the name: `@Path() String get userId;`.
+- Use `@Path()` on a primary-constructor parameter, getter, or field.
+- If the name differs from the path segment, provide the name: `@Path('userId') required final String id`.
+- If they match, you can omit the name: `@Path() required final String userId`.
 - **Validation**: The generator will throw an error if a path parameter in the template is missing a corresponding `@Path` annotation, or if an `@Path` annotation doesn't match a parameter in the template.
+
+Traditional getter and field blueprints remain supported.
 
 ### Query Parameters (`@Query`)
 
@@ -66,7 +67,7 @@ To nest routes, specify the `parent` blueprint in the `@Route` annotation.
 abstract class ProfileEdit {}
 ```
 
-### Automatic Parameter Inheritance
+### Automatic parameter inheritance
 
 Child routes automatically inherit all path parameters from their parent routes. In the example above, `ProfileEdit` will automatically have a `userId` parameter because its parent (`Profile`) requires one.
 
