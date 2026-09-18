@@ -20,11 +20,11 @@ jobs:
       - name: Restore packages
         run: |
           flutter pub global activate melos
-          flutter pub global run melos bootstrap
+          melos bootstrap
       - name: Analyze
-        run: flutter pub global run melos run analyze
+        run: melos run analyze
       - name: Test
-        run: flutter pub global run melos run test
+        run: melos run test
       - name: Publish
         working-directory: packages/simple_routes
-        run: flutter pub global run melos publish --no-dry-run --yes
+        run: melos publish --no-dry-run --yes

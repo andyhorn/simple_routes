@@ -25,12 +25,12 @@ fvm flutter pub global activate melos
 Then, bootstrap the workspace:
 
 ```bash
-fvm flutter pub global run melos bootstrap
+melos bootstrap
 ```
 
 ## Common Scripts
 
-- `fvm flutter pub global run melos run analyze`: Run analysis for all packages.
-- `fvm flutter pub global run melos run test`: Run tests for all packages.
-- `fvm flutter pub global run melos run format`: Format all packages.
-- `fvm flutter pub global run melos run generate`: Run code generation (build_runner) for packages that use it.
+- `melos run analyze`: Run analysis for all packages.
+- `melos run test`: Run tests for all packages.
+- `melos run format`: Format all packages.
+- `melos run generate`: Run code generation (build_runner) for packages that use it.

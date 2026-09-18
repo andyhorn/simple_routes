@@ -25,7 +25,7 @@ jobs:
       - name: Install melos
         run: flutter pub global activate melos
       - name: Check formatting
-        run: flutter pub global run melos run format:check
+        run: melos run format:check
 
   analyze:
     name: Analyze
@@ -36,9 +36,9 @@ jobs:
       - name: Install melos
         run: flutter pub global activate melos
       - name: Restore packages
-        run: flutter pub global run melos bootstrap
+        run: melos bootstrap
       - name: Analyze
-        run: flutter pub global run melos run analyze
+        run: melos run analyze
 
   test:
     name: Test
@@ -49,6 +49,6 @@ jobs:
       - name: Install melos
         run: flutter pub global activate melos
       - name: Restore packages
-        run: flutter pub global run melos bootstrap
+        run: melos bootstrap
       - name: Test
-        run: flutter pub global run melos run test
+        run: melos run test

@@ -21,6 +21,7 @@ dev_dependencies:
   mocktail: ^1.0.1
   
 melos:
+  sdkPath: .fvm/flutter_sdk
   packages:
     - packages/simple_routes
     - packages/simple_routes_annotations
