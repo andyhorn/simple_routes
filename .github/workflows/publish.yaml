@@ -24,8 +24,8 @@ jobs:
       - uses: kuhnroyal/flutter-fvm-config-action/setup@v3
       - name: Restore packages
         run: |
-          dart pub global activate melos
-          melos bootstrap
+          flutter pub global activate melos
+          flutter pub global run melos bootstrap
       - name: Determine package from tag
         id: package
         run: |
@@ -37,7 +37,7 @@ jobs:
           PACKAGE_NAME="${TAG%-v*}"
           echo "path=packages/${PACKAGE_NAME}" >> $GITHUB_OUTPUT
       - name: Test
-        run: melos run test
+        run: flutter pub global run melos run test
       - name: Publish
         working-directory: ${{ steps.package.outputs.path }}
-        run: dart pub publish --force
+        run: flutter pub publish --force

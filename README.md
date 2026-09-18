@@ -13,23 +13,24 @@ packages/
 
 ## Getting Started
 
-This project uses [Melos](https://melos.invertase.dev/) to manage the monorepo.
+This project uses [FVM](https://fvm.app/) to pin Flutter and [Melos](https://melos.invertase.dev/) to manage the monorepo.
 
-To get started, install Melos:
+To get started, install the configured Flutter SDK and Melos:
 
 ```bash
-dart pub global activate melos
+fvm install
+fvm flutter pub global activate melos
 ```
 
 Then, bootstrap the workspace:
 
 ```bash
-melos bootstrap
+fvm flutter pub global run melos bootstrap
 ```
 
 ## Common Scripts
 
-- `melos run analyze`: Run analysis for all packages.
-- `melos run test`: Run tests for all packages.
-- `melos run format`: Format all packages.
-- `melos run generate`: Run code generation (build_runner) for packages that use it.
+- `fvm flutter pub global run melos run analyze`: Run analysis for all packages.
+- `fvm flutter pub global run melos run test`: Run tests for all packages.
+- `fvm flutter pub global run melos run format`: Format all packages.
+- `fvm flutter pub global run melos run generate`: Run code generation (build_runner) for packages that use it.
