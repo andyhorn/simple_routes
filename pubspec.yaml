@@ -21,6 +21,7 @@ dev_dependencies:
   mocktail: ^1.0.1
   
 melos:
+  sdkPath: .fvm/flutter_sdk
   packages:
     - packages/simple_routes
     - packages/simple_routes_annotations
@@ -44,6 +45,10 @@ melos:
       name: Format
       description: Format all packages
       exec: dart format .
+    format:check:
+      name: Check formatting
+      description: Verify all packages are formatted
+      run: dart format --output=none --set-exit-if-changed .
     generate:
       name: Generate
       description: Generate code for all packages

@@ -47,13 +47,13 @@ class TestRouteData extends SimpleRouteData {
 
   @override
   Map<String, String> get parameters => {
-        'param': testValue,
-      };
+    'param': testValue,
+  };
 
   @override
   Map<String, String?> get query => {
-        'query': testQuery,
-      };
+    'query': testQuery,
+  };
 
   @override
   Object? get extra => testData;

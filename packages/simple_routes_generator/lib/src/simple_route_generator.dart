@@ -38,8 +38,8 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     final parentType = parentReader.isNull
         ? null
         : (parentReader.typeValue is InterfaceType
-              ? parentReader.typeValue as InterfaceType
-              : null);
+            ? parentReader.typeValue as InterfaceType
+            : null);
 
     _validatePathParams(blueprint, allPathParams, dataSources);
     _validateExtraAnnotations(blueprint, dataSources);
@@ -165,9 +165,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
                 source.type,
               );
             } else if (source.isExtra) {
-              namedArgs[source.name] = refer('state')
-                  .property('extra')
-                  .asA(
+              namedArgs[source.name] = refer('state').property('extra').asA(
                     refer(source.type.getDisplayString()),
                   );
             }
@@ -264,9 +262,8 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
   ) {
     final name = _buildRouteClassName(blueprint);
     final dataClassName = _buildRouteDataClassName(blueprint);
-    final baseClass = isData
-        ? _buildSimpleDataRouteType(dataClassName)
-        : 'SimpleRoute';
+    final baseClass =
+        isData ? _buildSimpleDataRouteType(dataClassName) : 'SimpleRoute';
 
     return Class((c) {
       c
@@ -749,8 +746,7 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     if (primaryConstructor != null) {
       for (final param in primaryConstructor.formalParameters) {
         if (shouldCollect(param)) {
-          final requiresValue =
-              param.isOptional &&
+          final requiresValue = param.isOptional &&
               param.type.nullabilitySuffix == NullabilitySuffix.none;
           final dataSource = requiresValue
               ? DataSource.fromElement(param)
@@ -769,9 +765,8 @@ class SimpleRouteGenerator extends GeneratorForAnnotation<Route> {
     List<DataSource> dataSources,
   ) {
     final pathDataSources = dataSources.where((ds) => ds.isPath);
-    final annotatedParamNames = pathDataSources
-        .map((ds) => ds.paramName ?? ds.name)
-        .toSet();
+    final annotatedParamNames =
+        pathDataSources.map((ds) => ds.paramName ?? ds.name).toSet();
 
     // 1. Check for missing @Path annotations
     for (final templateParam in pathParams) {

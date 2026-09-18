@@ -13,11 +13,12 @@ packages/
 
 ## Getting Started
 
-This project uses [Melos](https://melos.invertase.dev/) to manage the monorepo.
+This project uses [FVM](https://fvm.app/) to pin Flutter and [Melos](https://melos.invertase.dev/) to manage the monorepo.
 
-To get started, install Melos:
+To get started, install the configured Flutter SDK and Melos:
 
 ```bash
+fvm install
 dart pub global activate melos
 ```
 

@@ -85,7 +85,8 @@ abstract class User({
       );
     });
 
-    test('requires non-nullable optional primary parameters '
+    test(
+        'requires non-nullable optional primary parameters '
         'without forwarded defaults', () async {
       await testBuilder(
         simpleRouteBuilder(BuilderOptions.empty),
