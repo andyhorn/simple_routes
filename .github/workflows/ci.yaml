@@ -22,6 +22,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: kuhnroyal/flutter-fvm-config-action/setup@v3
+      - name: Configure Melos SDK path
+        run: ln -s "$FLUTTER_ROOT" .fvm/flutter_sdk
       - name: Install melos
         run: dart pub global activate melos
       - name: Check formatting
@@ -33,6 +35,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: kuhnroyal/flutter-fvm-config-action/setup@v3
+      - name: Configure Melos SDK path
+        run: ln -s "$FLUTTER_ROOT" .fvm/flutter_sdk
       - name: Install melos
         run: dart pub global activate melos
       - name: Restore packages
@@ -46,6 +50,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: kuhnroyal/flutter-fvm-config-action/setup@v3
+      - name: Configure Melos SDK path
+        run: ln -s "$FLUTTER_ROOT" .fvm/flutter_sdk
       - name: Install melos
         run: dart pub global activate melos
       - name: Restore packages
