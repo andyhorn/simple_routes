@@ -14,8 +14,21 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
+      - name: Load GitHub App credentials from 1Password
+        id: op
+        uses: 1password/load-secrets-action@v5
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          APP_CLIENT_ID: "op://simple_routes/release_please/client_id"
+          APP_PRIVATE_KEY: "op://simple_routes/release_please/simple-routes-release-please.privay-key.pem"
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ steps.op.outputs.APP_CLIENT_ID }}
+          private-key: ${{ steps.op.outputs.APP_PRIVATE_KEY }}
       - uses: googleapis/release-please-action@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
