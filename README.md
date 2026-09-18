@@ -19,7 +19,7 @@ To get started, install the configured Flutter SDK and Melos:
 
 ```bash
 fvm install
-fvm flutter pub global activate melos
+dart pub global activate melos
 ```
 
 Then, bootstrap the workspace:

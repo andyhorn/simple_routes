@@ -19,7 +19,7 @@ jobs:
       - uses: kuhnroyal/flutter-fvm-config-action/setup@v3
       - name: Restore packages
         run: |
-          flutter pub global activate melos
+          dart pub global activate melos
           melos bootstrap
       - name: Analyze
         run: melos run analyze
