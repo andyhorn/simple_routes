@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## [3.0.0](https://github.com/andyhorn/simple_routes/compare/simple_routes_generator-v2.1.4...simple_routes_generator-v3.0.0) (2026-09-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* [2/2] require Dart 3.13 and support primary constructors ([#74](https://github.com/andyhorn/simple_routes/issues/74))
+
+### Features
+
+* [2/2] require Dart 3.13 and support primary constructors ([#74](https://github.com/andyhorn/simple_routes/issues/74)) ([76bb979](https://github.com/andyhorn/simple_routes/commit/76bb9794849f40f61f3296d466d48350ebba70c8))
+
+
+### Bug Fixes
+
+* restore workspace version alignment from [#78](https://github.com/andyhorn/simple_routes/issues/78) ([#80](https://github.com/andyhorn/simple_routes/issues/80)) ([3af41bb](https://github.com/andyhorn/simple_routes/commit/3af41bb9f123f6b59c5514958b2861c1ff87517c))
+
 ## [3.0.0](https://github.com/andyhorn/simple_routes/compare/simple_routes_generator-v2.1.4...simple_routes_generator-v3.0.0) (2026-09-18)
 
 
