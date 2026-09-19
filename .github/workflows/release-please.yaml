@@ -20,7 +20,7 @@ jobs:
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           APP_CLIENT_ID: "op://simple_routes/release_please/client_id"
-          APP_PRIVATE_KEY: "op://simple_routes/release_please/simple-routes-release-please.privay-key.pem"
+          APP_PRIVATE_KEY: "op://simple_routes/release_please/simple-routes-release-please.private-key.pem"
       - name: Generate GitHub App token
         id: app-token
         uses: actions/create-github-app-token@v3
