@@ -1,0 +1,55 @@
+name: Publish simple_routes_annotations
+
+# One workflow per package: pub.dev's automated publishing validates each
+# package's tag pattern against the git ref carried in the OIDC token, and a
+# run has exactly one ref — so a run can only publish its own package.
+on:
+  push:
+    tags:
+      - 'simple_routes_annotations-v[0-9]*'
+
+concurrency:
+  group: pub-dev-publish-simple_routes_annotations
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: pub.dev
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      # Provisions the OIDC token dart pub needs to authenticate with pub.dev.
+      # Must run before the Flutter setup: Flutter's dart then shadows the
+      # standalone one on PATH, mirroring dart-lang/setup-dart's publish
+      # workflow. Without this, dart pub falls back to interactive OAuth and
+      # hangs in CI.
+      - uses: dart-lang/setup-dart@6afc89df92d6eb3834022f73cd65adc8cdfcb92d
+      - uses: kuhnroyal/flutter-fvm-config-action/setup@v3
+      - name: Configure Melos SDK path
+        run: ln -s "$FLUTTER_ROOT" .fvm/flutter_sdk
+      - name: Restore packages
+        run: |
+          dart pub global activate melos
+          melos bootstrap
+      - name: Test
+        run: (cd packages/simple_routes_annotations && dart test)
+      - name: Check GitHub OIDC availability
+        run: |
+          if [ -z "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:-}" ] || [ -z "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ]; then
+            echo "::error::GitHub OIDC is unavailable. Keep 'permissions: id-token: write' on this job and configure 'Automated publishing' on pub.dev for this package (repository andyhorn/simple_routes)."
+            exit 1
+          fi
+      - name: Publish
+        run: |
+          set -euo pipefail
+          dir="packages/simple_routes_annotations"
+          version="$(sed -n 's/^version: *//p' "$dir/pubspec.yaml")"
+          if curl -fsS "https://pub.dev/api/packages/simple_routes_annotations" | jq -e --arg v "$version" 'any(.versions[]?.version; . == $v)' > /dev/null; then
+            echo "simple_routes_annotations@$version is already on pub.dev, skipping"
+            exit 0
+          fi
+          echo "Publishing simple_routes_annotations@$version"
+          (cd "$dir" && timeout 5m dart pub publish --dry-run)
+          (cd "$dir" && timeout 5m dart pub publish --force)

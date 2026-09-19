@@ -1,0 +1,71 @@
+name: Publish simple_routes_generator
+
+# One workflow per package: pub.dev's automated publishing validates each
+# package's tag pattern against the git ref carried in the OIDC token, and a
+# run has exactly one ref — so a run can only publish its own package.
+#
+# simple_routes_generator depends on simple_routes_annotations, which is
+# released in the same batch but may not have finished publishing when this
+# run reaches its publish step. The retrying dry-run waits (up to ~10 minutes)
+# for the dependency to become resolvable on pub.dev before uploading.
+on:
+  push:
+    tags:
+      - 'simple_routes_generator-v[0-9]*'
+
+concurrency:
+  group: pub-dev-publish-simple_routes_generator
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: pub.dev
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      # Provisions the OIDC token dart pub needs to authenticate with pub.dev.
+      # Must run before the Flutter setup: Flutter's dart then shadows the
+      # standalone one on PATH, mirroring dart-lang/setup-dart's publish
+      # workflow. Without this, dart pub falls back to interactive OAuth and
+      # hangs in CI.
+      - uses: dart-lang/setup-dart@6afc89df92d6eb3834022f73cd65adc8cdfcb92d
+      - uses: kuhnroyal/flutter-fvm-config-action/setup@v3
+      - name: Configure Melos SDK path
+        run: ln -s "$FLUTTER_ROOT" .fvm/flutter_sdk
+      - name: Restore packages
+        run: |
+          dart pub global activate melos
+          melos bootstrap
+      - name: Test
+        run: (cd packages/simple_routes_generator && dart test)
+      - name: Check GitHub OIDC availability
+        run: |
+          if [ -z "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:-}" ] || [ -z "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ]; then
+            echo "::error::GitHub OIDC is unavailable. Keep 'permissions: id-token: write' on this job and configure 'Automated publishing' on pub.dev for this package (repository andyhorn/simple_routes)."
+            exit 1
+          fi
+      - name: Publish
+        run: |
+          set -euo pipefail
+          dir="packages/simple_routes_generator"
+          version="$(sed -n 's/^version: *//p' "$dir/pubspec.yaml")"
+          if curl -fsS "https://pub.dev/api/packages/simple_routes_generator" | jq -e --arg v "$version" 'any(.versions[]?.version; . == $v)' > /dev/null; then
+            echo "simple_routes_generator@$version is already on pub.dev, skipping"
+            exit 0
+          fi
+          echo "Publishing simple_routes_generator@$version"
+          deadline=40
+          for attempt in $(seq 1 $deadline); do
+            if (cd "$dir" && timeout 5m dart pub publish --dry-run); then
+              break
+            fi
+            if [ "$attempt" = "$deadline" ]; then
+              echo "::error::Dry run kept failing after ~10 minutes; is simple_routes_annotations published to pub.dev?"
+              exit 1
+            fi
+            echo "Attempt $attempt/$deadline failed; waiting for dependencies to land on pub.dev, retrying in 15s..."
+            sleep 15
+          done
+          (cd "$dir" && timeout 5m dart pub publish --force)
