@@ -9,9 +9,13 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to publish (e.g. simple_routes_generator-v2.1.4)'
-        required: true
+        description: 'Unused; any unpublished workspace package version is published regardless of the tag provided.'
+        required: false
         type: string
+
+concurrency:
+  group: pub-dev-publish
+  cancel-in-progress: false
 
 jobs:
   publish:
@@ -28,18 +32,19 @@ jobs:
         run: |
           dart pub global activate melos
           melos bootstrap
-      - name: Determine package from tag
-        id: package
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TAG="${{ inputs.tag }}"
-          else
-            TAG="${GITHUB_REF_NAME}"
-          fi
-          PACKAGE_NAME="${TAG%-v*}"
-          echo "path=packages/${PACKAGE_NAME}" >> $GITHUB_OUTPUT
       - name: Test
         run: melos run test
-      - name: Publish
-        working-directory: ${{ steps.package.outputs.path }}
-        run: dart pub publish --force
+      - name: Publish packages in dependency order
+        run: |
+          set -euo pipefail
+          for name in simple_routes_annotations simple_routes simple_routes_generator; do
+            dir="packages/$name"
+            version="$(sed -n 's/^version: *//p' "$dir/pubspec.yaml")"
+            if curl -fsS "https://pub.dev/api/packages/$name" | jq -e --arg v "$version" 'any(.versions[]?.version; . == $v)' > /dev/null; then
+              echo "$name@$version is already on pub.dev, skipping"
+              continue
+            fi
+            echo "Publishing $name@$version"
+            (cd "$dir" && dart pub publish --force)
+            sleep 15
+          done
