@@ -1,12 +1,16 @@
 name: Publish to pub.dev
 
+# Tag pushes carry the git ref that pub.dev's tag-pattern filter validates
+# against the OIDC token. Manual re-runs must use `gh run rerun`, which
+# reuses the original run's tag context; a workflow_dispatch run has no tag
+# and pub.dev would reject it, so the trigger stays off.
+
 on:
   push:
     tags:
       - 'simple_routes-v[0-9]*'
       - 'simple_routes_annotations-v[0-9]*'
       - 'simple_routes_generator-v[0-9]*'
-  workflow_dispatch:
 
 concurrency:
   group: pub-dev-publish
@@ -29,6 +33,12 @@ jobs:
           melos bootstrap
       - name: Test
         run: melos run test
+      - name: Check GitHub OIDC availability
+        run: |
+          if [ -z "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:-}" ] || [ -z "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ]; then
+            echo "::error::GitHub OIDC is unavailable. Keep 'permissions: id-token: write' on this job and configure 'Automated publishing' on pub.dev for each package (repository andyhorn/simple_routes, workflow publish.yaml)."
+            exit 1
+          fi
       - name: Publish packages in dependency order
         run: |
           set -euo pipefail
@@ -40,6 +50,6 @@ jobs:
               continue
             fi
             echo "Publishing $name@$version"
-            (cd "$dir" && dart pub publish --force)
+            (cd "$dir" && timeout 5m dart pub publish --force)
             sleep 15
           done
