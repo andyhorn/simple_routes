@@ -7,11 +7,6 @@ on:
       - 'simple_routes_annotations-v[0-9]*'
       - 'simple_routes_generator-v[0-9]*'
   workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Unused; any unpublished workspace package version is published regardless of the tag provided.'
-        required: false
-        type: string
 
 concurrency:
   group: pub-dev-publish
