@@ -40,23 +40,6 @@ jobs:
       - name: Test
         run: melos run test
       - name: Check GitHub OIDC availability
-        run: |
-          if [ -z "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:-}" ] || [ -z "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ]; then
-            echo "::error::GitHub OIDC is unavailable. Keep 'permissions: id-token: write' on this job and configure 'Automated publishing' on pub.dev for each package (repository andyhorn/simple_routes, workflow publish.yaml)."
-            exit 1
-          fi
-      - name: Publish packages in dependency order
-        run: |
-          set -euo pipefail
-          for name in simple_routes_annotations simple_routes simple_routes_generator; do
-            dir="packages/$name"
-            version="$(sed -n 's/^version: *//p' "$dir/pubspec.yaml")"
-            if curl -fsS "https://pub.dev/api/packages/$name" | jq -e --arg v "$version" 'any(.versions[]?.version; . == $v)' > /dev/null; then
-              echo "$name@$version is already on pub.dev, skipping"
-              continue
-            fi
-            echo "Publishing $name@$version"
-            (cd "$dir" && timeout 5m dart pub publish --dry-run)
-            (cd "$dir" && timeout 5m dart pub publish --force)
-            sleep 15
-          done
+        run: .github/scripts/check-oidc.sh
+      - name: Publish the tagged package
+        run: .github/scripts/publish-package.sh
