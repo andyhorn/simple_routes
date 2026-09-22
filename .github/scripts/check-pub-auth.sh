@@ -5,6 +5,6 @@ set -euo pipefail
 # credentials, instead of letting `dart pub publish` fall back to
 # interactive OAuth and hang in CI.
 if ! dart pub token list | grep -q 'https://pub.dev'; then
-  echo "::error::No pub.dev credentials found. Check that GCP_WIF_PROVIDER/PUB_SA_EMAIL are set and that the service account is registered as a publisher for each package on pub.dev."
+  echo "::error::No pub.dev credentials found. Check: the simple_routes vault's 'gcp' item still has gcp_wif_provider and pub_sa_email fields; the workload identity pool grants this repository access; and the service account is a registered publisher for each package on pub.dev."
   exit 1
 fi

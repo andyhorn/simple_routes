@@ -10,25 +10,34 @@ name="$1"
 dir="packages/$name"
 version="$(sed -n 's/^version: *//p' "$dir/pubspec.yaml")"
 
+# set -u doesn't catch an empty capture, and an empty version matches nothing
+# on pub.dev, so an unguarded parse miss polls the full timeout and then blames
+# pub.dev for a malformed pubspec.
+if [ -z "$version" ]; then
+  echo "::error::Could not parse a version from $dir/pubspec.yaml"
+  exit 1
+fi
+
 is_live() {
   curl -fsS "https://pub.dev/api/packages/$name" \
     | jq -e --arg v "$version" 'any(.versions[]?.version; . == $v)' > /dev/null
 }
 
-if is_live; then
-  echo "$name@$version is live"
-  exit 0
-fi
+attempts=30
+interval=10
 
-echo "Waiting for $name@$version to appear on pub.dev..."
-for i in $(seq 1 30); do
+for i in $(seq 1 "$attempts"); do
   if is_live; then
     echo "$name@$version is live"
     exit 0
   fi
-  if [ "$i" -eq 30 ]; then
-    echo "::error::Timed out waiting for $name@$version to appear on pub.dev"
-    exit 1
+  if [ "$i" -eq 1 ]; then
+    echo "Waiting for $name@$version to appear on pub.dev..."
   fi
-  sleep 10
+  if [ "$i" -lt "$attempts" ]; then
+    sleep "$interval"
+  fi
 done
+
+echo "::error::Timed out waiting for $name@$version to appear on pub.dev after $((attempts * interval))s"
+exit 1
