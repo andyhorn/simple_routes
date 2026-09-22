@@ -28,12 +28,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dart-lang/setup-dart@6afc89df92d6eb3834022f73cd65adc8cdfcb92d
+      - name: Load GCP WIF config from 1Password
+        id: op
+        uses: 1password/load-secrets-action@v5
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          GCP_WIF_PROVIDER: "op://simple_routes/gcp/GCP_WIF_PROVIDER"
+          PUB_SA_EMAIL: "op://simple_routes/gcp/PUB_SA_EMAIL"
       - name: Authenticate to GCP via Workload Identity Federation
         id: auth
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
-          service_account: ${{ secrets.PUB_SA_EMAIL }}
+          workload_identity_provider: ${{ steps.op.outputs.GCP_WIF_PROVIDER }}
+          service_account: ${{ steps.op.outputs.PUB_SA_EMAIL }}
           token_format: id_token
           id_token_audience: https://pub.dev
           id_token_include_email: true
