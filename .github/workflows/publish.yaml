@@ -33,8 +33,8 @@ jobs:
         uses: 1password/load-secrets-action@v5
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-          GCP_WIF_PROVIDER: "op://simple_routes/gcp/GCP_WIF_PROVIDER"
-          PUB_SA_EMAIL: "op://simple_routes/gcp/PUB_SA_EMAIL"
+          GCP_WIF_PROVIDER: "op://simple_routes/gcp/gcp_wif_provider"
+          PUB_SA_EMAIL: "op://simple_routes/gcp/pub_sa_email"
       - name: Authenticate to GCP via Workload Identity Federation
         id: auth
         uses: google-github-actions/auth@v2
