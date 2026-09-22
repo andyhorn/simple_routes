@@ -21,6 +21,10 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # A wedged run holds the pub-dev-publish concurrency group, which has
+    # cancel-in-progress disabled, so the 360-minute default would block every
+    # queued publish behind it.
+    timeout-minutes: 30
     environment: pub.dev
     permissions:
       id-token: write
@@ -45,14 +49,20 @@ jobs:
           id_token_audience: https://pub.dev
           id_token_include_email: true
       - name: Add pub.dev credentials
-        run: echo '${{ steps.auth.outputs.id_token }}' | dart pub token add https://pub.dev
-      - uses: kuhnroyal/flutter-fvm-config-action/setup@v3
+        env:
+          PUB_TOKEN: ${{ steps.auth.outputs.id_token }}
+        run: echo "$PUB_TOKEN" | dart pub token add https://pub.dev
+      # SHA-pinned, unlike the vendor-owned actions above: this is a personal-account
+      # action running in the job that holds the 1Password token and pub.dev credentials.
+      - uses: kuhnroyal/flutter-fvm-config-action/setup@c378498f1d1962d33039c3989411093ef8a17b2c # v3.3
       - name: Configure Melos SDK path
         run: ln -s "$FLUTTER_ROOT" .fvm/flutter_sdk
       - name: Restore packages
         run: |
           dart pub global activate melos
           melos bootstrap
+      - name: Analyze
+        run: melos run analyze
       - name: Test
         run: melos run test
       - name: Check pub.dev auth
@@ -63,12 +73,8 @@ jobs:
       # to index it avoids the dependents' `dart pub publish` resolution
       # failing against a version pub.dev doesn't know about yet.
       - name: Publish simple_routes_annotations
-        run: |
-          melos publish --scope=simple_routes_annotations --no-published --dry-run --yes
-          melos publish --scope=simple_routes_annotations --no-published --no-dry-run --yes
+        run: .github/scripts/publish.sh --scope=simple_routes_annotations
       - name: Wait for simple_routes_annotations to be live
         run: .github/scripts/wait-for-live.sh simple_routes_annotations
       - name: Publish dependent packages
-        run: |
-          melos publish --scope=simple_routes --scope=simple_routes_generator --no-published --dry-run --yes
-          melos publish --scope=simple_routes --scope=simple_routes_generator --no-published --no-dry-run --yes
+        run: .github/scripts/publish.sh --scope=simple_routes --scope=simple_routes_generator
