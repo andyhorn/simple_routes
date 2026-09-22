@@ -1,9 +1,11 @@
 name: Publish to pub.dev
 
-# Tag pushes carry the git ref that pub.dev's tag-pattern filter validates
-# against the OIDC token. Manual re-runs must use `gh run rerun`, which
-# reuses the original run's tag context; a workflow_dispatch run has no tag
-# and pub.dev would reject it, so the trigger stays off.
+# Tag pushes are the only trigger: release-please pushes one tag per package
+# it bumps, and each run publishes every package that isn't live yet (melos
+# --no-published skips ones that are), so redundant concurrent runs converge
+# on the same end state instead of racing. Manual re-runs must use
+# `gh run rerun`; a workflow_dispatch run has no tag context, so that trigger
+# stays off.
 
 on:
   push:
@@ -22,14 +24,21 @@ jobs:
     environment: pub.dev
     permissions:
       id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
-      # Provisions the OIDC token dart pub needs to authenticate with pub.dev.
-      # Must run before the Flutter setup: Flutter's dart then shadows the
-      # standalone one on PATH, mirroring dart-lang/setup-dart's publish
-      # workflow. Without this, dart pub falls back to interactive OAuth and
-      # hangs in CI.
       - uses: dart-lang/setup-dart@6afc89df92d6eb3834022f73cd65adc8cdfcb92d
+      - name: Authenticate to GCP via Workload Identity Federation
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.PUB_SA_EMAIL }}
+          token_format: id_token
+          id_token_audience: https://pub.dev
+          id_token_include_email: true
+      - name: Add pub.dev credentials
+        run: echo '${{ steps.auth.outputs.id_token }}' | dart pub token add https://pub.dev
       - uses: kuhnroyal/flutter-fvm-config-action/setup@v3
       - name: Configure Melos SDK path
         run: ln -s "$FLUTTER_ROOT" .fvm/flutter_sdk
@@ -39,7 +48,20 @@ jobs:
           melos bootstrap
       - name: Test
         run: melos run test
-      - name: Check GitHub OIDC availability
-        run: .github/scripts/check-oidc.sh
-      - name: Publish the tagged package
-        run: .github/scripts/publish-package.sh
+      - name: Check pub.dev auth
+        run: .github/scripts/check-pub-auth.sh
+      # simple_routes and simple_routes_generator both depend on
+      # simple_routes_annotations, sometimes on a version only just bumped in
+      # this same release. Publishing it alone first and waiting for pub.dev
+      # to index it avoids the dependents' `dart pub publish` resolution
+      # failing against a version pub.dev doesn't know about yet.
+      - name: Publish simple_routes_annotations
+        run: |
+          melos publish --scope=simple_routes_annotations --no-published --dry-run --yes
+          melos publish --scope=simple_routes_annotations --no-published --no-dry-run --yes
+      - name: Wait for simple_routes_annotations to be live
+        run: .github/scripts/wait-for-live.sh simple_routes_annotations
+      - name: Publish dependent packages
+        run: |
+          melos publish --scope=simple_routes --scope=simple_routes_generator --no-published --dry-run --yes
+          melos publish --scope=simple_routes --scope=simple_routes_generator --no-published --no-dry-run --yes
